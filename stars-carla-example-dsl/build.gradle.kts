@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 The STARS Project Authors
+ * Copyright 2022-2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-rootProject.name = "stars"
+plugins { id("tools.aqua.stars.library-conventions") }
 
-include(
-    "stars-core",
-    "stars-logic-kcmftbl",
-    "stars-data-av",
-    "stars-importer-carla",
-    "stars-carla-example-dsl",
-)
+mavenMetadata {
+  name.set("STARS Core Library")
+  description.set("STARS - Scenario-Based Testing of Autonomous Robotic Systems - Core Library")
+}
+
+dependencies {
+  implementation(project(":stars-core"))
+  implementation(project(":stars-logic-kcmftbl"))
+}
