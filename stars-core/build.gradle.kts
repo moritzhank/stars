@@ -29,5 +29,5 @@ dependencies {
   implementation(libs.slf4j.simple)
 
   // Use the Kotlin test library.
-  testImplementation("org.jetbrains.kotlin:kotlin-test")
+  testImplementation(kotlin("test-junit5"))
 }
