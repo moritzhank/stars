@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtlib_checker
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
 import tools.aqua.stars.logic.kcmftbl.dsl.*
 
 /** Create deep copy of [Formula] */
+/*
 fun copyF(f: Formula): Formula {
   return when (f) {
     is FF -> f
@@ -34,7 +35,7 @@ fun copyF(f: Formula): Formula {
     is Once -> Once(f.interval?.copy(), copyF(f.inner))
     is Historically -> Historically(f.interval?.copy(), copyF(f.inner))
     is Eventually -> Eventually(f.interval?.copy(), copyF(f.inner))
-    is Globally -> Globally(f.interval?.copy(), copyF(f.inner))
+    is Always -> Always(f.interval?.copy(), copyF(f.inner))
     is Since -> Since(f.interval?.copy(), copyF(f.lhs), copyF(f.rhs))
     is Until -> Until(f.interval?.copy(), copyF(f.lhs), copyF(f.rhs))
     is Forall -> Forall(copyF(f.inner))
@@ -145,3 +146,4 @@ private fun negAtomicAndCopy(f: Formula): Formula {
 }
 
 private fun Formula.wrapInNot(wrapInNot: Boolean) = if (wrapInNot) Neg(this) else this
+*/

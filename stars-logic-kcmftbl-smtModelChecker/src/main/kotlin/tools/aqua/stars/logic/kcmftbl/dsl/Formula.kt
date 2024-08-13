@@ -26,14 +26,14 @@ data object TT : Formula
 data object FF : Formula
 
 data class UnaryPredicate<E1 : EntityType<*, *, *, *, *>>(
-    val ref: Ref<E1>,
-    val phi: () -> Boolean
+  val ref: Ref<E1>,
+  val phi: () -> Boolean
 ) : Formula
 
 data class BinaryPredicate<E1 : EntityType<*, *, *, *, *>, E2 : EntityType<*, *, *, *, *>>(
-    val ref1: Ref<E1>,
-    val ref2: Ref<E2>,
-    val phi: () -> Boolean
+  val ref1: Ref<E1>,
+  val ref2: Ref<E2>,
+  val phi: () -> Boolean
 ) : Formula
 
 data class Neg(val inner: Formula) : Formula
@@ -59,10 +59,10 @@ data class Eventually(val interval: Pair<Int, Int>? = null, val inner: Formula) 
 data class Always(val interval: Pair<Int, Int>? = null, val inner: Formula) : Formula
 
 data class Since(val interval: Pair<Int, Int>? = null, val lhs: Formula, val rhs: Formula) :
-    Formula
+  Formula
 
 data class Until(val interval: Pair<Int, Int>? = null, val lhs: Formula, val rhs: Formula) :
-    Formula
+  Formula
 
 data class Forall<E : EntityType<*, *, *, *, *>>(val ref: Ref<E>, val inner: Formula) : Formula
 

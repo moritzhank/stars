@@ -78,7 +78,7 @@ class Ref<E1 : EntityType<*, *, *, *, *>>(
         S : SegmentType<E, T, S, U, D>,
         U : TickUnit<U, D>,
         D : TickDifference<D>> setSegment(segment: SegmentType<E, T, S, U, D>) {
-      this.tickDataType = segment.tickData
+      tickDataType = segment.tickData
     }
   }
 }

@@ -51,6 +51,11 @@ class exampleDSL {
         }
       }
     }
+
+    val y: Vehicle? = null
+
+    val x = y?.apply {}
+
     formula { v: Ref<Vehicle> ->
       minPrevalence(0.6) {
         neg(hasMidTrafficDensity) or
@@ -71,6 +76,13 @@ class exampleDSL {
     val predAnd = formula { exists { x: Ref<Vehicle> -> tt() and ff() } }
     val outAnd = formula {
       exists { x: Ref<Vehicle> -> outFormula.holds(x) and outFormula.holds(x) }
+    }
+
+    val x: Vehicle? = null
+    if (x != null) {
+
+      val y = x::tickData
+      val z = y.get()::vehiclesInBlock
     }
   }
 
