@@ -84,8 +84,8 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       S : SegmentType<E, T, S, U, D>,
       U : TickUnit<U, D>,
       D : TickDifference<D>> ((Ref<E1>, Ref<E2>) -> FormulaBuilder).holds(
-    ref1: Ref<E1>,
-    ref2: Ref<E2>
+      ref1: Ref<E1>,
+      ref2: Ref<E2>
   ): Formula = this(ref1, ref2).phi[0].also { phi.add(it) }
   // endregion
 
@@ -178,8 +178,8 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       S : SegmentType<E, T, S, U, D>,
       U : TickUnit<U, D>,
       D : TickDifference<D>> FormulaBuilder.pred(
-    ref1: Ref<E1>,
-    init: () -> Boolean = { true }
+      ref1: Ref<E1>,
+      init: () -> Boolean = { true }
   ): Formula = UnaryPredicate(ref1, init).also { phi.add(it) }
   fun <
       E1 : E,
@@ -189,9 +189,9 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       S : SegmentType<E, T, S, U, D>,
       U : TickUnit<U, D>,
       D : TickDifference<D>> FormulaBuilder.pred(
-    ref1: Ref<E1>,
-    ref2: Ref<E2>,
-    init: () -> Boolean = { true }
+      ref1: Ref<E1>,
+      ref2: Ref<E2>,
+      init: () -> Boolean = { true }
   ): Formula = BinaryPredicate(ref1, ref2, init).also { phi.add(it) }
   fun FormulaBuilder.neg(input: Formula): Neg {
     return Neg(input).also { phi.add(it) }
@@ -337,8 +337,8 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
   }
 
   fun <Type> FormulaBuilder.binding(
-    term: Term<Type>,
-    init: FormulaBuilder.(Term<Type>) -> Unit = {}
+      term: Term<Type>,
+      init: FormulaBuilder.(Term<Type>) -> Unit = {}
   ): Binding<Type> {
     return FormulaBuilder().apply { init(term) }.buildBinding(term).also { phi.add(it) }
   }
@@ -377,6 +377,6 @@ fun <
     S : SegmentType<E, T, S, U, D>,
     U : TickUnit<U, D>,
     D : TickDifference<D>> ((Ref<E1>, Ref<E2>) -> FormulaBuilder).holds(
-  ref1: Ref<E1>,
-  ref2: Ref<E2>
+    ref1: Ref<E1>,
+    ref2: Ref<E2>
 ): Formula = this(ref1, ref2).phi[0]

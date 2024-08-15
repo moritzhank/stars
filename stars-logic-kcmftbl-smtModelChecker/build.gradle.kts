@@ -23,3 +23,10 @@ dependencies {
   testImplementation(project(mapOf("path" to ":stars-data-av")))
   testImplementation(project(":stars-data-av", "test"))
 }
+
+tasks.build { dependsOn("buildDockerImage") }
+
+task<Exec>("buildDockerImage") {
+  setWorkingDir("src/main/resources")
+  commandLine("docker", "build", ".", "-t", "smt-solver")
+}
