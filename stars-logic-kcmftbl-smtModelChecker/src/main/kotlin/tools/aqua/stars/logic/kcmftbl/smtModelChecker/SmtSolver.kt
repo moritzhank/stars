@@ -22,15 +22,17 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder
 
-enum class SmtSolver(val solverName: String) {
-  CVC5("cvc5")
+fun main() {
+  val program = "(echo \"test\")"
+  println(runSmtSolver(program, SmtSolver.Z3))
 }
 
-fun runSmtSolver(
-    program: String,
-    solver: SmtSolver = SmtSolver.CVC5,
-    debug: Boolean = false
-): String? {
+enum class SmtSolver(val solverName: String) {
+  CVC5("cvc5"),
+  Z3("z3")
+}
+
+fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String? {
   val dockerFileName = "/Dockerfile"
   val workDir =
       FormulaBuilder::class.java.getResource(dockerFileName)?.path!!.dropLast(dockerFileName.length)
@@ -39,9 +41,8 @@ fun runSmtSolver(
   val generatedFilePath = "$workDir/exchange/$generatedFileName"
   val generatedFile = File(generatedFilePath)
   generatedFile.writeText(program)
-  val debugParams = if (!debug) "--rm " else ""
   val run =
-      "docker run $debugParams--mount type=bind,source=$workDir/exchange,target=/root/exchange smt-solver $solverName $generatedFileName".runCommand(
+      "docker run --rm --mount type=bind,source=$workDir/exchange,target=/root/exchange smt-solver $solverName $generatedFileName".runCommand(
           File(workDir))
   generatedFile.delete()
   checkNotNull(run) { "Error running the Docker container." }

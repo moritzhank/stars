@@ -13,5 +13,14 @@ if __name__ == "__main__":
         if result.returncode != 0:
             raise Exception(f"Error: {result.stderr}!")
         print(result.stdout)
+    elif solverName == "z3":
+        result = subprocess.run(
+            ["z3", f"exchange/{fileName}"],
+            capture_output = True,
+            text = True
+        )
+        if result.returncode != 0:
+            raise Exception(f"Error: {result.stderr}!")
+        print(result.stdout)
     else:
         raise Exception(f"Unsupported solver: {solverName}!")

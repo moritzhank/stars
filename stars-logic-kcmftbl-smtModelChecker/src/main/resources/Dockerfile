@@ -9,6 +9,7 @@ COPY install.py .
 RUN python3 install.py
 
 RUN rm install.py
+RUN apt-get install -y z3
 RUN apt-get autoremove -y wget
 RUN apt-get autoremove -y unzip
 

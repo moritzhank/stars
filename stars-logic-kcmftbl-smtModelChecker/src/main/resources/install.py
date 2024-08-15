@@ -4,7 +4,6 @@ import subprocess
 
 # Generated with GPT-4o from OpenAI and modified
 def download_cvc5():
-    os_type = platform.system().lower()
     architecture = platform.machine()
     arch_map = {
         "x86_64": "Linux-x86_64",
