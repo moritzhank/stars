@@ -32,7 +32,15 @@ enum class SmtSolver(val solverName: String) {
   Z3("z3")
 }
 
-fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String? {
+fun tryRunSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String? {
+  return try {
+    runSmtSolver(program, solver)
+  } catch (e: Exception) {
+    null
+  }
+}
+
+fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String {
   val dockerFileName = "/Dockerfile"
   val workDir =
       FormulaBuilder::class.java.getResource(dockerFileName)?.path!!.dropLast(dockerFileName.length)

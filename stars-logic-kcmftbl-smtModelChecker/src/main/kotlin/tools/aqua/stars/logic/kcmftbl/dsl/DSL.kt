@@ -169,8 +169,11 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
   }
   // endregion
 
+  // region formula definitions
   fun FormulaBuilder.tt(): TT = TT.also { phi.add(it) }
   fun FormulaBuilder.ff(): FF = FF.also { phi.add(it) }
+
+  // TODO: Exchange predicate definition
   fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
@@ -343,6 +346,7 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
     return FormulaBuilder().apply { init(term) }.buildBinding(term).also { phi.add(it) }
   }
 
+  // TODO: Terme anpassen
   infix fun <Type> Term<Type>.leq(other: Term<Type>): Leq<Type> =
       Leq(this, other).also { phi.add(it) }
 
@@ -356,10 +360,14 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
   infix fun <Type> Term<Type>.eq(other: Term<Type>): Eq<Type> = Eq(this, other).also { phi.add(it) }
 
   infix fun <Type> Term<Type>.ne(other: Term<Type>): Ne<Type> = Ne(this, other).also { phi.add(it) }
+
   fun <Type> term(init: () -> Type): Variable<Type> = Variable(init)
   fun <Type> const(value: Type): Constant<Type> = Constant(value)
+  // endregion
+
 }
 
+// holds
 fun <
     E1 : E,
     E : EntityType<E, T, S, U, D>,
