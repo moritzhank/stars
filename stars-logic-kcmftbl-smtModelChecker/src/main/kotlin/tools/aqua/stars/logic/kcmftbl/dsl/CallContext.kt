@@ -22,49 +22,58 @@ import kotlin.reflect.KFunction2
 import kotlin.reflect.KFunction3
 import kotlin.reflect.KProperty1
 
-class CallContextBase<B> {
+typealias CCB<Base> = CallContextBase<Base>
 
-  operator fun <R> times(prop: KProperty1<B, R>): CallContext<B, B, R> =
+class CallContextBase<Base> {
+
+  operator fun <Return> times(prop: KProperty1<Base, Return>): CallContext<Base, Base, Return> =
       PropertyCallContext(prop, null)
-  operator fun <R> times(prop: KFunction1<B, R>): CallContext<B, B, R> =
+  operator fun <Return> times(prop: KFunction1<Base, Return>): CallContext<Base, Base, Return> =
       Function1CallContext(prop, null)
-  operator fun <R, P> times(prop: KFunction2<B, P, R>): Callable2CallContext<B, B, P, R> =
-      Function2CallContext(prop, null)
-  operator fun <R, P1, P2> times(
-      prop: KFunction3<B, P1, P2, R>
-  ): Callable3CallContext<B, B, P1, P2, R> = Function3CallContext(prop, null)
+  operator fun <Return, Param> times(
+      prop: KFunction2<Base, Param, Return>
+  ): Callable2CallContext<Base, Base, Param, Return> = Function2CallContext(prop, null)
+  operator fun <Return, Param1, Param2> times(
+      prop: KFunction3<Base, Param1, Param2, Return>
+  ): Callable3CallContext<Base, Base, Param1, Param2, Return> = Function3CallContext(prop, null)
 }
 
-sealed interface CallContext<B, C, R> {
+sealed interface CallContext<Base, Caller, Return> {
 
-  val before: CallContext<B, *, C>?
-  operator fun <W> times(prop: KProperty1<R, W>): CallContext<B, R, W> =
+  val before: CallContext<Base, *, Caller>?
+  operator fun <W> times(prop: KProperty1<Return, W>): CallContext<Base, Return, W> =
       PropertyCallContext(prop, this)
-  operator fun <W> times(prop: KFunction1<R, W>): CallContext<B, R, W> =
+  operator fun <W> times(prop: KFunction1<Return, W>): CallContext<Base, Return, W> =
       Function1CallContext(prop, this)
-  operator fun <W, P> times(prop: KFunction2<R, P, W>): Callable2CallContext<B, R, P, W> =
-      Function2CallContext(prop, this)
+  operator fun <W, P> times(
+      prop: KFunction2<Return, P, W>
+  ): Callable2CallContext<Base, Return, P, W> = Function2CallContext(prop, this)
   operator fun <W, P1, P2> times(
-      prop: KFunction3<R, P1, P2, W>
-  ): Callable3CallContext<B, R, P1, P2, W> = Function3CallContext(prop, this)
-  infix fun and(callContext: CallContext<B, *, *>) = Pair(this, callContext)
+      prop: KFunction3<Return, P1, P2, W>
+  ): Callable3CallContext<Base, Return, P1, P2, W> = Function3CallContext(prop, this)
+  infix fun and(callContext: CallContext<Base, *, *>) = Pair(this, callContext)
 }
 
-sealed interface Callable2CallContext<B, C, P, R> : CallContext<B, C, R> {
+sealed interface Callable2CallContext<Base, Caller, Param, Return> :
+    CallContext<Base, Caller, Return> {
 
-  var param: CallContext<B, *, P>?
+  var param: CallContext<Base, *, Param>?
   infix fun withParam(
-      configParam: (b: CallContextBase<B>) -> CallContext<B, *, P>
-  ): Callable2CallContext<B, C, P, R> = this.apply { param = configParam(CallContextBase()) }
+      configParam: (b: CallContextBase<Base>) -> CallContext<Base, *, Param>
+  ): Callable2CallContext<Base, Caller, Param, Return> =
+      this.apply { param = configParam(CallContextBase()) }
 }
 
-sealed interface Callable3CallContext<B, C, P1, P2, R> : CallContext<B, C, R> {
+sealed interface Callable3CallContext<Base, Caller, Param1, Param2, Return> :
+    CallContext<Base, Caller, Return> {
 
-  var param1: CallContext<B, *, P1>?
-  var param2: CallContext<B, *, P2>?
+  var param1: CallContext<Base, *, Param1>?
+  var param2: CallContext<Base, *, Param2>?
   infix fun withParams(
-      configParam: (b: CallContextBase<B>) -> Pair<CallContext<B, *, P1>, CallContext<B, *, P2>>
-  ): Callable3CallContext<B, C, P1, P2, R> =
+      configParam:
+          (b: CallContextBase<Base>) -> Pair<
+                  CallContext<Base, *, Param1>, CallContext<Base, *, Param2>>
+  ): Callable3CallContext<Base, Caller, Param1, Param2, Return> =
       this.apply {
         val (p1, p2) = configParam(CallContextBase())
         param1 = p1
@@ -72,29 +81,29 @@ sealed interface Callable3CallContext<B, C, P1, P2, R> : CallContext<B, C, R> {
       }
 }
 
-private class PropertyCallContext<B, C, R>(
-    val prop: KProperty1<C, R>,
-    override val before: CallContext<B, *, C>? = null
-) : CallContext<B, C, R>
+private class PropertyCallContext<Base, Caller, Return>(
+    val prop: KProperty1<Caller, Return>,
+    override val before: CallContext<Base, *, Caller>? = null
+) : CallContext<Base, Caller, Return>
 
-private class Function1CallContext<B, C, R>(
-    val func: KFunction1<C, R>,
-    override val before: CallContext<B, *, C>? = null
-) : CallContext<B, C, R>
+private class Function1CallContext<Base, Caller, Return>(
+    val func: KFunction1<Caller, Return>,
+    override val before: CallContext<Base, *, Caller>? = null
+) : CallContext<Base, Caller, Return>
 
-private class Function2CallContext<B, C, P, R>(
-    val func: KFunction2<C, P, R>,
-    override val before: CallContext<B, *, C>? = null
-) : Callable2CallContext<B, C, P, R> {
+private class Function2CallContext<Base, Caller, Param, Return>(
+    val func: KFunction2<Caller, Param, Return>,
+    override val before: CallContext<Base, *, Caller>? = null
+) : Callable2CallContext<Base, Caller, Param, Return> {
 
-  override var param: CallContext<B, *, P>? = null
+  override var param: CallContext<Base, *, Param>? = null
 }
 
-private class Function3CallContext<B, C, P1, P2, R>(
-    val func: KFunction3<C, P1, P2, R>,
-    override val before: CallContext<B, *, C>? = null
-) : Callable3CallContext<B, C, P1, P2, R> {
+private class Function3CallContext<Base, Caller, Param1, Param2, Return>(
+    val func: KFunction3<Caller, Param1, Param2, Return>,
+    override val before: CallContext<Base, *, Caller>? = null
+) : Callable3CallContext<Base, Caller, Param1, Param2, Return> {
 
-  override var param1: CallContext<B, *, P1>? = null
-  override var param2: CallContext<B, *, P2>? = null
+  override var param1: CallContext<Base, *, Param1>? = null
+  override var param2: CallContext<Base, *, Param2>? = null
 }
