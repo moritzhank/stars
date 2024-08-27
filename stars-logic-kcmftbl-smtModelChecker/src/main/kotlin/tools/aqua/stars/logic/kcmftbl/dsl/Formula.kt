@@ -25,16 +25,19 @@ data object TT : Formula
 
 data object FF : Formula
 
+// todo: rework
+/*
 data class UnaryPredicate<E1 : EntityType<*, *, *, *, *>>(
-    val ref: Ref<E1>,
+    val ccb: CallContextBase<E1>,
     val phi: () -> Boolean
 ) : Formula
 
 data class BinaryPredicate<E1 : EntityType<*, *, *, *, *>, E2 : EntityType<*, *, *, *, *>>(
-    val ref1: Ref<E1>,
-    val ref2: Ref<E2>,
+    val ccb1: CallContextBase<E1>,
+    val ccb2: CallContextBase<E2>,
     val phi: () -> Boolean
 ) : Formula
+ */
 
 data class Neg(val inner: Formula) : Formula
 
@@ -64,9 +67,17 @@ data class Since(val interval: Pair<Int, Int>? = null, val lhs: Formula, val rhs
 data class Until(val interval: Pair<Int, Int>? = null, val lhs: Formula, val rhs: Formula) :
     Formula
 
-data class Forall<E : EntityType<*, *, *, *, *>>(val ref: Ref<E>, val inner: Formula) : Formula
+data class Forall<E : EntityType<*, *, *, *, *>>(val ccb: CallContextBase<E>, val inner: Formula) :
+    Formula
 
-data class Exists<E : EntityType<*, *, *, *, *>>(val ref: Ref<E>, val inner: Formula) : Formula
+data class Exists<E : EntityType<*, *, *, *, *>>(val ccb: CallContextBase<E>, val inner: Formula) :
+    Formula
+
+data class Binding<Type>(
+    val ccb: CallContextBase<Type>,
+    val bindTerm: Term<Type>,
+    val inner: Formula
+) : Formula
 
 data class MinPrevalence(val fraction: Double, val inner: Formula) : Formula
 
@@ -75,11 +86,3 @@ data class PastMinPrevalence(val fraction: Double, val inner: Formula) : Formula
 data class MaxPrevalence(val fraction: Double, val inner: Formula) : Formula
 
 data class PastMaxPrevalence(val fraction: Double, val inner: Formula) : Formula
-
-data class Binding<Type>(val bindTerm: Term<Type>, val inner: Formula) : Formula
-
-sealed interface Term<Type>
-
-data class Constant<Type>(val value: Type) : Term<Type>
-
-data class Variable<Type>(val phi: () -> Type) : Term<Type>

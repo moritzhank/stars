@@ -15,30 +15,36 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress("unused", "unused_variable")
 
 package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
-import kotlin.math.abs
-import kotlin.math.sign
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import tools.aqua.stars.data.av.dataclasses.*
+import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
-import tools.aqua.stars.logic.kcmftbl.dsl.Ref
 
 class exampleDSL {
   @Test
   fun monitors() {
     val hasMidTrafficDensity = formula {
-      forall() { x: Ref<Vehicle> ->
+      forall { v: CCB<Vehicle> ->
         eventually {
           (const(6) leq
-              term { x.now().let { v -> v.tickData.vehiclesInBlock(v.lane.road.block).size } }) and
-              (term { x.now().let { v -> v.tickData.vehiclesInBlock(v.lane.road.block).size } } leq
-                  const(15))
+              term(
+                  (v * Vehicle::tickData * TickData::vehiclesInBlock withParam
+                      {
+                        v * Vehicle::lane * Lane::road * Road::block
+                      }) * List<Vehicle>::size) and
+              (term(
+                  (v * Vehicle::tickData * TickData::vehiclesInBlock withParam
+                      {
+                        v * Vehicle::lane * Lane::road * Road::block
+                      }) * List<Vehicle>::size) leq const(15)))
         }
       }
     }
+    /*
     val hasMidTrafficDensityPred = formula {
       exists { x: Ref<Vehicle> ->
         eventually {
@@ -67,8 +73,10 @@ class exampleDSL {
     val changedLane = formula { v: Ref<Vehicle> ->
       binding(term { v.now().lane }) { l -> eventually { l ne term { v.now().lane } } }
     }
+    */
   }
 
+  /*
   @Test
   fun varyingInOut() {
     val outFormula = formula { x: Ref<Vehicle> -> tt() }
@@ -123,4 +131,5 @@ class exampleDSL {
       }
     }
   }
+  */
 }
