@@ -38,7 +38,6 @@ sealed interface CallContext<Caller, Return> {
   operator fun <W, P1, P2> times(
       func: KFunction3<Return, P1, P2, W>
   ): Callable3CallContext<Return, P1, P2, W> = Function3CallContext(func, this)
-  infix fun and(callContext: CallContext<*, *>) = Pair(this, callContext)
 }
 
 class CallContextBase<Type> : CallContext<Nothing, Type> {
@@ -60,9 +59,7 @@ class CallContextBase<Type> : CallContext<Nothing, Type> {
 sealed interface Callable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
 
   var param: CallContext<*, Param>?
-  infix fun withParam(
-      configParam: () -> CallContext<*, Param>
-  ): Callable2CallContext<Caller, Param, Return> = this.apply { param = configParam() }
+  fun withParam(cc: CallContext<*, Param>) = this.apply { param = cc }
 }
 
 sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
@@ -70,13 +67,10 @@ sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
 
   var param1: CallContext<*, Param1>?
   var param2: CallContext<*, Param2>?
-  infix fun withParams(
-      configParam: () -> Pair<CallContext<*, Param1>, CallContext<*, Param2>>
-  ): Callable3CallContext<Caller, Param1, Param2, Return> =
+  fun withParams(cc1: CallContext<*, Param1>, cc2: CallContext<*, Param2>) =
       this.apply {
-        val (p1, p2) = configParam()
-        param1 = p1
-        param2 = p2
+        param1 = cc1
+        param2 = cc2
       }
 }
 

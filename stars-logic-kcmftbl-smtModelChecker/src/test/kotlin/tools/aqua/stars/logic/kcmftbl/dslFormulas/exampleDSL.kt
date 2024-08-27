@@ -32,15 +32,12 @@ class exampleDSL {
         eventually {
           (const(6) leq
               term(
-                  (v * Vehicle::tickData * TickData::vehiclesInBlock withParam
-                      {
-                        v * Vehicle::lane * Lane::road * Road::block
-                      }) * List<Vehicle>::size) and
+                  (v * Vehicle::tickData * TickData::vehiclesInBlock).withParam(
+                      v * Vehicle::lane * Lane::road * Road::block) * List<Vehicle>::size) and
               (term(
-                  (v * Vehicle::tickData * TickData::vehiclesInBlock withParam
-                      {
-                        v * Vehicle::lane * Lane::road * Road::block
-                      }) * List<Vehicle>::size) leq const(15)))
+                  (v * Vehicle::tickData * TickData::vehiclesInBlock).withParam(
+                      v * Vehicle::lane * Lane::road * Road::block) * List<Vehicle>::size) leq
+                  const(15)))
         }
       }
     }
