@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
-/** Create deep copy of Formula*/
+/** Create deep copy of Formula */
 /*
 fun copyF(f: Formula): Formula {
   return when (f) {
