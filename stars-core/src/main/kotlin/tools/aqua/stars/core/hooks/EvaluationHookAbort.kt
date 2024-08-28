@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 The STARS Project Authors
+ * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import org.gradle.kotlin.dsl.application
+package tools.aqua.stars.core.hooks
 
-plugins {
-  id("tools.aqua.stars.kotlin-conventions")
-  id("tools.aqua.stars.publish-conventions")
-
-  application
-}
+/**
+ * Custom [RuntimeException] to indicate that an [EvaluationHook] has returned
+ * [EvaluationHookResult.ABORT].
+ */
+class EvaluationHookAbort(msg: String) : RuntimeException(msg)

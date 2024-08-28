@@ -43,13 +43,14 @@ fun <T> List<T>.x3(): List<Triple<T, T, T>> =
  */
 fun <T> List<T>.powerlist(): List<List<T>> =
     when {
-      isEmpty() -> listOf(listOf())
+      isEmpty() -> listOf(emptyList())
       else -> dropLast(1).powerlist().let { it + it.map { t -> t + last() } }.sortedBy { it.size }
     }
 
 /**
  * Build all possible combinations of the lists in the input list. Example instances kept until
  * better documentation will be written.
+ *
  * ```
  *    val input = listOf(
  *        listOf(listOf("a"), listOf("b"), listOf("c")),
@@ -83,4 +84,12 @@ fun <T> List<List<List<T>>>.crossProduct(): List<List<T>> {
   }
 
   return if (size == 2) nextLevelList else (listOf(nextLevelList) + subList(2, size)).crossProduct()
+}
+
+/**
+ * Evaluates the given [predicate] on each element of the sequence and stops the computation as soon
+ * as the predicate returns false.
+ */
+fun <T> Sequence<T>.computeWhile(predicate: (T) -> Boolean): Unit = forEach {
+  if (!predicate(it)) return
 }

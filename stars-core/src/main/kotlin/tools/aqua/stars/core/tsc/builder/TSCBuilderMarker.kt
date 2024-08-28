@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 The STARS Project Authors
+ * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +15,7 @@
  * limitations under the License.
  */
 
-import tools.aqua.defaultFormat
-import tools.aqua.destabilizesVersion
+package tools.aqua.stars.core.tsc.builder
 
-plugins {
-  id("com.dorongold.task-tree")
-  id("com.github.ben-manes.versions")
-  id("com.diffplug.spotless")
-}
-
-group = rootProject.group
-
-version = rootProject.version
-
-repositories { mavenCentral() }
-
-tasks.dependencyUpdates {
-  gradleReleaseChannel = "stable"
-  rejectVersionIf(destabilizesVersion)
-}
-
-spotless { kotlinGradle { defaultFormat(rootProject) } }
+/** Marker annotation for TSCBuilder classes. */
+@DslMarker annotation class TSCBuilderMarker

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 The STARS Project Authors
+ * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,19 @@
  * limitations under the License.
  */
 
-package tools.aqua
+package tools.aqua.stars.core.hooks
 
-import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.kotlin.dsl.maven
+/** The result of an evaluation hook. */
+enum class EvaluationHookResult {
+  /** Continue with the evaluation. */
+  OK,
 
-fun RepositoryHandler.vaadinAddons() = maven("https://maven.vaadin.com/vaadin-addons")
+  /** Skip this evaluation step and continue with next element. */
+  SKIP,
+
+  /** Cancel the evaluation at this point but finish post evaluation steps normally. */
+  CANCEL,
+
+  /** Abort the evaluation and throw an Exception. */
+  ABORT
+}

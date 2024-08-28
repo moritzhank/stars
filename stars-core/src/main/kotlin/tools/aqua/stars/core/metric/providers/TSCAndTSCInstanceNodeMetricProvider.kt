@@ -18,23 +18,23 @@
 package tools.aqua.stars.core.metric.providers
 
 import tools.aqua.stars.core.evaluation.TSCEvaluation
+import tools.aqua.stars.core.tsc.TSC
 import tools.aqua.stars.core.tsc.instance.TSCInstance
-import tools.aqua.stars.core.tsc.projection.TSCProjection
 import tools.aqua.stars.core.types.*
 
 /**
- * The [ProjectionAndTSCInstanceNodeMetricProvider] implements the [EvaluationMetricProvider] and
- * provides an [evaluate] function which gets a [TSCProjection] and a [TSCInstance] which is called
- * during the evaluation phase.
+ * The [TSCAndTSCInstanceNodeMetricProvider] implements the [EvaluationMetricProvider] and provides
+ * an [evaluate] function which gets a [TSC] and a [TSCInstance] which is called during the
+ * evaluation phase.
  *
- * @see TSCEvaluation.runEvaluation
  * @param E [EntityType].
  * @param T [TickDataType].
  * @param S [SegmentType].
  * @param U [TickUnit].
  * @param D [TickDifference].
+ * @see TSCEvaluation.runEvaluation
  */
-interface ProjectionAndTSCInstanceNodeMetricProvider<
+interface TSCAndTSCInstanceNodeMetricProvider<
     E : EntityType<E, T, S, U, D>,
     T : TickDataType<E, T, S, U, D>,
     S : SegmentType<E, T, S, U, D>,
@@ -44,8 +44,8 @@ interface ProjectionAndTSCInstanceNodeMetricProvider<
   /**
    * Evaluate the metric based on the given parameters.
    *
-   * @param projection The current [TSCProjection].
+   * @param tsc The current [TSC].
    * @param tscInstance The current [TSCInstance].
    */
-  fun evaluate(projection: TSCProjection<E, T, S, U, D>, tscInstance: TSCInstance<E, T, S, U, D>)
+  fun evaluate(tsc: TSC<E, T, S, U, D>, tscInstance: TSCInstance<E, T, S, U, D>)
 }
