@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
 import java.io.File
@@ -50,8 +52,8 @@ fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String {
   val generatedFile = File(generatedFilePath)
   generatedFile.writeText(program)
   val run =
-      "docker run --rm --mount type=bind,source=$workDir/exchange,target=/root/exchange smt-solver $solverName $generatedFileName".runCommand(
-          File(workDir))
+      "docker run --rm --mount type=bind,source=$workDir/exchange,target=/root/exchange smt-solver $solverName $generatedFileName"
+          .runCommand(File(workDir))
   generatedFile.delete()
   checkNotNull(run) { "Error running the Docker container." }
   return run
