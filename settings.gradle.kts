@@ -40,5 +40,4 @@ include(
     "stars-logic-kcmftbl",
     "stars-data-av",
     "stars-importer-carla",
-    "stars-carla-example-dsl",
     "stars-logic-kcmftbl-smtModelChecker")
