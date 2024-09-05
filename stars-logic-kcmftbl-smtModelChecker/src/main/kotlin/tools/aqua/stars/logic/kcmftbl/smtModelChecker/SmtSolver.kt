@@ -24,11 +24,6 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder
 
-fun main() {
-  val program = "(echo \"test\")"
-  println(runSmtSolver(program, SmtSolver.Z3))
-}
-
 enum class SmtSolver(val solverName: String) {
   CVC5("cvc5"),
   Z3("z3")
