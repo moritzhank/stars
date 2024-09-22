@@ -14,5 +14,5 @@ RUN apt-get autoremove -y wget
 RUN apt-get autoremove -y unzip
 
 COPY run.py .
-ENTRYPOINT [ "python3", "run.py" ]
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
+#ENTRYPOINT [ "python3", "run.py" ]
+ENTRYPOINT ["tail", "-f", "/dev/null"]

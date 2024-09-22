@@ -24,6 +24,19 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder
 
+fun main() {
+  println(
+      runSmtSolver(
+          "(set-option :produce-unsat-cores true)" +
+              "(declare-datatype Car ((cons (velocity Real))))\n" +
+              "(declare-const v1 Car)\n" +
+              ";(assert (= (velocity v1) 10.0))\n" +
+              "(assert (forall ((x Car)) (= (velocity x) 10.0)))\n" +
+              "(check-sat)\n" +
+              "(get-unsat-core)",
+          SmtSolver.Z3))
+}
+
 enum class SmtSolver(val solverName: String) {
   CVC5("cvc5"),
   Z3("z3")
