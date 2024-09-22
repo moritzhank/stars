@@ -29,39 +29,40 @@ typealias CCB<Type> = CallContextBase<Type>
 sealed interface CallContext<Caller, Return> {
 
   val before: CallContext<*, Caller>?
+  val base: CallContextBase<*>
 
   operator fun <W> times(prop: KProperty1<Return, W>): CallContext<Return, W> =
-      PropertyCallContext(prop, this)
+      PropertyCallContext(prop, this, base)
 
   operator fun <W> times(func: KFunction1<Return, W>): CallContext<Return, W> =
-      Function1CallContext(func, this)
+      Function1CallContext(func, this, base)
 
   operator fun <W, P> times(func: KFunction2<Return, P, W>): Callable2CallContext<Return, P, W> =
-      Function2CallContext(func, this)
+      Function2CallContext(func, this, base)
 
   operator fun <W, P1, P2> times(
       func: KFunction3<Return, P1, P2, W>
-  ): Callable3CallContext<Return, P1, P2, W> = Function3CallContext(func, this)
+  ): Callable3CallContext<Return, P1, P2, W> = Function3CallContext(func, this, base)
 }
 
-class CallContextBase<Type> : CallContext<Nothing, Type> {
+class CallContextBase<Type>(val dslBuilder: DSLBuilder) : CallContext<Nothing, Type> {
 
-  lateinit var formulaRef: Formula
   override val before: CallContext<*, Nothing>? = null
+  override val base: CallContextBase<*> = this
 
   override operator fun <Return> times(prop: KProperty1<Type, Return>): CallContext<Type, Return> =
-      PropertyCallContext(prop, null)
+      PropertyCallContext(prop, null, base)
 
   override operator fun <Return> times(func: KFunction1<Type, Return>): CallContext<Type, Return> =
-      Function1CallContext(func, null)
+      Function1CallContext(func, null, base)
 
   override operator fun <Return, Param> times(
       func: KFunction2<Type, Param, Return>
-  ): Callable2CallContext<Type, Param, Return> = Function2CallContext(func, null)
+  ): Callable2CallContext<Type, Param, Return> = Function2CallContext(func, null, base)
 
   override operator fun <Return, Param1, Param2> times(
       func: KFunction3<Type, Param1, Param2, Return>
-  ): Callable3CallContext<Type, Param1, Param2, Return> = Function3CallContext(func, null)
+  ): Callable3CallContext<Type, Param1, Param2, Return> = Function3CallContext(func, null, base)
 }
 
 sealed interface Callable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
@@ -86,17 +87,20 @@ sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
 
 private class PropertyCallContext<Caller, Return>(
     val prop: KProperty1<Caller, Return>,
-    override val before: CallContext<*, Caller>? = null
+    override val before: CallContext<*, Caller>? = null,
+    override val base: CallContextBase<*>
 ) : CallContext<Caller, Return>
 
 private class Function1CallContext<Caller, Return>(
     val func: KFunction1<Caller, Return>,
-    override val before: CallContext<*, Caller>? = null
+    override val before: CallContext<*, Caller>? = null,
+    override val base: CallContextBase<*>
 ) : CallContext<Caller, Return>
 
 private class Function2CallContext<Caller, Param, Return>(
     val func: KFunction2<Caller, Param, Return>,
-    override val before: CallContext<*, Caller>? = null
+    override val before: CallContext<*, Caller>? = null,
+    override val base: CallContextBase<*>
 ) : Callable2CallContext<Caller, Param, Return> {
 
   override var param: CallContext<*, Param>? = null
@@ -104,7 +108,8 @@ private class Function2CallContext<Caller, Param, Return>(
 
 private class Function3CallContext<Caller, Param1, Param2, Return>(
     val func: KFunction3<Caller, Param1, Param2, Return>,
-    override val before: CallContext<*, Caller>? = null
+    override val before: CallContext<*, Caller>? = null,
+    override val base: CallContextBase<*>
 ) : Callable3CallContext<Caller, Param1, Param2, Return> {
 
   override var param1: CallContext<*, Param1>? = null
