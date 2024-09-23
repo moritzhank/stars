@@ -45,10 +45,11 @@ sealed interface CallContext<Caller, Return> {
   ): Callable3CallContext<Return, P1, P2, W> = Function3CallContext(func, this, base)
 }
 
-class CallContextBase<Type>(val dslBuilder: DSLBuilder) : CallContext<Nothing, Type> {
+class CallContextBase<Type>() : CallContext<Nothing, Type> {
 
   override val before: CallContext<*, Nothing>? = null
   override val base: CallContextBase<*> = this
+  lateinit var dslBuilder: DSLBuilder
 
   override operator fun <Return> times(prop: KProperty1<Type, Return>): CallContext<Type, Return> =
       PropertyCallContext(prop, null, base)
@@ -65,53 +66,86 @@ class CallContextBase<Type>(val dslBuilder: DSLBuilder) : CallContext<Nothing, T
   ): Callable3CallContext<Type, Param1, Param2, Return> = Function3CallContext(func, null, base)
 }
 
-sealed interface Callable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
+sealed interface Callable1CallContext<Caller, Return> : CallContext<Caller, Return> {
 
-  var param: CallContext<*, Param>?
-
-  fun withParam(cc: CallContext<*, Param>) = this.apply { param = cc }
+  val func: KFunction1<Caller, Return>
 }
 
-sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
+sealed interface Callable2CallContext<Caller, Param, Return> {
+
+  fun withParam(cc: CallContext<*, Param>): PCallable2CallContext<Caller, Param, Return>
+}
+
+sealed interface PCallable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
+
+  val func: KFunction2<Caller, Param, Return>
+  val param: CallContext<*, Param>
+}
+
+sealed interface Callable3CallContext<Caller, Param1, Param2, Return> {
+
+  fun withParams(
+      cc1: CallContext<*, Param1>,
+      cc2: CallContext<*, Param2>
+  ): PCallable3CallContext<Caller, Param1, Param2, Return>
+}
+
+sealed interface PCallable3CallContext<Caller, Param1, Param2, Return> :
     CallContext<Caller, Return> {
 
-  var param1: CallContext<*, Param1>?
-  var param2: CallContext<*, Param2>?
-
-  fun withParams(cc1: CallContext<*, Param1>, cc2: CallContext<*, Param2>) =
-      this.apply {
-        param1 = cc1
-        param2 = cc2
-      }
+  val func: KFunction3<Caller, Param1, Param2, Return>
+  val param1: CallContext<*, Param1>
+  val param2: CallContext<*, Param2>
 }
 
 private class PropertyCallContext<Caller, Return>(
     val prop: KProperty1<Caller, Return>,
-    override val before: CallContext<*, Caller>? = null,
+    override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>
 ) : CallContext<Caller, Return>
 
 private class Function1CallContext<Caller, Return>(
-    val func: KFunction1<Caller, Return>,
-    override val before: CallContext<*, Caller>? = null,
+    override val func: KFunction1<Caller, Return>,
+    override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>
-) : CallContext<Caller, Return>
+) : Callable1CallContext<Caller, Return>
 
 private class Function2CallContext<Caller, Param, Return>(
-    val func: KFunction2<Caller, Param, Return>,
-    override val before: CallContext<*, Caller>? = null,
-    override val base: CallContextBase<*>
+    private val func: KFunction2<Caller, Param, Return>,
+    private val before: CallContext<*, Caller>?,
+    private val base: CallContextBase<*>
 ) : Callable2CallContext<Caller, Param, Return> {
 
-  override var param: CallContext<*, Param>? = null
+  override fun withParam(cc: CallContext<*, Param>): PCallable2CallContext<Caller, Param, Return> =
+      assert(base.dslBuilder.isAllowedCC(cc)).let { PFunction2CallContext(func, before, base, cc) }
 }
+
+private class PFunction2CallContext<Caller, Param, Return>(
+    override val func: KFunction2<Caller, Param, Return>,
+    override val before: CallContext<*, Caller>?,
+    override val base: CallContextBase<*>,
+    override val param: CallContext<*, Param>
+) : PCallable2CallContext<Caller, Param, Return>
 
 private class Function3CallContext<Caller, Param1, Param2, Return>(
-    val func: KFunction3<Caller, Param1, Param2, Return>,
-    override val before: CallContext<*, Caller>? = null,
-    override val base: CallContextBase<*>
+    private val func: KFunction3<Caller, Param1, Param2, Return>,
+    private val before: CallContext<*, Caller>?,
+    private val base: CallContextBase<*>
 ) : Callable3CallContext<Caller, Param1, Param2, Return> {
 
-  override var param1: CallContext<*, Param1>? = null
-  override var param2: CallContext<*, Param2>? = null
+  override fun withParams(
+      cc1: CallContext<*, Param1>,
+      cc2: CallContext<*, Param2>
+  ): PCallable3CallContext<Caller, Param1, Param2, Return> =
+      assert(base.dslBuilder.isAllowedCC(cc1) && base.dslBuilder.isAllowedCC(cc2)).let {
+        PFunction3CallContext(func, before, base, cc1, cc2)
+      }
 }
+
+private class PFunction3CallContext<Caller, Param1, Param2, Return>(
+    override val func: KFunction3<Caller, Param1, Param2, Return>,
+    override val before: CallContext<*, Caller>?,
+    override val base: CallContextBase<*>,
+    override val param1: CallContext<*, Param1>,
+    override val param2: CallContext<*, Param2>
+) : PCallable3CallContext<Caller, Param1, Param2, Return>

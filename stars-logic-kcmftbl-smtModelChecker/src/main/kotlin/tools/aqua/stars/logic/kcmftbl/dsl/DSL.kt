@@ -19,8 +19,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-import tools.aqua.stars.core.types.*
-
+/*
 class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
 
   companion object {
@@ -416,3 +415,4 @@ fun <
     ref2: Ref<E2>
 ): Formula = this(ref1, ref2).phi[0]
 */
+ */

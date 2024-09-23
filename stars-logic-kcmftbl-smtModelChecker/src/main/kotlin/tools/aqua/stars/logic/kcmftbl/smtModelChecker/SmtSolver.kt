@@ -22,7 +22,7 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder
+import tools.aqua.stars.logic.kcmftbl.dsl.CallContext
 
 fun main() {
   println(
@@ -53,7 +53,7 @@ fun tryRunSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String
 fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String {
   val dockerFileName = "/Dockerfile"
   val workDir =
-      FormulaBuilder::class.java.getResource(dockerFileName)?.path!!.dropLast(dockerFileName.length)
+      CallContext::class.java.getResource(dockerFileName)?.path!!.dropLast(dockerFileName.length)
   val solverName = solver.solverName
   val generatedFileName = "run-${UUID.randomUUID()}.txt"
   val generatedFilePath = "$workDir/exchange/$generatedFileName"

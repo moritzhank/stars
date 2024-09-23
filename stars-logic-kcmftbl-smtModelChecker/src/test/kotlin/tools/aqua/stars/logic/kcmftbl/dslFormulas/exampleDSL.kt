@@ -20,23 +20,32 @@
 package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
 import kotlin.test.Test
-import tools.aqua.stars.data.av.dataclasses.*
+import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FunctionBuilder.Companion.function
-import tools.aqua.stars.logic.kcmftbl.dsl.TFCCB
+
+class A(val v: Int) {
+
+  fun double(): Int {
+    return v + v
+  }
+}
 
 class exampleDSL {
   @Test
   fun monitors() {
 
-    val x = function { ped: TFCCB<Pedestrian> ->
+    val y = function { a: CCB<A> ->
       add {
-        //val x = TFCCB<Pedestrian>() not usable in this context
-        wrap(ped * Pedestrian::id)
-        wrap(ped * Pedestrian::id)
+        wrap(a * A::v)
+        wrap(a * A::v)
       }
     }
 
-    println(x)
+    val x = function { a: CCB<A> ->
+      registerFunction(A::double, y)
+      wrap((a * A::double))
+    }
+
     /*
     val hasMidTrafficDensity = formula {
       forall { v: CCB<Vehicle> ->
@@ -143,3 +152,9 @@ class exampleDSL {
   }
   */
 }
+
+fun main() {
+  val x = ::test
+}
+
+fun test() {}

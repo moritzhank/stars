@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package tools.aqua.stars.logic.kcmftbl.dsl
 
 sealed interface TranslatableFunction<Return>
 
 data class CallContextWrapper<Return>(
-    val callContext: TFunCallContext<*, Return>,
+    val callContext: CallContext<*, Return>,
 ) : TranslatableFunction<Return>
 
 data class Add<T : Number>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>) :
