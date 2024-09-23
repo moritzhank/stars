@@ -78,38 +78,64 @@ class FunctionBuilder<Return>(
     }
   }
 
-  private fun <P, R> buildCallContextWrapper(cc: CallContext<P, R>): CallContextWrapper<R> =
-      assert(isAllowedCC(cc)).let { CallContextWrapper(cc) }
+  private fun <P, R> buildCallContextWrapper(cc: CallContext<P, R>): TFCallContextWrapper<R> =
+      assertCCAllowed(cc).let { TFCallContextWrapper(cc) }
 
-  private fun <T : Number> buildAdd(): Add<T> =
+  private fun <T> buildEq(): TFEqual<T> =
+    assert(funs.size == 2).let {
+      TFEqual(funs[0] as TranslatableFunction<T>, funs[1] as TranslatableFunction<T>)
+    }
+
+  private fun <T : Number> buildAdd(): TFAdd<T> =
       assert(funs.size == 2).let {
-        Add(funs[0] as TranslatableFunction<T>, funs[1] as TranslatableFunction<T>)
+        TFAdd(funs[0] as TranslatableFunction<T>, funs[1] as TranslatableFunction<T>)
       }
+
+  private fun <C, T : Collection<C>> buildFilter(cc: CallContext<*, T>): TFFilter<C, T> =
+      assert(funs.size == 1)
+          .also { assertCCAllowed(cc) }
+          .let { TFFilter(cc, funs[0] as TranslatableFunction<Boolean>) }
 
   fun FunctionBuilder<Return>.wrap(cc: CallContext<*, Return>): TranslatableFunction<Return> =
       buildCallContextWrapper(cc).also { funs.add(it) }
 
-  fun <T : Number> FunctionBuilder<T>.add(init: FunctionBuilder<T>.() -> Unit): Add<T> {
+  fun <T : Number> const(content: T) = TFConstant(content).also { funs.add(it) }
+
+  fun const(content: Boolean) = TFBConstant(content).also { funs.add(it) }
+
+  fun <T> FunctionBuilder<Boolean>.eq(init: FunctionBuilder<T>.() -> Unit): TFEqual<T> {
+    return FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())
+      .apply(init)
+      .buildEq<T>()
+      .also { funs.add(it) }
+  }
+
+  // Syntax-shortcut for eq
+  infix fun <T> CallContext<*, T>.eq(other: CallContext<*, T>): TranslatableFunction<Boolean> {
+    val fb = FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())
+    fb.funs.add(buildCallContextWrapper(this))
+    fb.funs.add(buildCallContextWrapper(other))
+    return fb.buildEq<T>().also { funs.add(it) }
+  }
+
+  fun <T : Number> FunctionBuilder<T>.add(init: FunctionBuilder<T>.() -> Unit): TFAdd<T> {
     return FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())
         .apply(init)
         .buildAdd<T>()
         .also { funs.add(it) }
   }
+
+  fun <C, T : Collection<C>> FunctionBuilder<T>.filter(
+      collection: CallContext<*, T>,
+      init: FunctionBuilder<Boolean>.(CallContextBase<C>) -> Unit
+  ): TFFilter<C, T> {
+    val ccb = CallContextBase<C>()
+    val fb = FunctionBuilder<Boolean>(allowedCCBs.plus(ccb), registeredFunctions.toMutableMap())
+    ccb.dslBuilder = fb
+    init.invoke(fb, ccb)
+    return fb.buildFilter(collection).also { funs.add(it) }
+  }
 }
-
-// TFunctions and its implementations sole purpose is the wrapping of TranslatableFunction
-// and making it verifiable for function-registration
-
-sealed interface TFunction<Return> {
-
-  val tfunc: TranslatableFunction<Return>
-}
-
-sealed interface T2Function<Param, Return> : TFunction<Return>
-
-sealed interface T3Function<Param1, Param2, Return> : TFunction<Return>
-
-sealed interface T4Function<Param1, Param2, Param3, Return> : TFunction<Return>
 
 private class TFuncImpl<Return>(override val tfunc: TranslatableFunction<Return>) :
     TFunction<Return>

@@ -29,11 +29,23 @@ open class DSLBuilder(
     protected val registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>
 ) {
 
-  // Check if CallContext is legal for current DSLBuilder-context
-  fun isAllowedCC(cc: CallContext<*, *>): Boolean {
+  private fun formatCC(cc: CallContext<*, *>): String {
+    val name =
+        when (cc) {
+          is Callable1CallContext<*, *> -> cc.func.name
+          is PCallable2CallContext<*, *, *> -> cc.func.name
+          is PCallable3CallContext<*, *, *, *> -> cc.func.name
+          is PropAccessibleCallContext<*, *> -> cc.prop.name
+          else -> "?"
+        }
+    return "\"$name\" ($cc)"
+  }
+
+  // Assert that the CallContext is legal for the current DSLBuilder-context
+  fun assertCCAllowed(cc: CallContext<*, *>) {
     // Is cc's CallContextBase allowed?
     if (!allowedCCBs.contains(cc.base)) {
-      return false
+      throw AssertionError("${formatCC(cc)} is not allowed in this context.")
     }
     // Are all function calls registered?
     var elemBefore: CallContext<*, *>? = cc
@@ -47,10 +59,9 @@ open class DSLBuilder(
             else -> true
           }
       if (!isRegistered) {
-        return false
+        throw AssertionError("${formatCC(currentElem)} is not a registered function.")
       }
     }
-    return true
   }
 
   fun <Caller, Return> registerFunction(

@@ -21,13 +21,26 @@ package tools.aqua.stars.logic.kcmftbl.dsl
 
 sealed interface TranslatableFunction<Return>
 
-data class CallContextWrapper<Return>(
+data class TFConstant<T : Number>(val content: T) : TranslatableFunction<T>
+
+data class TFBConstant(val content: Boolean) : TranslatableFunction<Boolean>
+
+data class TFCallContextWrapper<Return>(
     val callContext: CallContext<*, Return>,
 ) : TranslatableFunction<Return>
 
-data class Add<T : Number>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>) :
+data class TFAdd<T : Number>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>) :
     TranslatableFunction<T>
 
+data class TFEqual<T>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>):
+    TranslatableFunction<Boolean>
+
+data class TFFilter<C, T : Collection<C>>(
+    val collection: CallContext<*, T>,
+    val phi: TranslatableFunction<Boolean>
+) : TranslatableFunction<Collection<C>>
+
+/*
 data class Subtract<T : Number>(
     val lhs: TranslatableFunction<T>,
     val rhs: TranslatableFunction<T>
@@ -40,3 +53,4 @@ data class Multiply<T : Number>(
 
 data class Divide<T : Number>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>) :
     TranslatableFunction<T>
+ */

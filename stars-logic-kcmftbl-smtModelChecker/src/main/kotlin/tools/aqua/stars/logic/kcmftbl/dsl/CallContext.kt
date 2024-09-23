@@ -50,6 +50,9 @@ class CallContextBase<Type>() : CallContext<Nothing, Type> {
   override val before: CallContext<*, Nothing>? = null
   override val base: CallContextBase<*> = this
   lateinit var dslBuilder: DSLBuilder
+  var debugInfo: String? = null
+
+  override fun toString(): String = debugInfo ?: super.toString()
 
   override operator fun <Return> times(prop: KProperty1<Type, Return>): CallContext<Type, Return> =
       PropertyCallContext(prop, null, base)
@@ -64,6 +67,11 @@ class CallContextBase<Type>() : CallContext<Nothing, Type> {
   override operator fun <Return, Param1, Param2> times(
       func: KFunction3<Type, Param1, Param2, Return>
   ): Callable3CallContext<Type, Param1, Param2, Return> = Function3CallContext(func, null, base)
+}
+
+sealed interface PropAccessibleCallContext<Caller, Return> : CallContext<Caller, Return> {
+
+  val prop: KProperty1<Caller, Return>
 }
 
 sealed interface Callable1CallContext<Caller, Return> : CallContext<Caller, Return> {
@@ -99,10 +107,10 @@ sealed interface PCallable3CallContext<Caller, Param1, Param2, Return> :
 }
 
 private class PropertyCallContext<Caller, Return>(
-    val prop: KProperty1<Caller, Return>,
+    override val prop: KProperty1<Caller, Return>,
     override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>
-) : CallContext<Caller, Return>
+) : PropAccessibleCallContext<Caller, Return>
 
 private class Function1CallContext<Caller, Return>(
     override val func: KFunction1<Caller, Return>,
@@ -117,7 +125,7 @@ private class Function2CallContext<Caller, Param, Return>(
 ) : Callable2CallContext<Caller, Param, Return> {
 
   override fun withParam(cc: CallContext<*, Param>): PCallable2CallContext<Caller, Param, Return> =
-      assert(base.dslBuilder.isAllowedCC(cc)).let { PFunction2CallContext(func, before, base, cc) }
+      base.dslBuilder.assertCCAllowed(cc).let { PFunction2CallContext(func, before, base, cc) }
 }
 
 private class PFunction2CallContext<Caller, Param, Return>(
@@ -137,9 +145,10 @@ private class Function3CallContext<Caller, Param1, Param2, Return>(
       cc1: CallContext<*, Param1>,
       cc2: CallContext<*, Param2>
   ): PCallable3CallContext<Caller, Param1, Param2, Return> =
-      assert(base.dslBuilder.isAllowedCC(cc1) && base.dslBuilder.isAllowedCC(cc2)).let {
-        PFunction3CallContext(func, before, base, cc1, cc2)
-      }
+      base.dslBuilder
+          .assertCCAllowed(cc1)
+          .also { base.dslBuilder.assertCCAllowed(cc2) }
+          .let { PFunction3CallContext(func, before, base, cc1, cc2) }
 }
 
 private class PFunction3CallContext<Caller, Param1, Param2, Return>(

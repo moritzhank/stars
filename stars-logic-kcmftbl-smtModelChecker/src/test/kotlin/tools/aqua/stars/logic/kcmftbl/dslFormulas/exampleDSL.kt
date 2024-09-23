@@ -20,36 +20,24 @@
 package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
 import kotlin.test.Test
+import tools.aqua.stars.data.av.dataclasses.*
 import tools.aqua.stars.logic.kcmftbl.dsl.CCB
+import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
 import tools.aqua.stars.logic.kcmftbl.dsl.FunctionBuilder.Companion.function
 
-class A(val v: Int) {
-
-  fun double(): Int {
-    return v + v
-  }
-}
-
 class exampleDSL {
+
   @Test
   fun monitors() {
 
-    val y = function { a: CCB<A> ->
-      add {
-        wrap(a * A::v)
-        wrap(a * A::v)
+    val vehiclesInBlock = function { t: CCB<TickData>, b: CCB<Block> ->
+      filter(t * TickData::vehicles) { v: CCB<Vehicle> ->
+        v * Vehicle::lane * Lane::road * Road::block eq b
       }
     }
-
-    val x = function { a: CCB<A> ->
-      registerFunction(A::double, y)
-      wrap((a * A::double))
-    }
-
-    /*
     val hasMidTrafficDensity = formula {
+      registerFunction(TickData::vehiclesInBlock, vehiclesInBlock)
       forall { v: CCB<Vehicle> ->
-        val x = CallContextBase<Pedestrian>()
         eventually {
           (const(6) leq
               term(
@@ -62,7 +50,6 @@ class exampleDSL {
         }
       }
     }
-     */
     /*
     val hasMidTrafficDensityPred = formula {
       exists { x: Ref<Vehicle> ->
@@ -152,9 +139,3 @@ class exampleDSL {
   }
   */
 }
-
-fun main() {
-  val x = ::test
-}
-
-fun test() {}
