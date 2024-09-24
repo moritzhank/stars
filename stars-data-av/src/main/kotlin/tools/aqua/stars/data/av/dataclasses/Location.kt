@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for 3D locations.
  *
@@ -24,4 +26,5 @@ package tools.aqua.stars.data.av.dataclasses
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
+@SmtTranslatable
 data class Location(val x: Double, val y: Double, val z: Double)

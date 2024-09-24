@@ -17,7 +17,10 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /** Data class for weather types. */
+@SmtTranslatable
 enum class WeatherType {
   Clear,
   Cloudy,

@@ -18,6 +18,8 @@
 plugins { id("tools.aqua.stars.library-conventions") }
 
 dependencies {
+  implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.20")
+  implementation(kotlin("reflect"))
   implementation(project(":stars-core"))
   implementation(project(":stars-logic-kcmftbl"))
   implementation(project(":stars-logic-kcmftbl-smtModelChecker"))

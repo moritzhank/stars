@@ -17,11 +17,14 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for landmark types.
  *
  * @property value Internal json value.
  */
+@SmtTranslatable
 enum class LandmarkType(val value: Int) {
   Danger(101),
   LanesMerging(121),

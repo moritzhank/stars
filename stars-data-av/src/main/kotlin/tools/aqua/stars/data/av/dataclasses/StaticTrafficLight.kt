@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for static traffic lights.
  *
@@ -25,6 +27,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property rotation The [Rotation] of the traffic light.
  * @property stopLocations List of stop locations as [Location]s.
  */
+@SmtTranslatable
 data class StaticTrafficLight(
     var id: Int,
     val location: Location,

@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for lane midpoints.
  *
@@ -24,6 +26,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property location The [Location] of the midpoint.
  * @property rotation The [Rotation] of the midpoint.
  */
+@SmtTranslatable
 data class LaneMidpoint(
     val distanceToStart: Double,
     val location: Location,

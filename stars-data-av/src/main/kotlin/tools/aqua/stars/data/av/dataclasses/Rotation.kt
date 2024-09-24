@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for rotations.
  *
@@ -24,4 +26,5 @@ package tools.aqua.stars.data.av.dataclasses
  * @property yaw The yaw.
  * @property roll The roll.
  */
+@SmtTranslatable
 data class Rotation(val pitch: Double, val yaw: Double, val roll: Double)

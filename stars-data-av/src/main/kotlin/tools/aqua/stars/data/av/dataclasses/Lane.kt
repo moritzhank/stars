@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for lanes.
  *
@@ -39,6 +41,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property laneDirection The [LaneDirection] of this [Lane].
  */
 @Suppress("MemberVisibilityCanBePrivate")
+@SmtTranslatable
 data class Lane(
     val laneId: Int,
     var road: Road,

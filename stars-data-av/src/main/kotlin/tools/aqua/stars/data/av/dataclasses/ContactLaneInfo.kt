@@ -17,11 +17,14 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for contact lane info.
  *
  * @property lane The [Lane].
  */
+@SmtTranslatable
 data class ContactLaneInfo(
     val lane: Lane,
 )

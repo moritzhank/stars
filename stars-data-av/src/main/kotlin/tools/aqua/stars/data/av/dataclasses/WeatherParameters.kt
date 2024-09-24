@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for weather parameters.
  *
@@ -35,6 +37,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property mieScatteringScale The scale of mie scattering.
  * @property rayleighScatteringScale The scale of rayleigh scattering.
  */
+@SmtTranslatable
 data class WeatherParameters(
     val type: WeatherType,
     val cloudiness: Double,

@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for 3D vector.
  *
@@ -24,6 +26,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
+@SmtTranslatable
 data class Vector3D(val x: Double, val y: Double, val z: Double) {
   constructor(vector: Vector3D) : this(vector.x, vector.y, vector.z)
 

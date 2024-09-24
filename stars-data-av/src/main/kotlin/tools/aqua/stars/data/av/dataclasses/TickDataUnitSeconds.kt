@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 import tools.aqua.stars.core.types.TickUnit
 
 /**
@@ -24,6 +25,7 @@ import tools.aqua.stars.core.types.TickUnit
  *
  * @property tickSeconds Current tick value in seconds.
  */
+@SmtTranslatable
 class TickDataUnitSeconds(val tickSeconds: Double) :
     TickUnit<TickDataUnitSeconds, TickDataDifferenceSeconds> {
   override fun plus(other: TickDataDifferenceSeconds): TickDataUnitSeconds =

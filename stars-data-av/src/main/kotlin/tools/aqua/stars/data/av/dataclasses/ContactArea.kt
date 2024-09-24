@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for road touching points.
  *
@@ -29,6 +31,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property lane2StartPos Start position on lane 2.
  * @property lane2EndPos End position on lane 2.
  */
+@SmtTranslatable
 data class ContactArea(
     val id: String,
     val contactLocation: Location,

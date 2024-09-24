@@ -17,7 +17,10 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /** Enum for [Lane] directions. */
+@SmtTranslatable
 enum class LaneDirection {
   STRAIGHT,
   LEFT_TURN,

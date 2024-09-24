@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for landmarks.
  *
@@ -32,6 +34,7 @@ package tools.aqua.stars.data.av.dataclasses
  * @property location The [Location] of the landmark.
  * @property rotation The [Rotation] of the landmark.
  */
+@SmtTranslatable
 data class Landmark(
     val id: Int,
     val name: String,

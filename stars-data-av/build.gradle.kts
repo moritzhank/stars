@@ -25,6 +25,7 @@ mavenMetadata {
 
 dependencies {
   implementation(project(":stars-core"))
+  implementation(project(":stars-logic-kcmftbl-smtModelChecker"))
   testImplementation(project(":stars-logic-kcmftbl"))
 }
 

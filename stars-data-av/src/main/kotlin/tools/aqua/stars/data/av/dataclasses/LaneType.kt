@@ -17,11 +17,14 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+
 /**
  * Data class for lane types.
  *
  * @property value Internal json value.
  */
+@SmtTranslatable
 enum class LaneType(val value: Int) {
   Any(-2),
   Bidirectional(512),

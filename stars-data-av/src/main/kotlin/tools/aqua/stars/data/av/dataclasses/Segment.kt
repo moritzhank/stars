@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 import tools.aqua.stars.core.types.SegmentType
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.core.types.SegmentType
  * @property simulationRunId Identifier of the simulation run.
  * @property segmentSource Source identifier.
  */
+@SmtTranslatable
 data class Segment(
     val mainInitList: List<TickData>,
     val simulationRunId: String = "",
