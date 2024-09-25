@@ -19,13 +19,45 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 abstract class SmtTranslatable {
 
-  @SmtIgnore val smt_tid: Int = uniqueId()
+  val smtId: Int = uniqueId()
+  private val registeredMembers = mutableMapOf<String, ObjectReference>()
 
   companion object {
     private var nextId = 0
 
     fun uniqueId() = nextId++
   }
-}
 
-@Target(AnnotationTarget.PROPERTY) annotation class SmtIgnore
+  // Can be overwritten to register Members
+  open fun registerMembers() {}
+
+  protected fun register(name: String, prop: Boolean) =
+      Val(prop).let { registeredMembers[name] = it }
+
+  protected fun register(name: String, prop: Number) =
+      Val(prop).let { registeredMembers[name] = it }
+
+  protected fun register(name: String, prop: String) =
+      Val(prop).let { registeredMembers[name] = it }
+
+  protected fun register(name: String, prop: SmtTranslatable) =
+      Ref(prop.smtId, prop).let { registeredMembers[name] = it }
+
+  protected fun register(name: String, prop: Collection<SmtTranslatable>) =
+      RefLst(uniqueId(), prop).let { registeredMembers[name] = it }
+
+  protected fun registerBooleanCollection(name: String, prop: Collection<Boolean>) =
+      Lst(uniqueId(), prop).let { registeredMembers[name] = it }
+
+  protected fun registerNumberCollection(name: String, prop: Collection<Number>) =
+      Lst(uniqueId(), prop).let { registeredMembers[name] = it }
+
+  protected fun registerStringCollection(name: String, prop: Collection<String>) =
+      Lst(uniqueId(), prop).let { registeredMembers[name] = it }
+
+  fun toObjectRepresentation(
+      objectRepresentations: MutableList<ObjectRepresentation> = mutableListOf()
+  ) {
+      //todo
+  }
+}

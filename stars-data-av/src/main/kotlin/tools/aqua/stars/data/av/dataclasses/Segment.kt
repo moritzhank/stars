@@ -18,7 +18,6 @@
 package tools.aqua.stars.data.av.dataclasses
 
 import tools.aqua.stars.core.types.SegmentType
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIgnore
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 /**
@@ -29,7 +28,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property segmentSource Source identifier.
  */
 data class Segment(
-    @SmtIgnore val mainInitList: List<TickData>,
+    val mainInitList: List<TickData>,
     val simulationRunId: String = "",
     override val segmentSource: String,
 ) :
@@ -38,7 +37,6 @@ data class Segment(
 
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }
 
-  @SmtIgnore
   override val ticks: Map<TickDataUnitSeconds, TickData> = tickData.associateBy { it.currentTick }
 
   override val primaryEntityId: Int
