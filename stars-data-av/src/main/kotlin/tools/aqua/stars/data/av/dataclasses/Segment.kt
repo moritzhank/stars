@@ -17,8 +17,9 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 import tools.aqua.stars.core.types.SegmentType
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIgnore
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 /**
  * Evaluation segment.
@@ -29,13 +30,14 @@ import tools.aqua.stars.core.types.SegmentType
  */
 @SmtTranslatable
 data class Segment(
-    val mainInitList: List<TickData>,
+    @SmtIgnore val mainInitList: List<TickData>,
     val simulationRunId: String = "",
     override val segmentSource: String,
 ) : SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }
 
+  @SmtIgnore
   override val ticks: Map<TickDataUnitSeconds, TickData> = tickData.associateBy { it.currentTick }
 
   override val primaryEntityId: Int

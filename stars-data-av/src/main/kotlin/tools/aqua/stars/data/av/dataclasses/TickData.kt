@@ -17,8 +17,8 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 import tools.aqua.stars.core.types.TickDataType
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 /**
  * Json format containing data for current tick.
