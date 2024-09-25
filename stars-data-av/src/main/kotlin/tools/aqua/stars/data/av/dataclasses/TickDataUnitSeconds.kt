@@ -25,9 +25,8 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  *
  * @property tickSeconds Current tick value in seconds.
  */
-@SmtTranslatable
 class TickDataUnitSeconds(val tickSeconds: Double) :
-    TickUnit<TickDataUnitSeconds, TickDataDifferenceSeconds> {
+    SmtTranslatable(), TickUnit<TickDataUnitSeconds, TickDataDifferenceSeconds> {
   override fun plus(other: TickDataDifferenceSeconds): TickDataUnitSeconds =
       TickDataUnitSeconds(this.tickSeconds + other.differenceSeconds)
 

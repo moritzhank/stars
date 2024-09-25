@@ -24,7 +24,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  *
  * @property lane The [Lane].
  */
-@SmtTranslatable
 data class ContactLaneInfo(
     val lane: Lane,
-)
+) : SmtTranslatable()

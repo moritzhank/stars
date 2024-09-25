@@ -25,9 +25,8 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  *
  * @property differenceSeconds Difference in seconds.
  */
-@SmtTranslatable
 class TickDataDifferenceSeconds(val differenceSeconds: Double) :
-    TickDifference<TickDataDifferenceSeconds> {
+    SmtTranslatable(), TickDifference<TickDataDifferenceSeconds> {
   override fun compareTo(other: TickDataDifferenceSeconds): Int =
       this.differenceSeconds.compareTo(other.differenceSeconds)
 

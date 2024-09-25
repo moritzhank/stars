@@ -27,7 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property block The [Block] of the [Lane].
  * @property lanes List of [Lane]s on this road.
  */
-@SmtTranslatable
-data class Road(var id: Int, val isJunction: Boolean, val block: Block, var lanes: List<Lane>) {
+data class Road(var id: Int, val isJunction: Boolean, val block: Block, var lanes: List<Lane>) :
+    SmtTranslatable() {
   override fun toString(): String = "$id"
 }

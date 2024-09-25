@@ -16,9 +16,11 @@
  */
 
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentationGenerator
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 fun main() {
   val testSegment = ExperimentLoader.loadTestSegment()
+  println("UTID_count: ${SmtTranslatable.uniqueId()}")
   val testSegment_or = ObjectRepresentationGenerator(testSegment).getResult()
   println(testSegment_or.size)
 }

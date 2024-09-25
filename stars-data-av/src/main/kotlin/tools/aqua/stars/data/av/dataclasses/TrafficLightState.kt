@@ -17,14 +17,11 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
-
 /**
  * Enum for traffic light states.
  *
  * @property value Internal json value.
  */
-@SmtTranslatable
 enum class TrafficLightState(val value: Int) {
   Red(0),
   Yellow(1),

@@ -26,12 +26,11 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property id Identifier of the road block.
  * @property roads Roads incorporated in this block.
  */
-@SmtTranslatable
 data class Block(
     val fileName: String,
     val id: String,
     var roads: List<Road>,
-) {
+) : SmtTranslatable() {
   override fun toString(): String = id
 
   override fun hashCode(): Int = id.hashCode()

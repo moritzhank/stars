@@ -26,4 +26,4 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
-@SmtTranslatable data class Location(val x: Double, val y: Double, val z: Double)
+data class Location(val x: Double, val y: Double, val z: Double) : SmtTranslatable()

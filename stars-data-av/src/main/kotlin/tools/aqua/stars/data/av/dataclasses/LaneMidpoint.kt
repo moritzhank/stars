@@ -26,9 +26,8 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property location The [Location] of the midpoint.
  * @property rotation The [Rotation] of the midpoint.
  */
-@SmtTranslatable
 data class LaneMidpoint(
     val distanceToStart: Double,
     val location: Location,
     val rotation: Rotation,
-)
+) : SmtTranslatable()

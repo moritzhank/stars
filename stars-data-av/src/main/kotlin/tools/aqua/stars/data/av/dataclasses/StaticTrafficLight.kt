@@ -27,13 +27,12 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property rotation The [Rotation] of the traffic light.
  * @property stopLocations List of stop locations as [Location]s.
  */
-@SmtTranslatable
 data class StaticTrafficLight(
     var id: Int,
     val location: Location,
     val rotation: Rotation,
     val stopLocations: List<Location>,
-) {
+) : SmtTranslatable() {
 
   /** Returns [TrafficLightState] from [TickData]. */
   fun getStateInTick(tickData: TickData): TrafficLightState =

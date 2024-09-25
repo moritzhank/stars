@@ -17,10 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
-
 /** Enum for the current daytime. */
-@SmtTranslatable
 enum class Daytime {
   Noon,
   Sunset

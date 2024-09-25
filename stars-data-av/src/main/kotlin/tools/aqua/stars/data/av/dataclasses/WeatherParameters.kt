@@ -37,7 +37,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property mieScatteringScale The scale of mie scattering.
  * @property rayleighScatteringScale The scale of rayleigh scattering.
  */
-@SmtTranslatable
 data class WeatherParameters(
     val type: WeatherType,
     val cloudiness: Double,
@@ -53,4 +52,4 @@ data class WeatherParameters(
     val scatteringIntensity: Double,
     val mieScatteringScale: Double,
     val rayleighScatteringScale: Double,
-)
+) : SmtTranslatable()

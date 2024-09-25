@@ -41,7 +41,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property laneDirection The [LaneDirection] of this [Lane].
  */
 @Suppress("MemberVisibilityCanBePrivate")
-@SmtTranslatable
 data class Lane(
     val laneId: Int,
     var road: Road,
@@ -58,7 +57,7 @@ data class Lane(
     var contactAreas: List<ContactArea>,
     var trafficLights: List<StaticTrafficLight>,
     var laneDirection: LaneDirection,
-) {
+) : SmtTranslatable() {
 
   /** Whether this [Lane] turns left. */
   val isTurningLeft: Boolean

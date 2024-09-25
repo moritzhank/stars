@@ -17,6 +17,15 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-@Target(AnnotationTarget.CLASS) annotation class SmtTranslatable()
+abstract class SmtTranslatable {
+
+  @SmtIgnore val smt_tid: Int = uniqueId()
+
+  companion object {
+    private var nextId = 0
+
+    fun uniqueId() = nextId++
+  }
+}
 
 @Target(AnnotationTarget.PROPERTY) annotation class SmtIgnore

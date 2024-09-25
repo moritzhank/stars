@@ -26,8 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
-@SmtTranslatable
-data class Vector3D(val x: Double, val y: Double, val z: Double) {
+data class Vector3D(val x: Double, val y: Double, val z: Double) : SmtTranslatable() {
   constructor(vector: Vector3D) : this(vector.x, vector.y, vector.z)
 
   constructor(location: Location) : this(location.x, location.y, location.z)

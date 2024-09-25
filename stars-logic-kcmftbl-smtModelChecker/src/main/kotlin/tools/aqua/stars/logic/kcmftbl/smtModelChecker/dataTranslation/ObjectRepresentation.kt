@@ -19,14 +19,10 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-import java.lang.IllegalArgumentException
-import kotlin.collections.Collection
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KVisibility
+import kotlin.reflect.*
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.typeOf
 
 interface ObjectReference
 
@@ -34,79 +30,82 @@ class Ref(val id: Int) : ObjectReference
 
 class Val(val value: Any) : ObjectReference
 
-class Col(val id: Int, val list: Collection<*>) : ObjectReference
+class Lst(val id: Int, val list: Collection<*>) : ObjectReference
+
+class Enm(val value: Any) : ObjectReference
+
+class Nll() : ObjectReference
 
 class ObjectRepresentation(val id: Int, val ref: Any, val member: Map<String, ObjectReference>)
 
-class ObjectRepresentationGenerator(val obj: Any) {
-
-  // Every object gets assigned a unique id, that is equivalent to its position in resulting array
-  private var nextId = 1
-  // Cannot use Maps (HashMaps) because the hashCode() function leads to infinite recursion in
-  // certain cases
-  private val objectToId = mutableListOf<Pair<Any, Int>>()
+class ObjectRepresentationGenerator(obj: SmtTranslatable) {
 
   private val result = mutableListOf<ObjectRepresentation>()
   private val queue = mutableListOf(obj)
+  private val markedIds = mutableListOf(obj.smt_tid)
+  private val memberCache = mutableMapOf<KClass<*>, List<KProperty1<*, *>>>()
 
-  private fun queueIfUnregistered(obj: Any, current: Any) {
-    println(obj)
-    if (obj === current || queue.any { it === obj } || result.any { it.ref === obj }) {
-      return
+  private fun queueIfUnmarked(obj: SmtTranslatable) {
+    if (!markedIds.contains(obj.smt_tid)) {
+      queue.add(obj)
+      markedIds.add(obj.smt_tid)
     }
-    queue.add(obj)
   }
 
-  private fun <T> Collection<Pair<Any, T>>.getEntry(obj: Any): T? {
-    this.forEach {
-      if (it.first === obj) {
-        return it.second
-      }
-    }
-    return null
+  private fun KType.isPrimitive(): Boolean {
+    return this == typeOf<String>() ||
+        this.isSubtypeOf(typeOf<Number>()) ||
+        this == typeOf<Boolean>()
   }
 
-  private fun getId(obj: Any): Int {
-    val id = objectToId.getEntry(obj)
-    if (id != null) {
-      return id
-    }
-    return nextId++.apply { objectToId.add(Pair(obj, this)) }
-  }
+  private fun getMembers(cls: KClass<*>): List<KProperty1<*, *>> =
+      memberCache[cls]
+          ?: cls.members
+              .filterIsInstance<KProperty1<*, *>>()
+              .filter { it.visibility == KVisibility.PUBLIC && !it.hasAnnotation<SmtIgnore>() }
+              .also { memberCache[cls] = it }
 
   init {
     while (queue.isNotEmpty()) {
       val current = queue.removeFirst()
-      val members =
-          current::class.members.filterIsInstance<KProperty1<*, *>>().filter {
-            it.visibility == KVisibility.PUBLIC
-          }
-      val members_or = mutableMapOf<String, ObjectReference>()
+      val members = getMembers(current::class)
+      val memberObjectReferences = mutableMapOf<String, ObjectReference>()
       for (member in members) {
-        if (member.hasAnnotation<SmtIgnore>()) {
+        val instanceOfMember: Any? = (member as KProperty1<Any, *>).get(current)
+        // Member is null
+        if (instanceOfMember == null) {
+          memberObjectReferences[member.name] = Nll()
           continue
         }
+        // Member is not translatable
         val isTranslatable =
-            (member.returnType.classifier as KClass<*>).hasAnnotation<SmtTranslatable>()
-        val instanceOfMember: Any = (member as KProperty1<Any, *>).get(current) ?: continue
-        // Member is not marked as translatable
+          member.returnType.isSubtypeOf(typeOf<SmtTranslatable>()) ||
+                  member.returnType.isSubtypeOf(typeOf<SmtTranslatable?>())
         if (!isTranslatable) {
-          // Member is primitive
-          if (member.returnType == typeOf<String>() ||
-              member.returnType.isSubtypeOf(typeOf<Number>()) ||
-              member.returnType == typeOf<Boolean>()) {
-            members_or[member.name] = Val(instanceOfMember)
-            // Member is collection
+          // Member is enum
+          if (member.returnType.isSubtypeOf(typeOf<Enum<*>>())) {
+            memberObjectReferences[member.name] = Enm(instanceOfMember)
+            // Member is primitive
+          } else if (member.returnType.isPrimitive()) {
+            memberObjectReferences[member.name] = Val(instanceOfMember)
+            // Member is List
           } else if (member.returnType.isSubtypeOf(typeOf<Collection<*>>())) {
-            val id = getId(instanceOfMember)
-            members_or[member.name] = Col(id, instanceOfMember as Collection<*>)
-            for (elem in instanceOfMember) {
-              if (elem == null) {
-                continue
+            // Continue for empty list
+            val firstElem: Any = (instanceOfMember as Collection<*>).firstOrNull() ?: continue
+            // Check if generic type of list is primitive
+            val genericType = firstElem::class.createType()
+            if (!genericType.isPrimitive()) {
+              // Check if generic type of list is translatable
+              if (genericType.isSubtypeOf(typeOf<SmtTranslatable>())) {
+                for (listElem in instanceOfMember) {
+                  queueIfUnmarked(listElem as SmtTranslatable)
+                }
+              } else {
+                throw IllegalArgumentException(
+                    "$genericType as generic type is not supported for object representation. You can use @SmtIgnore to prevent this exception.")
               }
-              queueIfUnregistered(elem, current)
             }
-            // Member is other reference not marked with translatable
+            memberObjectReferences[member.name] = Lst(SmtTranslatable.uniqueId(), instanceOfMember)
           } else {
             throw IllegalArgumentException(
                 "${member.returnType} is not supported for object representation. You can use @SmtIgnore to prevent this exception.")
@@ -114,11 +113,11 @@ class ObjectRepresentationGenerator(val obj: Any) {
           continue
         }
         // Member is translatable reference
-        val id = getId(instanceOfMember)
-        members_or[member.name] = Ref(id)
-        queueIfUnregistered(instanceOfMember, current)
+        memberObjectReferences[member.name] = Ref((instanceOfMember as SmtTranslatable).smt_tid)
+        queueIfUnmarked(instanceOfMember)
       }
-      val current_or = ObjectRepresentation(getId(current), current, members_or)
+      val current_or =
+          ObjectRepresentation((current as SmtTranslatable).smt_tid, current, memberObjectReferences)
       result.add(current_or)
     }
   }

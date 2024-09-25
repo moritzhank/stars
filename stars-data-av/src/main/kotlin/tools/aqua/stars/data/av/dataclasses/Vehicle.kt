@@ -21,7 +21,6 @@ package tools.aqua.stars.data.av.dataclasses
 
 import kotlin.math.pow
 import kotlin.math.sqrt
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 /**
  * Data class for vehicles.
@@ -39,7 +38,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property acceleration The current acceleration m/s².
  * @property angularVelocity The current angular velocity.
  */
-@SmtTranslatable
 data class Vehicle(
     override val id: Int,
     override val tickData: TickData,

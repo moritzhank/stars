@@ -25,9 +25,8 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  *
  * @property tickMillis Current tick value in milliseconds.
  */
-@SmtTranslatable
 data class TickDataUnitMilliseconds(val tickMillis: Long) :
-    TickUnit<TickDataUnitMilliseconds, TickDataDifferenceMilliseconds> {
+    SmtTranslatable(), TickUnit<TickDataUnitMilliseconds, TickDataDifferenceMilliseconds> {
   override fun compareTo(other: TickDataUnitMilliseconds): Int =
       this.tickMillis.compareTo(other.tickMillis)
 

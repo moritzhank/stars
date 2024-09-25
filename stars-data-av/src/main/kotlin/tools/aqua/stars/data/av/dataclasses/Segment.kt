@@ -28,12 +28,13 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property simulationRunId Identifier of the simulation run.
  * @property segmentSource Source identifier.
  */
-@SmtTranslatable
 data class Segment(
     @SmtIgnore val mainInitList: List<TickData>,
     val simulationRunId: String = "",
     override val segmentSource: String,
-) : SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
+) :
+    SmtTranslatable(),
+    SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }
 

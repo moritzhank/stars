@@ -31,7 +31,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property lane2StartPos Start position on lane 2.
  * @property lane2EndPos End position on lane 2.
  */
-@SmtTranslatable
 data class ContactArea(
     val id: String,
     val contactLocation: Location,
@@ -41,4 +40,4 @@ data class ContactArea(
     val lane2: Lane,
     val lane2StartPos: Double,
     val lane2EndPos: Double
-)
+) : SmtTranslatable()

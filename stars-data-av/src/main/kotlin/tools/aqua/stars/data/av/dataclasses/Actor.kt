@@ -21,8 +21,8 @@ import tools.aqua.stars.core.types.EntityType
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 /** Abstract actor data class. */
-@SmtTranslatable
 sealed class Actor :
+    SmtTranslatable(),
     EntityType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   /**

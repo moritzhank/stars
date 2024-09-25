@@ -17,8 +17,6 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
-
 /**
  * Data class for pedestrians.
  *
@@ -27,7 +25,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property positionOnLane The [Pedestrian]'s position on the [Lane].
  * @property lane The [Pedestrian]'s [Lane].
  */
-@SmtTranslatable
 data class Pedestrian(
     override val id: Int,
     override val tickData: TickData,

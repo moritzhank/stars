@@ -26,9 +26,8 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property fromDistanceFromStart Distance from the start of speed limit start.
  * @property toDistanceFromStart Distance from the start of speed limit end.
  */
-@SmtTranslatable
 data class SpeedLimit(
     val speedLimit: Double,
     val fromDistanceFromStart: Double,
     val toDistanceFromStart: Double
-)
+) : SmtTranslatable()

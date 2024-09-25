@@ -34,7 +34,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property location The [Location] of the landmark.
  * @property rotation The [Rotation] of the landmark.
  */
-@SmtTranslatable
 data class Landmark(
     val id: Int,
     val name: String,
@@ -47,4 +46,4 @@ data class Landmark(
     val text: String,
     val location: Location,
     val rotation: Rotation
-)
+) : SmtTranslatable()

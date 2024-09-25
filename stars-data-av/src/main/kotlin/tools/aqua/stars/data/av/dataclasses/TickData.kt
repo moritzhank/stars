@@ -30,7 +30,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property weather The current [WeatherParameters].
  * @property daytime The current [Daytime].
  */
-@SmtTranslatable
 data class TickData(
     override val currentTick: TickDataUnitSeconds,
     override var entities: List<Actor>,
@@ -38,7 +37,9 @@ data class TickData(
     val blocks: List<Block>,
     val weather: WeatherParameters,
     val daytime: Daytime
-) : TickDataType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
+) :
+    SmtTranslatable(),
+    TickDataType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   override lateinit var segment: Segment
 

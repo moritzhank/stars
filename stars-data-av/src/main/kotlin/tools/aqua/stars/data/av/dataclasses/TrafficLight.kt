@@ -26,7 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property state The current state oif the traffic light.
  * @property relatedOpenDriveId The related open drive identifier.
  */
-@SmtTranslatable
-data class TrafficLight(var id: Int, var state: TrafficLightState, val relatedOpenDriveId: Int) {
+data class TrafficLight(var id: Int, var state: TrafficLightState, val relatedOpenDriveId: Int) :
+    SmtTranslatable() {
   override fun toString(): String = "TrafficLight($id, $state)"
 }
