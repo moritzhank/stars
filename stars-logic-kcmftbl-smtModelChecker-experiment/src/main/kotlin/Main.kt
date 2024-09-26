@@ -1,3 +1,6 @@
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectReference
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
+
 /*
  * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
@@ -15,8 +18,8 @@
  * limitations under the License.
  */
 
-import java.time.*
-
 fun main() {
   val testSegment = ExperimentLoader.loadTestSegment()
+  val result = mutableListOf<ObjectRepresentation>()
+  testSegment.toObjectRepresentation(result)
 }

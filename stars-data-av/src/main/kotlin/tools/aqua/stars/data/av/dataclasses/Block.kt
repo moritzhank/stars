@@ -31,6 +31,7 @@ data class Block(
     val id: String,
     var roads: List<Road>,
 ) : SmtTranslatable() {
+
   override fun toString(): String = id
 
   override fun hashCode(): Int = id.hashCode()

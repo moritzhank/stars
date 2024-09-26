@@ -35,6 +35,10 @@ data class Segment(
     SmtTranslatable(),
     SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
+    override fun registerMembers() {
+        register("tickData", tickData)
+    }
+
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }
 
   override val ticks: Map<TickDataUnitSeconds, TickData> = tickData.associateBy { it.currentTick }

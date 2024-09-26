@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
+import kotlin.reflect.KProperty1
+
 abstract class SmtTranslatable {
 
   val smtId: Int = uniqueId()
@@ -30,6 +32,11 @@ abstract class SmtTranslatable {
 
   // Can be overwritten to register Members
   open fun registerMembers() {}
+
+    /*
+  protected fun register(prop: KProperty1<SmtTranslatable, Boolean>) =
+      Val(prop.get(this)).let { registeredMembers[prop.name] = it }
+     */
 
   protected fun register(name: String, prop: Boolean) =
       Val(prop).let { registeredMembers[name] = it }
@@ -56,8 +63,26 @@ abstract class SmtTranslatable {
       Lst(uniqueId(), prop).let { registeredMembers[name] = it }
 
   fun toObjectRepresentation(
-      objectRepresentations: MutableList<ObjectRepresentation> = mutableListOf()
+      objectRepresentations: MutableList<ObjectRepresentation>,
+      visitedIds: MutableList<Int> = mutableListOf()
   ) {
-      //todo
+      if (visitedIds.contains(smtId)) {
+          return
+      } else {
+          registerMembers()
+          visitedIds.add(smtId)
+      }
+      for (entry in registeredMembers.entries) {
+          val objectReference = entry.component2()
+          when(objectReference) {
+              is Ref -> { objectReference.ref.toObjectRepresentation(objectRepresentations, visitedIds) }
+              is RefLst -> {
+                  for (elem in objectReference.list) {
+                      elem.toObjectRepresentation(objectRepresentations, visitedIds)
+                  }
+              }
+          }
+      }
+      objectRepresentations.add(ObjectRepresentation(this, registeredMembers))
   }
 }

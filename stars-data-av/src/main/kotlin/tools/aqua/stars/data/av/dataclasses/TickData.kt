@@ -43,6 +43,11 @@ data class TickData(
 
   override lateinit var segment: Segment
 
+    override fun registerMembers() {
+        register("currentTick", currentTick)
+        register("blocks", blocks)
+    }
+
   /** Name-Alias for [entities]. */
   val actors: List<Actor>
     get() = entities
