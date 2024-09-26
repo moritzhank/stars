@@ -19,15 +19,20 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
+import kotlin.reflect.KCallable
 import tools.aqua.stars.core.types.*
 
-class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
+class FormulaBuilder(
+    allowedCCBs: List<CallContextBase<*>>,
+    registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>,
+    val phi: MutableList<Formula> = mutableListOf()
+) : DSLBuilder(allowedCCBs, registeredFunctions) {
 
   companion object {
 
     // formula with no free variables
     fun formula(init: FormulaBuilder.() -> Unit): Formula {
-      val builder = FormulaBuilder()
+      val builder = FormulaBuilder(listOf(), mutableMapOf())
       init.invoke(builder)
       return builder.phi[0]
     }
@@ -43,7 +48,8 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
         init: FormulaBuilder.(CallContextBase<E1>) -> Unit
     ): (CallContextBase<E1>) -> FormulaBuilder {
       return { ccb: CallContextBase<E1> ->
-        val builder = FormulaBuilder()
+        val builder = FormulaBuilder(listOf(), mutableMapOf())
+        ccb.dslBuilder = builder
         init.invoke(builder, ccb)
         builder
       }
@@ -60,14 +66,21 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
         init: FormulaBuilder.(CallContextBase<E1>, CallContextBase<E1>) -> Unit
     ): (CallContextBase<E1>, CallContextBase<E1>) -> FormulaBuilder {
       return { ccb1: CallContextBase<E1>, ccb2: CallContextBase<E1> ->
-        FormulaBuilder().apply { init(ccb1, ccb2) }.let { this }
-        val builder = FormulaBuilder()
+        val builder = FormulaBuilder(listOf(), mutableMapOf())
+        ccb1.dslBuilder = builder
+        ccb2.dslBuilder = builder
         init.invoke(builder, ccb1, ccb2)
         builder
       }
     }
   }
 
+  fun deriveFB() = FormulaBuilder(allowedCCBs, registeredFunctions.toMutableMap())
+
+  fun deriveFB(newAllowedCCB: CCB<*>) =
+      FormulaBuilder(allowedCCBs.plus(newAllowedCCB), registeredFunctions.toMutableMap())
+
+  // todo: rework
   /*
   // does formula with one variable hold for given variable
   fun <
@@ -144,7 +157,7 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
     assert(phi.size == 2)
     return Until(interval, lhs = phi[0], rhs = phi[1])
   }
-  // todo: rework
+
   fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
@@ -155,7 +168,7 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
     assert(phi.size == 1)
     return Forall(ccb, phi[0])
   }
-  // todo: rework
+
   fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
@@ -197,6 +210,7 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
   fun FormulaBuilder.tt(): TT = TT.also { phi.add(it) }
 
   fun FormulaBuilder.ff(): FF = FF.also { phi.add(it) }
+
   // todo: rework
   /*
   fun <
@@ -227,7 +241,10 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
   }
 
   fun FormulaBuilder.neg(init: FormulaBuilder.() -> Unit = {}): Neg {
-    return FormulaBuilder().apply(init).buildNeg().also { phi.add(it) }
+    return FormulaBuilder(allowedCCBs, registeredFunctions.toMutableMap())
+        .apply(init)
+        .buildNeg()
+        .also { phi.add(it) }
   }
 
   infix fun Formula.and(other: Formula): And =
@@ -259,56 +276,56 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Prev {
-    return FormulaBuilder().apply(init).buildPrev(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildPrev(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.next(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Next {
-    return FormulaBuilder().apply(init).buildNext(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildNext(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.once(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Once {
-    return FormulaBuilder().apply(init).buildOnce(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildOnce(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.historically(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Historically {
-    return FormulaBuilder().apply(init).buildHistorically(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildHistorically(interval).also { phi.add(it) }
   }
 
   fun eventually(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Eventually {
-    return FormulaBuilder().apply(init).buildEventually(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildEventually(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.always(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Always {
-    return FormulaBuilder().apply(init).buildAlways(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildAlways(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.since(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Since {
-    return FormulaBuilder().apply(init).buildSince(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildSince(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.until(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Until {
-    return FormulaBuilder().apply(init).buildUntil(interval).also { phi.add(it) }
+    return deriveFB().apply(init).buildUntil(interval).also { phi.add(it) }
   }
 
   inline fun <
@@ -321,7 +338,9 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       init: FormulaBuilder.(CallContextBase<E1>) -> Unit = {}
   ): Forall<E1> {
     val ccb = CallContextBase<E1>()
-    return FormulaBuilder().apply { init(ccb) }.buildForall(ccb).also { phi.add(it) }
+    val fb = deriveFB(ccb)
+    ccb.dslBuilder = fb
+    return fb.apply { init(ccb) }.buildForall(ccb).also { phi.add(it) }
   }
 
   inline fun <
@@ -334,35 +353,37 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       init: FormulaBuilder.(CallContextBase<E1>) -> Unit = {}
   ): Exists<E1> {
     val ccb = CallContextBase<E1>()
-    return FormulaBuilder().apply { init(ccb) }.buildExists(ccb).also { phi.add(it) }
+    val fb = deriveFB(ccb)
+    ccb.dslBuilder = fb
+    return fb.apply { init(ccb) }.buildExists(ccb).also { phi.add(it) }
   }
 
   fun FormulaBuilder.minPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): MinPrevalence {
-    return FormulaBuilder().apply(init).buildMinPrevalence(fraction).also { phi.add(it) }
+    return deriveFB().apply(init).buildMinPrevalence(fraction).also { phi.add(it) }
   }
 
   fun FormulaBuilder.maxPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): MaxPrevalence {
-    return FormulaBuilder().apply(init).buildMaxPrevalence(fraction).also { phi.add(it) }
+    return deriveFB().apply(init).buildMaxPrevalence(fraction).also { phi.add(it) }
   }
 
   fun FormulaBuilder.pastMinPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): PastMinPrevalence {
-    return FormulaBuilder().apply(init).buildPastMinPrevalence(fraction).also { phi.add(it) }
+    return deriveFB().apply(init).buildPastMinPrevalence(fraction).also { phi.add(it) }
   }
 
   fun FormulaBuilder.pastMaxPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): PastMaxPrevalence {
-    return FormulaBuilder().apply(init).buildPastMaxPrevalence(fraction).also { phi.add(it) }
+    return deriveFB().apply(init).buildPastMaxPrevalence(fraction).also { phi.add(it) }
   }
 
   fun <Type> FormulaBuilder.binding(
@@ -370,7 +391,9 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
       init: FormulaBuilder.(CallContextBase<Type>) -> Unit = {}
   ): Binding<Type> {
     val ccb = CallContextBase<Type>()
-    return FormulaBuilder().apply { init(ccb) }.buildBinding(ccb, term).also { phi.add(it) }
+    val fb = deriveFB(ccb)
+    ccb.dslBuilder = fb
+    return fb.apply { init(ccb) }.buildBinding(ccb, term).also { phi.add(it) }
   }
 
   infix fun <Type> Term<Type>.leq(other: Term<Type>): Leq<Type> =
@@ -387,12 +410,14 @@ class FormulaBuilder(val phi: MutableList<Formula> = mutableListOf()) {
 
   infix fun <Type> Term<Type>.ne(other: Term<Type>): Ne<Type> = Ne(this, other).also { phi.add(it) }
 
-  fun <Type> term(ccb: CallContext<*, Type>): Variable<Type> = Variable(ccb)
+  fun <Type> term(cc: CallContext<*, Type>): Variable<Type> =
+      assertCCAllowed(cc).let { Variable(cc) }
 
   fun <Type> const(value: Type): Constant<Type> = Constant(value)
   // endregion
 }
 
+// todo: rework?!
 /*
 // holds
 fun <

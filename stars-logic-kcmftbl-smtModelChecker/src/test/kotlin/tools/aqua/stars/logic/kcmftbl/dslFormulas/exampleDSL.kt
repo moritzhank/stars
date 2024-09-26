@@ -23,11 +23,20 @@ import kotlin.test.Test
 import tools.aqua.stars.data.av.dataclasses.*
 import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
+import tools.aqua.stars.logic.kcmftbl.dsl.FunctionBuilder.Companion.function
 
 class exampleDSL {
+
   @Test
   fun monitors() {
+
+    val vehiclesInBlock = function { t: CCB<TickData>, b: CCB<Block> ->
+      filter(t * TickData::vehicles) { v: CCB<Vehicle> ->
+        v * Vehicle::lane * Lane::road * Road::block eq b
+      }
+    }
     val hasMidTrafficDensity = formula {
+      registerFunction(TickData::vehiclesInBlock, vehiclesInBlock)
       forall { v: CCB<Vehicle> ->
         eventually {
           (const(6) leq
