@@ -41,12 +41,19 @@ data class TickData(
     SmtTranslatable(),
     TickDataType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
-  override lateinit var segment: Segment
+  override fun registerMembers() {
+    register(TickData::currentTick)
+    registerCollection(TickData::entities)
+    registerCollection(TickData::trafficLights)
+    registerCollection(TickData::blocks)
+    register(TickData::weather)
+    registerEnum(TickData::daytime)
+    register(TickData::segment)
+    registerCollection(TickData::vehicles)
+    registerCollection(TickData::pedestrians)
+  }
 
-    override fun registerMembers() {
-        register("currentTick", currentTick)
-        register("blocks", blocks)
-    }
+  override lateinit var segment: Segment
 
   /** Name-Alias for [entities]. */
   val actors: List<Actor>

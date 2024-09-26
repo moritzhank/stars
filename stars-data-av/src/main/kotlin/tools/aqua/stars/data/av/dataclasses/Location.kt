@@ -26,4 +26,11 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
-data class Location(val x: Double, val y: Double, val z: Double) : SmtTranslatable()
+data class Location(val x: Double, val y: Double, val z: Double) : SmtTranslatable() {
+
+  override fun registerMembers() {
+    registerNumber(Location::x)
+    registerNumber(Location::y)
+    registerNumber(Location::z)
+  }
+}

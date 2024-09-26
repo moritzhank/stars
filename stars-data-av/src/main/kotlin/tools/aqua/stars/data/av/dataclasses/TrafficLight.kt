@@ -28,5 +28,12 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  */
 data class TrafficLight(var id: Int, var state: TrafficLightState, val relatedOpenDriveId: Int) :
     SmtTranslatable() {
+
+  override fun registerMembers() {
+    registerNumber(TrafficLight::id)
+    registerEnum(TrafficLight::state)
+    registerNumber(TrafficLight::relatedOpenDriveId)
+  }
+
   override fun toString(): String = "TrafficLight($id, $state)"
 }

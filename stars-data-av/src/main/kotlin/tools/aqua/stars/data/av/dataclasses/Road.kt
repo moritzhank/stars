@@ -29,5 +29,13 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  */
 data class Road(var id: Int, val isJunction: Boolean, val block: Block, var lanes: List<Lane>) :
     SmtTranslatable() {
+
+  override fun registerMembers() {
+    registerNumber(Road::id)
+    registerBoolean(Road::isJunction)
+    register(Road::block)
+    registerCollection(Road::lanes)
+  }
+
   override fun toString(): String = "$id"
 }

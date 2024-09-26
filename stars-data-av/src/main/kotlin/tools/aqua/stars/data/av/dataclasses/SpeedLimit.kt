@@ -30,4 +30,11 @@ data class SpeedLimit(
     val speedLimit: Double,
     val fromDistanceFromStart: Double,
     val toDistanceFromStart: Double
-) : SmtTranslatable()
+) : SmtTranslatable() {
+
+  override fun registerMembers() {
+    registerNumber(SpeedLimit::speedLimit)
+    registerNumber(SpeedLimit::fromDistanceFromStart)
+    registerNumber(SpeedLimit::toDistanceFromStart)
+  }
+}

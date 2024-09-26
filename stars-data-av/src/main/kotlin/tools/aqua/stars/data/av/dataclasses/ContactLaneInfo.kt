@@ -26,4 +26,9 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  */
 data class ContactLaneInfo(
     val lane: Lane,
-) : SmtTranslatable()
+) : SmtTranslatable() {
+
+  override fun registerMembers() {
+    register(ContactLaneInfo::lane)
+  }
+}

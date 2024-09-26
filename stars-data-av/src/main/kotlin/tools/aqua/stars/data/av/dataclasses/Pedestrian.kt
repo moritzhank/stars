@@ -32,6 +32,13 @@ data class Pedestrian(
     val lane: Lane,
 ) : Actor() {
 
+  override fun registerMembers() {
+    registerNumber(Pedestrian::id)
+    register(Pedestrian::tickData)
+    registerNumber(Pedestrian::positionOnLane)
+    register(Pedestrian::lane)
+  }
+
   override fun clone(newTickData: TickData): Actor =
       Pedestrian(id, newTickData, positionOnLane, lane)
 

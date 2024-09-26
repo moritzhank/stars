@@ -27,7 +27,7 @@ class Lst<T>(val id: Int, val list: Collection<T>) : ObjectReference
 
 class RefLst(val id: Int, val list: Collection<SmtTranslatable>) : ObjectReference
 
-class Enm(val value: Any) : ObjectReference
+class Enm(val value: Enum<*>) : ObjectReference
 
 class Nll() : ObjectReference
 

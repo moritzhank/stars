@@ -34,6 +34,13 @@ data class StaticTrafficLight(
     val stopLocations: List<Location>,
 ) : SmtTranslatable() {
 
+  override fun registerMembers() {
+    registerNumber(StaticTrafficLight::id)
+    register(StaticTrafficLight::location)
+    register(StaticTrafficLight::rotation)
+    registerCollection(StaticTrafficLight::stopLocations)
+  }
+
   /** Returns [TrafficLightState] from [TickData]. */
   fun getStateInTick(tickData: TickData): TrafficLightState =
       tickData.trafficLights.firstOrNull { it.relatedOpenDriveId == this.id }?.state

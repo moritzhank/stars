@@ -40,4 +40,16 @@ data class ContactArea(
     val lane2: Lane,
     val lane2StartPos: Double,
     val lane2EndPos: Double
-) : SmtTranslatable()
+) : SmtTranslatable() {
+
+  override fun registerMembers() {
+    registerString(ContactArea::id)
+    register(ContactArea::contactLocation)
+    register(ContactArea::lane1)
+    registerNumber(ContactArea::lane1StartPos)
+    registerNumber(ContactArea::lane1EndPos)
+    register(ContactArea::lane2)
+    registerNumber(ContactArea::lane2StartPos)
+    registerNumber(ContactArea::lane2EndPos)
+  }
+}

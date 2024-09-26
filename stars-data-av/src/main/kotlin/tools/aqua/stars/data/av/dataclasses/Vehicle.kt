@@ -53,6 +53,21 @@ data class Vehicle(
     val angularVelocity: Vector3D,
 ) : Actor() {
 
+  override fun registerMembers() {
+    registerNumber(Vehicle::id)
+    register(Vehicle::tickData)
+    registerNumber(Vehicle::positionOnLane)
+    register(Vehicle::lane)
+    registerString(Vehicle::typeId)
+    registerBoolean(Vehicle::isEgo)
+    register(Vehicle::location)
+    register(Vehicle::forwardVector)
+    register(Vehicle::rotation)
+    register(Vehicle::velocity)
+    register(Vehicle::acceleration)
+    register(Vehicle::angularVelocity)
+  }
+
   /** Effective velocity in m/s based on the [velocity] vector. */
   val effVelocityInMPerS: Double
     get() = sqrt(velocity.x.pow(2) + velocity.y.pow(2) + velocity.z.pow(2))

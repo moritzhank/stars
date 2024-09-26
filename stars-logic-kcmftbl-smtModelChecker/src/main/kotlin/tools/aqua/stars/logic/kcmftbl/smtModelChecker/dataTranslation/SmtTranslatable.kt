@@ -33,56 +33,63 @@ abstract class SmtTranslatable {
   // Can be overwritten to register Members
   open fun registerMembers() {}
 
-    /*
-  protected fun register(prop: KProperty1<SmtTranslatable, Boolean>) =
-      Val(prop.get(this)).let { registeredMembers[prop.name] = it }
-     */
+  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.registerCollection(
+      prop: KProperty1<T1, Collection<T2>>
+  ) =
+      prop.get(this).let {
+        RefLst(uniqueId(), it).let { this@SmtTranslatable.registeredMembers[prop.name] = it }
+      }
 
-  protected fun register(name: String, prop: Boolean) =
-      Val(prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.register(prop: KProperty1<T1, T2>) =
+      prop.get(this).let { Ref(it.smtId, it).let { registeredMembers[prop.name] = it } }
 
-  protected fun register(name: String, prop: Number) =
-      Val(prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerBoolean(prop: KProperty1<T1, Boolean>) =
+      prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun register(name: String, prop: String) =
-      Val(prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerNumber(prop: KProperty1<T1, Number>) =
+      prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun register(name: String, prop: SmtTranslatable) =
-      Ref(prop.smtId, prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerString(prop: KProperty1<T1, String>) =
+      prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun register(name: String, prop: Collection<SmtTranslatable>) =
-      RefLst(uniqueId(), prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerEnum(prop: KProperty1<T1, Enum<*>>) =
+      prop.get(this).let { Enm(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun registerBooleanCollection(name: String, prop: Collection<Boolean>) =
-      Lst(uniqueId(), prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerBooleanCollection(
+      prop: KProperty1<T1, Collection<Boolean>>
+  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
 
-  protected fun registerNumberCollection(name: String, prop: Collection<Number>) =
-      Lst(uniqueId(), prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerNumberCollection(
+      prop: KProperty1<T1, Collection<Number>>
+  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
 
-  protected fun registerStringCollection(name: String, prop: Collection<String>) =
-      Lst(uniqueId(), prop).let { registeredMembers[name] = it }
+  protected fun <T1 : SmtTranslatable> T1.registerStringCollection(
+      prop: KProperty1<T1, Collection<String>>
+  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
 
   fun toObjectRepresentation(
       objectRepresentations: MutableList<ObjectRepresentation>,
       visitedIds: MutableList<Int> = mutableListOf()
   ) {
-      if (visitedIds.contains(smtId)) {
-          return
-      } else {
-          registerMembers()
-          visitedIds.add(smtId)
-      }
-      for (entry in registeredMembers.entries) {
-          val objectReference = entry.component2()
-          when(objectReference) {
-              is Ref -> { objectReference.ref.toObjectRepresentation(objectRepresentations, visitedIds) }
-              is RefLst -> {
-                  for (elem in objectReference.list) {
-                      elem.toObjectRepresentation(objectRepresentations, visitedIds)
-                  }
-              }
+    if (visitedIds.contains(smtId)) {
+      return
+    } else {
+      registerMembers()
+      visitedIds.add(smtId)
+    }
+    for (entry in registeredMembers.entries) {
+      val objectReference = entry.component2()
+      when (objectReference) {
+        is Ref -> {
+          objectReference.ref.toObjectRepresentation(objectRepresentations, visitedIds)
+        }
+        is RefLst -> {
+          for (elem in objectReference.list) {
+            elem.toObjectRepresentation(objectRepresentations, visitedIds)
           }
+        }
       }
-      objectRepresentations.add(ObjectRepresentation(this, registeredMembers))
+    }
+    objectRepresentations.add(ObjectRepresentation(this, registeredMembers))
   }
 }

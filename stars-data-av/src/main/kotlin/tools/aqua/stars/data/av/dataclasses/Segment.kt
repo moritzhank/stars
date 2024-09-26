@@ -35,9 +35,9 @@ data class Segment(
     SmtTranslatable(),
     SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
-    override fun registerMembers() {
-        register("tickData", tickData)
-    }
+  override fun registerMembers() {
+    registerCollection(Segment::tickData)
+  }
 
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }
 

@@ -30,4 +30,11 @@ data class LaneMidpoint(
     val distanceToStart: Double,
     val location: Location,
     val rotation: Rotation,
-) : SmtTranslatable()
+) : SmtTranslatable() {
+
+  override fun registerMembers() {
+    registerNumber(LaneMidpoint::distanceToStart)
+    register(LaneMidpoint::location)
+    register(LaneMidpoint::rotation)
+  }
+}
