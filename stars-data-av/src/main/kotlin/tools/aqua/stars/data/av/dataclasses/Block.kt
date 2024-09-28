@@ -33,8 +33,8 @@ data class Block(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerString(Block::id)
-    registerCollection(Block::roads)
+    registerString("id", id)
+    registerCollection("roads", roads)
   }
 
   override fun toString(): String = id

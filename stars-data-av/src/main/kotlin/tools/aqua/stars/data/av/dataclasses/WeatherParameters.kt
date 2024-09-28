@@ -55,19 +55,19 @@ data class WeatherParameters(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerEnum(WeatherParameters::type)
-    registerNumber(WeatherParameters::cloudiness)
-    registerNumber(WeatherParameters::precipitation)
-    registerNumber(WeatherParameters::precipitationDeposits)
-    registerNumber(WeatherParameters::windIntensity)
-    registerNumber(WeatherParameters::sunAzimuthAngle)
-    registerNumber(WeatherParameters::sunAltitudeAngle)
-    registerNumber(WeatherParameters::fogDensity)
-    registerNumber(WeatherParameters::fogDistance)
-    registerNumber(WeatherParameters::wetness)
-    registerNumber(WeatherParameters::fogFalloff)
-    registerNumber(WeatherParameters::scatteringIntensity)
-    registerNumber(WeatherParameters::mieScatteringScale)
-    registerNumber(WeatherParameters::rayleighScatteringScale)
+    registerEnum("type", type)
+    registerNumber("cloudiness", cloudiness)
+    registerNumber("precipitation", precipitation)
+    registerNumber("precipitationDeposits", precipitationDeposits)
+    registerNumber("windIntensity", windIntensity)
+    registerNumber("sunAzimuthAngle", sunAzimuthAngle)
+    registerNumber("sunAltitudeAngle", sunAltitudeAngle)
+    registerNumber("fogDensity", fogDensity)
+    registerNumber("fogDistance", fogDistance)
+    registerNumber("wetness", wetness)
+    registerNumber("fogFalloff", fogFalloff)
+    registerNumber("scatteringIntensity", scatteringIntensity)
+    registerNumber("mieScatteringScale", mieScatteringScale)
+    registerNumber("rayleighScatteringScale", rayleighScatteringScale)
   }
 }

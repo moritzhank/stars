@@ -43,13 +43,13 @@ data class ContactArea(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerString(ContactArea::id)
-    register(ContactArea::contactLocation)
-    register(ContactArea::lane1)
-    registerNumber(ContactArea::lane1StartPos)
-    registerNumber(ContactArea::lane1EndPos)
-    register(ContactArea::lane2)
-    registerNumber(ContactArea::lane2StartPos)
-    registerNumber(ContactArea::lane2EndPos)
+    registerString("id", id)
+    register("contactLocation", contactLocation)
+    register("lane1", lane1)
+    registerNumber("lane1StartPos", lane1StartPos)
+    registerNumber("lane1EndPos", lane1EndPos)
+    register("lane2", lane2)
+    registerNumber("lane2StartPos", lane2StartPos)
+    registerNumber("lane2EndPos", lane2EndPos)
   }
 }

@@ -36,7 +36,7 @@ data class Segment(
     SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   override fun registerMembers() {
-    registerCollection(Segment::tickData)
+    registerCollection("tickData", tickData)
   }
 
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }

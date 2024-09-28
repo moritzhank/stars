@@ -31,10 +31,10 @@ data class Road(var id: Int, val isJunction: Boolean, val block: Block, var lane
     SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(Road::id)
-    registerBoolean(Road::isJunction)
-    register(Road::block)
-    registerCollection(Road::lanes)
+    registerNumber("id", id)
+    registerBoolean("isJunction", isJunction)
+    register("block", block)
+    registerCollection("lanes", lanes)
   }
 
   override fun toString(): String = "$id"

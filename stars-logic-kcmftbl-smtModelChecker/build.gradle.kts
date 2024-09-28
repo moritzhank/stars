@@ -18,7 +18,6 @@
 plugins { id("tools.aqua.stars.library-conventions") }
 
 dependencies {
-  implementation(kotlin("reflect"))
   implementation(project(":stars-core"))
   implementation(project(":stars-logic-kcmftbl"))
   testImplementation(project(mapOf("path" to ":stars-data-av")))

@@ -54,18 +54,18 @@ data class Vehicle(
 ) : Actor() {
 
   override fun registerMembers() {
-    registerNumber(Vehicle::id)
-    register(Vehicle::tickData)
-    registerNumber(Vehicle::positionOnLane)
-    register(Vehicle::lane)
-    registerString(Vehicle::typeId)
-    registerBoolean(Vehicle::isEgo)
-    register(Vehicle::location)
-    register(Vehicle::forwardVector)
-    register(Vehicle::rotation)
-    register(Vehicle::velocity)
-    register(Vehicle::acceleration)
-    register(Vehicle::angularVelocity)
+    registerNumber("id", id)
+    register("tickData", tickData)
+    registerNumber("positionOnLane", positionOnLane)
+    register("lane", lane)
+    registerString("typeId", typeId)
+    registerBoolean("isEgo", isEgo)
+    register("location", location)
+    register("forwardVector", forwardVector)
+    register("rotation", rotation)
+    register("velocity", velocity)
+    register("acceleration", acceleration)
+    register("angularVelocity", angularVelocity)
   }
 
   /** Effective velocity in m/s based on the [velocity] vector. */

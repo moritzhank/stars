@@ -42,15 +42,15 @@ data class TickData(
     TickDataType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   override fun registerMembers() {
-    register(TickData::currentTick)
-    registerCollection(TickData::entities)
-    registerCollection(TickData::trafficLights)
-    registerCollection(TickData::blocks)
-    register(TickData::weather)
-    registerEnum(TickData::daytime)
-    register(TickData::segment)
-    registerCollection(TickData::vehicles)
-    registerCollection(TickData::pedestrians)
+    register("currentTick", currentTick)
+    registerCollection("entities", entities)
+    registerCollection("trafficLights", trafficLights)
+    registerCollection("blocks", blocks)
+    register("weather", weather)
+    registerEnum("daytime", daytime)
+    register("segment", segment)
+    registerCollection("vehicles", vehicles)
+    registerCollection("pedestrians", pedestrians)
   }
 
   override lateinit var segment: Segment

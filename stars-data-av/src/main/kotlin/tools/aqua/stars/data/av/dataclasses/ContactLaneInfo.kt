@@ -29,6 +29,6 @@ data class ContactLaneInfo(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    register(ContactLaneInfo::lane)
+    register("lane", lane)
   }
 }

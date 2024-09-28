@@ -33,8 +33,8 @@ data class LaneMidpoint(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(LaneMidpoint::distanceToStart)
-    register(LaneMidpoint::location)
-    register(LaneMidpoint::rotation)
+    registerNumber("distanceToStart", distanceToStart)
+    register("location", location)
+    register("rotation", rotation)
   }
 }

@@ -33,8 +33,8 @@ data class SpeedLimit(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(SpeedLimit::speedLimit)
-    registerNumber(SpeedLimit::fromDistanceFromStart)
-    registerNumber(SpeedLimit::toDistanceFromStart)
+    registerNumber("speedLimit", speedLimit)
+    registerNumber("fromDistanceFromStart", fromDistanceFromStart)
+    registerNumber("toDistanceFromStart", toDistanceFromStart)
   }
 }

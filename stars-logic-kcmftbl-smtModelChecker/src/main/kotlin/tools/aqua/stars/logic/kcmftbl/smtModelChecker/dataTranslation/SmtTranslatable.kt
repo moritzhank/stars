@@ -19,8 +19,6 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-import kotlin.reflect.KProperty1
-
 abstract class SmtTranslatable {
 
   private var smtId: Int? = null
@@ -38,39 +36,38 @@ abstract class SmtTranslatable {
   // Can be overwritten to register Members
   open fun registerMembers() {}
 
-  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.registerCollection(
-      prop: KProperty1<T1, Collection<T2>>
-  ) =
-      prop.get(this).let {
-        RefLst(uniqueId(), it).let { this@SmtTranslatable.registeredMembers[prop.name] = it }
-      }
+  protected fun <T : SmtTranslatable> registerCollection(name: String, obj: Collection<T>) =
+      obj.let { RefLst(uniqueId(), it).let { this@SmtTranslatable.registeredMembers[name] = it } }
 
-  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.register(prop: KProperty1<T1, T2>) =
-      prop.get(this).let { Ref(it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.register(name: String, obj: T2) =
+      obj.let { Ref(it).let { registeredMembers[name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerBoolean(prop: KProperty1<T1, Boolean>) =
-      prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatable> T1.registerBoolean(name: String, obj: Boolean) =
+      obj.let { Val(it).let { registeredMembers[name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerNumber(prop: KProperty1<T1, Number>) =
-      prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatable> T1.registerNumber(name: String, obj: Number) =
+      obj.let { Val(it).let { registeredMembers[name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerString(prop: KProperty1<T1, String>) =
-      prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatable> T1.registerString(name: String, obj: String) =
+      obj.let { Val(it).let { registeredMembers[name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerEnum(prop: KProperty1<T1, Enum<*>>) =
-      prop.get(this).let { Enm(it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatable> T1.registerEnum(name: String, obj: Enum<*>) =
+      obj.let { Enm(it).let { registeredMembers[name] = it } }
 
   protected fun <T1 : SmtTranslatable> T1.registerBooleanCollection(
-      prop: KProperty1<T1, Collection<Boolean>>
-  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
+      name: String,
+      obj: Collection<Boolean>
+  ) = obj.let { Lst(uniqueId(), it).let { registeredMembers[name] = it } }
 
   protected fun <T1 : SmtTranslatable> T1.registerNumberCollection(
-      prop: KProperty1<T1, Collection<Number>>
-  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
+      name: String,
+      obj: Collection<Number>
+  ) = obj.let { Lst(uniqueId(), it).let { registeredMembers[name] = it } }
 
   protected fun <T1 : SmtTranslatable> T1.registerStringCollection(
-      prop: KProperty1<T1, Collection<String>>
-  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
+      name: String,
+      obj: Collection<String>
+  ) = obj.let { Lst(uniqueId(), it).let { registeredMembers[name] = it } }
 
   fun toObjectRepresentation(
       objectRepresentations: MutableList<ObjectRepresentation>,

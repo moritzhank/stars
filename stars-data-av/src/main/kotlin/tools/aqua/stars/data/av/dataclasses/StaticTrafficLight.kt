@@ -35,10 +35,10 @@ data class StaticTrafficLight(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(StaticTrafficLight::id)
-    register(StaticTrafficLight::location)
-    register(StaticTrafficLight::rotation)
-    registerCollection(StaticTrafficLight::stopLocations)
+    registerNumber("id", id)
+    register("location", location)
+    register("rotation", rotation)
+    registerCollection("stopLocations", stopLocations)
   }
 
   /** Returns [TrafficLightState] from [TickData]. */

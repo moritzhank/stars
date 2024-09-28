@@ -29,7 +29,7 @@ data class TickDataUnitMilliseconds(val tickMillis: Long) :
     SmtTranslatable(), TickUnit<TickDataUnitMilliseconds, TickDataDifferenceMilliseconds> {
 
   override fun registerMembers() {
-    registerNumber(TickDataUnitMilliseconds::tickMillis)
+    registerNumber("tickMillis", tickMillis)
   }
 
   override fun compareTo(other: TickDataUnitMilliseconds): Int =

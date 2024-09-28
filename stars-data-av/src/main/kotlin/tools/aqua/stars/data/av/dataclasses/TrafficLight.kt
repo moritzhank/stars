@@ -30,9 +30,9 @@ data class TrafficLight(var id: Int, var state: TrafficLightState, val relatedOp
     SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(TrafficLight::id)
-    registerEnum(TrafficLight::state)
-    registerNumber(TrafficLight::relatedOpenDriveId)
+    registerNumber("id", id)
+    registerEnum("state", state)
+    registerNumber("relatedOpenDriveId", relatedOpenDriveId)
   }
 
   override fun toString(): String = "TrafficLight($id, $state)"

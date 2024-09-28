@@ -33,10 +33,10 @@ data class Pedestrian(
 ) : Actor() {
 
   override fun registerMembers() {
-    registerNumber(Pedestrian::id)
-    register(Pedestrian::tickData)
-    registerNumber(Pedestrian::positionOnLane)
-    register(Pedestrian::lane)
+    registerNumber("id", id)
+    register("tickData", tickData)
+    registerNumber("positionOnLane", positionOnLane)
+    register("lane", lane)
   }
 
   override fun clone(newTickData: TickData): Actor =

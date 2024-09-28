@@ -49,16 +49,16 @@ data class Landmark(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(Landmark::id)
-    registerString(Landmark::name)
-    registerNumber(Landmark::distance)
-    registerNumber(Landmark::s)
-    registerString(Landmark::country)
-    registerEnum(Landmark::type)
-    registerNumber(Landmark::value)
-    registerString(Landmark::unit)
-    registerString(Landmark::text)
-    register(Landmark::location)
-    register(Landmark::rotation)
+    registerNumber("id", id)
+    registerString("name", name)
+    registerNumber("distance", distance)
+    registerNumber("s", s)
+    registerString("country", country)
+    registerEnum("type", type)
+    registerNumber("value", value)
+    registerString("unit", unit)
+    registerString("text", text)
+    register("location", location)
+    register("rotation", rotation)
   }
 }

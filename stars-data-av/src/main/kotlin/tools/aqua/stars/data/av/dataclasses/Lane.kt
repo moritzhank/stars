@@ -60,21 +60,21 @@ data class Lane(
 ) : SmtTranslatable() {
 
   override fun registerMembers() {
-    registerNumber(Lane::laneId)
-    register(Lane::road)
-    registerEnum(Lane::laneType)
-    registerNumber(Lane::laneWidth)
-    registerNumber(Lane::laneLength)
-    registerCollection(Lane::predecessorLanes)
-    registerCollection(Lane::successorLanes)
-    registerCollection(Lane::intersectingLanes)
-    registerCollection(Lane::yieldLanes)
-    registerCollection(Lane::laneMidpoints)
-    registerCollection(Lane::speedLimits)
-    registerCollection(Lane::landmarks)
-    registerCollection(Lane::contactAreas)
-    registerCollection(Lane::trafficLights)
-    registerEnum(Lane::laneDirection)
+    registerNumber("laneId", laneId)
+    register("road", road)
+    registerEnum("laneType", laneType)
+    registerNumber("laneWidth", laneWidth)
+    registerNumber("laneLength", laneLength)
+    registerCollection("predecessorLanes", predecessorLanes)
+    registerCollection("successorLanes", successorLanes)
+    registerCollection("intersectingLanes", intersectingLanes)
+    registerCollection("yieldLanes", yieldLanes)
+    registerCollection("laneMidpoints", laneMidpoints)
+    registerCollection("speedLimits", speedLimits)
+    registerCollection("landmarks", landmarks)
+    registerCollection("contactAreas", contactAreas)
+    registerCollection("trafficLights", trafficLights)
+    registerEnum("laneDirection", laneDirection)
   }
 
   /** Whether this [Lane] turns left. */
