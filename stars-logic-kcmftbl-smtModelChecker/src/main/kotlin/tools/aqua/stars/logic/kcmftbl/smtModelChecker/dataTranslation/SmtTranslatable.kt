@@ -24,6 +24,7 @@ import kotlin.reflect.KProperty1
 abstract class SmtTranslatable {
 
   private var smtId: Int? = null
+  private var smtType: String? = null
   private val registeredMembers = mutableMapOf<String, ObjectReference>()
 
   companion object {
@@ -74,21 +75,25 @@ abstract class SmtTranslatable {
 
   fun toObjectRepresentation(
       objectRepresentations: MutableList<ObjectRepresentation>,
-      visitedIds: Array<Boolean> = Array(nextId) { false }
+      capturedTypes: MutableSet<String>
   ) {
     if (smtId != null) {
       return
     }
     smtId = uniqueId()
+    this::class.simpleName!!.let {
+      smtType = it
+      capturedTypes.add(it)
+    }
     registerMembers()
     for (entry in registeredMembers.entries) {
       when (val objectReference = entry.component2()) {
         is Ref -> {
-          objectReference.ref.toObjectRepresentation(objectRepresentations, visitedIds)
+          objectReference.ref.toObjectRepresentation(objectRepresentations, capturedTypes)
         }
         is RefLst -> {
           for (elem in objectReference.list) {
-            elem.toObjectRepresentation(objectRepresentations, visitedIds)
+            elem.toObjectRepresentation(objectRepresentations, capturedTypes)
           }
         }
       }

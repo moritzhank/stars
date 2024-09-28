@@ -50,6 +50,8 @@ class exampleDSL {
         }
       }
     }
+    // todo: WHY NO ERROR FOR LIST<VEHICLE>::SIZE ?!?! no function but how to implement
+
     /*
     val hasMidTrafficDensityPred = formula {
       exists { x: Ref<Vehicle> ->
@@ -63,11 +65,6 @@ class exampleDSL {
         }
       }
     }
-
-    val y: Vehicle? = null
-
-    val x = y?.apply {}
-
     formula { v: Ref<Vehicle> ->
       minPrevalence(0.6) {
         neg(hasMidTrafficDensity) or
