@@ -21,21 +21,7 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 import tools.aqua.stars.logic.kcmftbl.dsl.CallContext
-
-fun main() {
-  println(
-      runSmtSolver(
-          "(set-option :produce-unsat-cores true)" +
-              "(declare-datatype Car ((cons (velocity Real))))\n" +
-              "(declare-const v1 Car)\n" +
-              ";(assert (= (velocity v1) 10.0))\n" +
-              "(assert (forall ((x Car)) (= (velocity x) 10.0)))\n" +
-              "(check-sat)\n" +
-              "(get-unsat-core)",
-          SmtSolver.Z3))
-}
 
 enum class SmtSolver(val solverName: String) {
   CVC5("cvc5"),
@@ -65,25 +51,4 @@ fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String {
   generatedFile.delete()
   checkNotNull(run) { "Error running the Docker container." }
   return run
-}
-
-// Copied from: https://stackoverflow.com/a/41495542 and modified
-private fun String.runCommand(workingDir: File, timeOutInMS: Long = 60 * 60 * 1000): String? {
-  try {
-    val parts = this.split("\\s".toRegex())
-    val proc =
-        ProcessBuilder(*parts.toTypedArray())
-            .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
-    proc.waitFor(timeOutInMS, TimeUnit.MILLISECONDS)
-    if (proc.exitValue() != 0)
-        throw IllegalStateException(
-            "Error executing a command:${System.lineSeparator()}${proc.errorStream.bufferedReader().readText()}")
-    return proc.inputStream.bufferedReader().readText()
-  } catch (e: Exception) {
-    e.printStackTrace()
-    return null
-  }
 }

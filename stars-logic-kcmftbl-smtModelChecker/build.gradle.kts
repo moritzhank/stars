@@ -27,7 +27,17 @@ dependencies {
 
 tasks.build { dependsOn("buildDockerImage") }
 
+tasks.processResources { dependsOn("copyShadowJar") }
+
 task<Exec>("buildDockerImage") {
-  setWorkingDir("src/main/resources")
+  dependsOn(tasks.processResources)
+  setWorkingDir("build/resources/main/")
   commandLine("docker", "build", ".", "-t", "smt-solver")
+}
+
+task<Copy>("copyShadowJar") {
+  dependsOn(":stars-logic-kcmftbl-smtModelChecker-dispatcher:shadowJar")
+  from(
+      project(":stars-logic-kcmftbl-smtModelChecker-dispatcher").file("/build/libs/dispatcher.jar"))
+  into("build/resources/main/")
 }

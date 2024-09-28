@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0" }
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
- * Copyright 2021-2024 The STARS Project Authors
+ * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,13 +34,28 @@ plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
  * limitations under the License.
  */
 
-rootProject.name = "stars"
+plugins {
+  id("tools.aqua.stars.library-conventions")
+  id("com.gradleup.shadow") version "8.3.2"
+}
 
-include(
-    "stars-core",
-    "stars-logic-kcmftbl",
-    "stars-data-av",
-    "stars-importer-carla",
-    "stars-logic-kcmftbl-smtModelChecker",
-    "stars-logic-kcmftbl-smtModelChecker-experiment",
-    "stars-logic-kcmftbl-smtModelChecker-dispatcher")
+dependencies {
+  implementation("io.ktor:ktor-server-netty:2.3.12")
+  implementation("io.ktor:ktor-network:2.3.12")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+}
+
+tasks.compileKotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_1_8) } }
+
+tasks.compileJava {
+  sourceCompatibility = "1.8"
+  targetCompatibility = "1.8"
+}
+
+tasks.jar { manifest { attributes["Main-Class"] = "MainKt" } }
+
+tasks.shadowJar {
+  archiveBaseName.set("dispatcher")
+  archiveClassifier.set("")
+  archiveVersion.set("")
+}

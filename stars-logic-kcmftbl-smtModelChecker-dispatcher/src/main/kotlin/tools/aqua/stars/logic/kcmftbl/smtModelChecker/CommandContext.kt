@@ -15,22 +15,9 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
+class CommandContext(val output: String, val error: String, val exitCode: Int) {
 
-interface ObjectReference
-
-class Ref(val ref: SmtTranslatable) : ObjectReference
-
-class Val<T>(val value: T) : ObjectReference
-
-class Lst<T>(val id: Int, val primitiveSmtSort: PrimitiveSmtSort, val list: Collection<T>) :
-    ObjectReference
-
-class RefLst(val id: Int, val genericType: String, val list: Collection<SmtTranslatable>) :
-    ObjectReference
-
-class Enm(val value: Enum<*>) : ObjectReference
-
-class ObjectRepresentation(val ref: SmtTranslatable, val member: Map<String, ObjectReference>)
+  override fun toString(): String = "[OUT] $output\n[ERR] ${error}\nExited with $exitCode."
+}

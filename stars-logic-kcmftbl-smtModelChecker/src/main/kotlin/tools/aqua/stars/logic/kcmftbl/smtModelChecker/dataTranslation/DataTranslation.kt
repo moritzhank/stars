@@ -70,8 +70,15 @@ fun generateSmtLib(
       }
     }
   }
-  // todo: Generate object representations
   result.appendLine()
+  result.appendLine("; Declaration of individuals")
+  for (objRep in objRepresentation) {
+    val name = "obj_${objRep.ref.getSmtId()}"
+    val type = objRep.ref.getSmtType()
+    result.appendLine("(declare-const $name $type)")
+  }
+  result.appendLine()
+  result.appendLine("(check-sat)")
   return result.toString()
 }
 
