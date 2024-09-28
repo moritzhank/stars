@@ -19,6 +19,12 @@ import kotlin.time.measureTime
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import java.io.File
+import java.io.FileWriter
+import kotlin.math.log10
+import kotlin.math.pow
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 /*
  * Copyright 2024 The STARS Project Authors
@@ -38,12 +44,30 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  */
 
 fun main() {
-  var testSegment: Segment?
-  var time = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
-  println("Reading finished in $time.")
-  val result = mutableListOf<ObjectRepresentation>()
-  time = measureTime { testSegment?.toObjectRepresentation(result) }
-  println("Translation finished in $time.")
-  println("Size of ObjectTranslations: ${result.size}")
-  println("Last smtId: ${SmtTranslatable.uniqueId() - 1}")
+  val timesSegLoad = mutableListOf<Duration>()
+  val timesTranslation = mutableListOf<Duration>()
+  for (i in 0..99) {
+    var testSegment: Segment?
+    var time = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
+    timesSegLoad.add(time)
+    val result = mutableListOf<ObjectRepresentation>()
+    time = measureTime { testSegment?.toObjectRepresentation(result) }
+    timesTranslation.add(time)
+    SmtTranslatable.resetIds()
+  }
+  val timesSegLoadMean = timesSegLoad.map { it.toDouble(DurationUnit.SECONDS) }.mean()
+  val timesTranslationMean = timesTranslation.map { it.toDouble(DurationUnit.MILLISECONDS) }.mean()
+  var timesSegLoadGMean = timesSegLoad.map { it.toDouble(DurationUnit.SECONDS) }.gmean()
+  val timesTranslationGMean = timesTranslation.map { it.toDouble(DurationUnit.MILLISECONDS) }.gmean()
+  val x = FileWriter(File("experiment_times.txt"))
+  x.append("SegLoad: $timesSegLoad\n" +
+          "Translation: $timesTranslation\n" +
+          "Mean SegLoad: ${timesSegLoadMean}s\n" +
+          "Geom. Mean SegLoad: ${timesSegLoadGMean}s\n" +
+          "Mean Translation: ${timesTranslationMean}ms\n" +
+          "Geom. Mean Translation: ${timesTranslationGMean}ms\n")
+  x.close()
 }
+
+fun Collection<Double>.mean() = sum() / size
+fun Collection<Double>.gmean() = (10.0).pow(fold(0.0) {n, elem -> n + log10(elem) } / size)
