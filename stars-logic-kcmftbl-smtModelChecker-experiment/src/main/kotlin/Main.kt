@@ -18,6 +18,7 @@
 import kotlin.time.measureTime
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
 
 /*
  * Copyright 2024 The STARS Project Authors
@@ -37,11 +38,12 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepr
  */
 
 fun main() {
-  var testSegment: Segment? = null
+  var testSegment: Segment?
   var time = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
   println("Reading finished in $time.")
-  var result = mutableListOf<ObjectRepresentation>()
+  val result = mutableListOf<ObjectRepresentation>()
   time = measureTime { testSegment?.toObjectRepresentation(result) }
   println("Translation finished in $time.")
   println("Size of ObjectTranslations: ${result.size}")
+  println("Last smtId: ${SmtTranslatable.uniqueId() - 1}")
 }

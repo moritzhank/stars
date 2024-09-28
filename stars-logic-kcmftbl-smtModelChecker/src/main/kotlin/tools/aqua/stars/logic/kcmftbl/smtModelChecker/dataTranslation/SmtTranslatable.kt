@@ -15,19 +15,24 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 import kotlin.reflect.KProperty1
 
 abstract class SmtTranslatable {
 
-  val smtId: Int = uniqueId()
+  private var smtId: Int? = null
   private val registeredMembers = mutableMapOf<String, ObjectReference>()
 
   companion object {
+
     private var nextId = 0
 
     fun uniqueId() = nextId++
+
+    fun resetIds() = run { nextId = 0 }
   }
 
   // Can be overwritten to register Members
@@ -41,7 +46,7 @@ abstract class SmtTranslatable {
       }
 
   protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.register(prop: KProperty1<T1, T2>) =
-      prop.get(this).let { Ref(it.smtId, it).let { registeredMembers[prop.name] = it } }
+      prop.get(this).let { Ref(it).let { registeredMembers[prop.name] = it } }
 
   protected fun <T1 : SmtTranslatable> T1.registerBoolean(prop: KProperty1<T1, Boolean>) =
       prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
@@ -69,17 +74,15 @@ abstract class SmtTranslatable {
 
   fun toObjectRepresentation(
       objectRepresentations: MutableList<ObjectRepresentation>,
-      visitedIds: MutableList<Int> = mutableListOf()
+      visitedIds: Array<Boolean> = Array(nextId) { false }
   ) {
-    if (visitedIds.contains(smtId)) {
+    if (smtId != null) {
       return
-    } else {
-      registerMembers()
-      visitedIds.add(smtId)
     }
+    smtId = uniqueId()
+    registerMembers()
     for (entry in registeredMembers.entries) {
-      val objectReference = entry.component2()
-      when (objectReference) {
+      when (val objectReference = entry.component2()) {
         is Ref -> {
           objectReference.ref.toObjectRepresentation(objectRepresentations, visitedIds)
         }

@@ -82,9 +82,9 @@ class FunctionBuilder<Return>(
       assertCCAllowed(cc).let { TFCallContextWrapper(cc) }
 
   private fun <T> buildEq(): TFEqual<T> =
-    assert(funs.size == 2).let {
-      TFEqual(funs[0] as TranslatableFunction<T>, funs[1] as TranslatableFunction<T>)
-    }
+      assert(funs.size == 2).let {
+        TFEqual(funs[0] as TranslatableFunction<T>, funs[1] as TranslatableFunction<T>)
+      }
 
   private fun <T : Number> buildAdd(): TFAdd<T> =
       assert(funs.size == 2).let {
@@ -105,9 +105,9 @@ class FunctionBuilder<Return>(
 
   fun <T> FunctionBuilder<Boolean>.eq(init: FunctionBuilder<T>.() -> Unit): TFEqual<T> {
     return FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())
-      .apply(init)
-      .buildEq<T>()
-      .also { funs.add(it) }
+        .apply(init)
+        .buildEq<T>()
+        .also { funs.add(it) }
   }
 
   // Syntax-shortcut for eq

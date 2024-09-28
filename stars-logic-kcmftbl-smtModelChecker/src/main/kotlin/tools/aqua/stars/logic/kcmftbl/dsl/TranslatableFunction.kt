@@ -32,7 +32,7 @@ data class TFCallContextWrapper<Return>(
 data class TFAdd<T : Number>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>) :
     TranslatableFunction<T>
 
-data class TFEqual<T>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>):
+data class TFEqual<T>(val lhs: TranslatableFunction<T>, val rhs: TranslatableFunction<T>) :
     TranslatableFunction<Boolean>
 
 data class TFFilter<C, T : Collection<C>>(

@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 interface ObjectReference
 
-class Ref(val id: Int, val ref: SmtTranslatable) : ObjectReference
+class Ref(val ref: SmtTranslatable) : ObjectReference
 
 class Val<T>(val value: T) : ObjectReference
 
