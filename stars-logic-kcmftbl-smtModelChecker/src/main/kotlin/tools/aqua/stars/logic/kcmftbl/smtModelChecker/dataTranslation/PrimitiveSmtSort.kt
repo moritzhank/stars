@@ -15,21 +15,27 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
-
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-interface ObjectReference
+enum class PrimitiveSmtSort(val smtSortName: String) {
 
-class Ref(val ref: SmtTranslatable) : ObjectReference
+  BOOL("Bool"),
+  INT("Int"),
+  REAL("Real"),
+  STRING("String")
+}
 
-class Val<T>(val value: T) : ObjectReference
-
-class Lst<T>(val id: Int, val primitiveSmtSort: PrimitiveSmtSort, val list: Collection<T>) :
-    ObjectReference
-
-class RefLst(val id: Int, val list: Collection<SmtTranslatable>) : ObjectReference
-
-class Enm(val value: Enum<*>) : ObjectReference
-
-class ObjectRepresentation(val ref: Any, val member: Map<String, ObjectReference>)
+fun primitiveSmtSort(obj: Any): PrimitiveSmtSort {
+  val simpleName = obj::class.simpleName
+  val result =
+      when (simpleName) {
+        "Boolean" -> PrimitiveSmtSort.BOOL
+        "Int" -> PrimitiveSmtSort.INT
+        "Float" -> PrimitiveSmtSort.REAL
+        "Double" -> PrimitiveSmtSort.REAL
+        "String" -> PrimitiveSmtSort.STRING
+        else -> null
+      }
+  requireNotNull(result) { "$obj has no primitive smt-type." }
+  return result
+}

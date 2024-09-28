@@ -25,7 +25,7 @@ abstract class SmtTranslatable {
 
   private var smtId: Int? = null
   private var smtType: String? = null
-  private val registeredMembers = mutableMapOf<String, ObjectReference>()
+  private var registeredMembers = mutableMapOf<String, ObjectReference>()
 
   companion object {
 
@@ -39,10 +39,15 @@ abstract class SmtTranslatable {
   // Can be overwritten to register Members
   open fun registerMembers() {}
 
+  fun getSmtId(): Int? = smtId
+
+  fun getSmtType(): String? = smtType
+
   protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.registerCollection(
       prop: KProperty1<T1, Collection<T2>>
   ) =
       prop.get(this).let {
+
         RefLst(uniqueId(), it).let { this@SmtTranslatable.registeredMembers[prop.name] = it }
       }
 
@@ -63,37 +68,58 @@ abstract class SmtTranslatable {
 
   protected fun <T1 : SmtTranslatable> T1.registerBooleanCollection(
       prop: KProperty1<T1, Collection<Boolean>>
-  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
+  ) =
+      prop.get(this).let {
+        Lst(uniqueId(), PrimitiveSmtSort.BOOL, it).let { registeredMembers[prop.name] = it }
+      }
 
-  protected fun <T1 : SmtTranslatable> T1.registerNumberCollection(
-      prop: KProperty1<T1, Collection<Number>>
-  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatable> T1.registerIntCollection(
+      prop: KProperty1<T1, Collection<Int>>
+  ) =
+      prop.get(this).let {
+        Lst(uniqueId(), PrimitiveSmtSort.INT, it).let { registeredMembers[prop.name] = it }
+      }
+
+  protected fun <T1 : SmtTranslatable> T1.registerDoubleCollection(
+      prop: KProperty1<T1, Collection<Double>>
+  ) =
+      prop.get(this).let {
+        Lst(uniqueId(), PrimitiveSmtSort.REAL, it).let { registeredMembers[prop.name] = it }
+      }
 
   protected fun <T1 : SmtTranslatable> T1.registerStringCollection(
       prop: KProperty1<T1, Collection<String>>
-  ) = prop.get(this).let { Lst(uniqueId(), it).let { registeredMembers[prop.name] = it } }
+  ) =
+      prop.get(this).let {
+        Lst(uniqueId(), PrimitiveSmtSort.STRING, it).let { registeredMembers[prop.name] = it }
+      }
 
   fun toObjectRepresentation(
       objectRepresentations: MutableList<ObjectRepresentation>,
-      capturedTypes: MutableSet<String>
+      capturedTypes: MutableSet<String>,
+      capturedTypesToMembers: MutableMap<String, MutableMap<String, ObjectReference>>
   ) {
     if (smtId != null) {
       return
     }
     smtId = uniqueId()
+    registerMembers()
     this::class.simpleName!!.let {
       smtType = it
-      capturedTypes.add(it)
+      if (capturedTypes.add(it)) {
+        capturedTypesToMembers[it] = registeredMembers
+      }
     }
-    registerMembers()
     for (entry in registeredMembers.entries) {
       when (val objectReference = entry.component2()) {
         is Ref -> {
-          objectReference.ref.toObjectRepresentation(objectRepresentations, capturedTypes)
+          objectReference.ref.toObjectRepresentation(
+              objectRepresentations, capturedTypes, capturedTypesToMembers)
         }
         is RefLst -> {
           for (elem in objectReference.list) {
-            elem.toObjectRepresentation(objectRepresentations, capturedTypes)
+            elem.toObjectRepresentation(
+                objectRepresentations, capturedTypes, capturedTypesToMembers)
           }
         }
       }

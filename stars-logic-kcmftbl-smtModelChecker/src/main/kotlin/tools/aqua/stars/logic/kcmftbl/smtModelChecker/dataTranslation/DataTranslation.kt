@@ -19,14 +19,57 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 fun generateSmtLib(
     objRepresentation: MutableList<ObjectRepresentation>,
-    capturedTypes: MutableSet<String>
+    capturedTypes: MutableSet<String>,
+    capturedTypesToMember: MutableMap<String, MutableMap<String, ObjectReference>>
 ): String {
   val result = StringBuilder()
+  // Generate general datatypes
+  result.appendLine("; General datatypes")
+  result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
+  result.appendLine()
   // Generate sort declarations
-  result.append("; Sort declarations")
-  result.append("(declare-sort )")
+  result.appendLine("; Sort declarations")
   for (capturedType in capturedTypes) {
-    result.append("(declare-sort $capturedType)\n")
+    result.appendLine("(declare-sort $capturedType 0)")
   }
+  result.appendLine()
+  result.appendLine("; Member declarations")
+  for (capturedType in capturedTypes) {
+    result.appendLine("; Member declaration for $capturedType")
+    for (entry in capturedTypesToMember[capturedType]!!.entries) {
+      val name = entry.component1()
+      val objRef = entry.component2()
+      when (objRef) {
+        is Enm -> {
+          result.appendLine(
+              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) Int)")
+        }
+        is Val<*> -> {
+          val primitiveSort = primitiveSmtSort(objRef.value!!).smtSortName
+          result.appendLine(
+              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) $primitiveSort)")
+        }
+        is Ref -> {
+          val refSort = objRef.ref.getSmtType()!!
+          result.appendLine(
+              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) $refSort)")
+        }
+        is Lst<*> -> {
+          val primitiveSort = objRef.primitiveSmtSort.smtSortName
+          result.appendLine(
+            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List $primitiveSort))")
+        }
+        is RefLst -> {
+          // todo
+        }
+        else -> {
+          throw IllegalArgumentException("$objRef is no valid ObjectReference.")
+        }
+      }
+    }
+  }
+  result.appendLine()
   return result.toString()
 }
+
+private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }

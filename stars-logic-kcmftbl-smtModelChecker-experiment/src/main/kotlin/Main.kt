@@ -23,8 +23,10 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
 import tools.aqua.stars.data.av.dataclasses.Segment
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectReference
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 
 /*
  * Copyright 2024 The STARS Project Authors
@@ -52,12 +54,15 @@ fun main() {
     timesSegLoad.add(time)
     val result = mutableListOf<ObjectRepresentation>()
     val resultCapturedTypes = mutableSetOf<String>()
-    time = measureTime { testSegment?.toObjectRepresentation(result, resultCapturedTypes) }
+    val resultCapturedTypesToMembers = mutableMapOf<String, MutableMap<String, ObjectReference>>()
+    time = measureTime {
+      testSegment?.toObjectRepresentation(result, resultCapturedTypes, resultCapturedTypesToMembers)
+    }
     timesTranslation.add(time)
 
     // Generate SMTLIB
-    // val smtlib = generateSmtLib(result, resultCapturedTypes)
-    // println(smtlib)
+    val smtlib = generateSmtLib(result, resultCapturedTypes, resultCapturedTypesToMembers)
+    println(smtlib)
 
     SmtTranslatable.resetIds()
   }
