@@ -48,7 +48,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSm
 fun main() {
   val timesSegLoad = mutableListOf<Duration>()
   val timesTranslation = mutableListOf<Duration>()
-  for (i in 0..0) {
+  for (i in 0..99) {
     var testSegment: Segment?
     var time = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
     timesSegLoad.add(time)
@@ -61,8 +61,8 @@ fun main() {
     timesTranslation.add(time)
 
     // Generate SMTLIB
-    val smtlib = generateSmtLib(result, resultCapturedTypes, resultCapturedTypesToMembers)
-    println(smtlib)
+    //val smtlib = generateSmtLib(result, resultCapturedTypes, resultCapturedTypesToMembers)
+    //println(smtlib)
 
     SmtTranslatable.resetIds()
   }

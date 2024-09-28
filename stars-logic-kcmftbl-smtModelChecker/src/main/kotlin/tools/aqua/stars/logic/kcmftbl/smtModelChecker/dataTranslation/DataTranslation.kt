@@ -33,13 +33,13 @@ fun generateSmtLib(
     result.appendLine("(declare-sort $capturedType 0)")
   }
   result.appendLine()
+  // Generate member declarations
   result.appendLine("; Member declarations")
   for (capturedType in capturedTypes) {
     result.appendLine("; Member declaration for $capturedType")
     for (entry in capturedTypesToMember[capturedType]!!.entries) {
       val name = entry.component1()
-      val objRef = entry.component2()
-      when (objRef) {
+      when (val objRef = entry.component2()) {
         is Enm -> {
           result.appendLine(
               "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) Int)")
@@ -57,10 +57,12 @@ fun generateSmtLib(
         is Lst<*> -> {
           val primitiveSort = objRef.primitiveSmtSort.smtSortName
           result.appendLine(
-            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List $primitiveSort))")
+              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List $primitiveSort))")
         }
         is RefLst -> {
-          // todo
+          val refSort = objRef.genericType
+          result.appendLine(
+              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List $refSort))")
         }
         else -> {
           throw IllegalArgumentException("$objRef is no valid ObjectReference.")
@@ -68,6 +70,7 @@ fun generateSmtLib(
       }
     }
   }
+  // todo: Generate object representations
   result.appendLine()
   return result.toString()
 }

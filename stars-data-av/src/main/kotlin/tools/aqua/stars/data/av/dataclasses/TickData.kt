@@ -43,7 +43,7 @@ data class TickData(
 
   override fun registerMembers() {
     register(TickData::currentTick)
-    registerCollection(TickData::entities)
+    // registerCollection(TickData::entities)
     registerCollection(TickData::trafficLights)
     registerCollection(TickData::blocks)
     register(TickData::weather)

@@ -43,13 +43,24 @@ abstract class SmtTranslatable {
 
   fun getSmtType(): String? = smtType
 
-  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.registerCollection(
-      prop: KProperty1<T1, Collection<T2>>
-  ) =
-      prop.get(this).let {
+  /** Using this function may cause undesirable behavior! */
+  protected fun registerMember(name: String, objRef: ObjectReference) {
+    registeredMembers[name] = objRef
+  }
 
-        RefLst(uniqueId(), it).let { this@SmtTranslatable.registeredMembers[prop.name] = it }
+  protected inline fun <T1 : SmtTranslatable, reified T2 : SmtTranslatable> T1.registerCollection(
+      prop: KProperty1<T1, Collection<T2>>
+  ) {
+    val t2KClass = T2::class
+    require(t2KClass.isData) {
+      "${t2KClass.simpleName} has to be a data class. Only collections of data classes can be registered."
+    }
+    prop.get(this).let {
+      RefLst(uniqueId(), t2KClass.simpleName!!, it).let {
+        this@SmtTranslatable.registerMember(prop.name, it)
       }
+    }
+  }
 
   protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.register(prop: KProperty1<T1, T2>) =
       prop.get(this).let { Ref(it).let { registeredMembers[prop.name] = it } }

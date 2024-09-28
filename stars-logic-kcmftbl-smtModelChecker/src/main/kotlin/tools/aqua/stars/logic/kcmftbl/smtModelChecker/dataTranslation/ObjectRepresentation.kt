@@ -28,7 +28,8 @@ class Val<T>(val value: T) : ObjectReference
 class Lst<T>(val id: Int, val primitiveSmtSort: PrimitiveSmtSort, val list: Collection<T>) :
     ObjectReference
 
-class RefLst(val id: Int, val list: Collection<SmtTranslatable>) : ObjectReference
+class RefLst(val id: Int, val genericType: String, val list: Collection<SmtTranslatable>) :
+    ObjectReference
 
 class Enm(val value: Enum<*>) : ObjectReference
 
