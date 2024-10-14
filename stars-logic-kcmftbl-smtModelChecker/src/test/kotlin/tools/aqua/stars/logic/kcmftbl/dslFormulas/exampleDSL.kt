@@ -50,6 +50,18 @@ class exampleDSL {
         }
       }
     }
+      val testIf = function { t: CCB<TickData> ->
+          cond<Int> { // needs fixing: compiler cant infer generic types
+              eq { // infix operator not yet available
+                  wrap(t * TickData::vehicles * List<Vehicle>::size)
+                  const(10.0)
+              }
+          }.satisfied {
+              const(10.0)
+          }.otherwise {
+              const(5.0)
+          }
+      }
     // todo: WHY NO ERROR FOR LIST<VEHICLE>::SIZE ?!?! no function but how to implement
 
     /*
