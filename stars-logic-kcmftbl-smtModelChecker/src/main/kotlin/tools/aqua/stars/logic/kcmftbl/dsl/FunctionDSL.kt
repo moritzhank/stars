@@ -96,6 +96,11 @@ class FunctionBuilder<Return>(
           .also { assertCCAllowed(cc) }
           .let { TFFilter(cc, funs[0] as TranslatableFunction<Boolean>) }
 
+  private fun <T> buildITE(funCond: TranslatableFunction<Boolean>): TFITE<T> =
+      assert(funs.size == 2).let {
+        TFITE(funCond, funs[0] as TranslatableFunction<T>, funs[1] as TranslatableFunction<T>)
+      }
+
   fun FunctionBuilder<Return>.wrap(cc: CallContext<*, Return>): TranslatableFunction<Return> =
       buildCallContextWrapper(cc).also { funs.add(it) }
 
@@ -135,6 +140,16 @@ class FunctionBuilder<Return>(
     init.invoke(fb, ccb)
     return fb.buildFilter(collection).also { funs.add(it) }
   }
+
+  fun <T> FunctionBuilder<T>.cond(init: FunctionBuilder<Boolean>.() -> Unit): TFITECond<T> {
+    val funBuilder =
+        FunctionBuilder<Boolean>(allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
+    assert(funBuilder.funs.size == 1)
+    return TFITECond(
+        funBuilder.funs[0] as TranslatableFunction<Boolean>,
+        funBuilder.allowedCCBs,
+        registeredFunctions.toMutableMap())
+  }
 }
 
 private class TFuncImpl<Return>(override val tfunc: TranslatableFunction<Return>) :
@@ -149,3 +164,34 @@ private class T3FuncImpl<Param1, Param2, Return>(override val tfunc: Translatabl
 private class T4FuncImpl<Param1, Param2, Param3, Return>(
     override val tfunc: TranslatableFunction<Return>
 ) : T4Function<Param1, Param2, Param3, Return>
+
+class TFITECond<T>(
+    val cond: TranslatableFunction<Boolean>,
+    val allowedCCBs: List<CallContextBase<*>>,
+    val registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>
+) {
+
+  fun satisfied(init: FunctionBuilder<T>.() -> Unit): TFITEThen<T> {
+    val funBuilder = FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
+    assert(funBuilder.funs.size == 1)
+    return TFITEThen(
+        cond,
+        funBuilder.funs[0] as TranslatableFunction<T>,
+        funBuilder.allowedCCBs,
+        registeredFunctions.toMutableMap())
+  }
+}
+
+class TFITEThen<T>(
+    val cond: TranslatableFunction<Boolean>,
+    val then: TranslatableFunction<T>,
+    val allowedCCBs: List<CallContextBase<*>>,
+    val registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>
+) {
+
+  fun otherwise(init: FunctionBuilder<T>.() -> Unit): TFITE<T> {
+    val funBuilder = FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
+    assert(funBuilder.funs.size == 1)
+    return TFITE(cond, then, funBuilder.funs[0] as TranslatableFunction<T>)
+  }
+}

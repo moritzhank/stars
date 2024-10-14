@@ -40,6 +40,12 @@ data class TFFilter<C, T : Collection<C>>(
     val phi: TranslatableFunction<Boolean>
 ) : TranslatableFunction<Collection<C>>
 
+data class TFITE<T>(
+    val cond: TranslatableFunction<Boolean>,
+    val thenFormula: TranslatableFunction<T>,
+    val elseFormula: TranslatableFunction<T>
+) : TranslatableFunction<T>
+
 /*
 data class Subtract<T : Number>(
     val lhs: TranslatableFunction<T>,
