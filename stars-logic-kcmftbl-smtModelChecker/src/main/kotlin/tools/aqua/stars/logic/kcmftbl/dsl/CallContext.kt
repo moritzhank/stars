@@ -26,79 +26,100 @@ import kotlin.reflect.KProperty1
 
 typealias CCB<Type> = CallContextBase<Type>
 
+/**
+ * Symbolic representation of a call to a member of [Caller] which returns [Return]
+ */
 sealed interface CallContext<Caller, Return> {
 
   val before: CallContext<*, Caller>?
   val base: CallContextBase<*>
 
   operator fun <W> times(prop: KProperty1<Return, W>): CallContext<Return, W> =
-      PropertyCallContext(prop, this, base)
+      PropertyCallContextImpl(prop, this, base)
 
   operator fun <W> times(func: KFunction1<Return, W>): CallContext<Return, W> =
-      Function1CallContext(func, this, base)
+      Callable1CallContextImpl(func, this, base)
 
-  operator fun <W, P> times(func: KFunction2<Return, P, W>): Callable2CallContext<Return, P, W> =
-      Function2CallContext(func, this, base)
+  operator fun <W, P> times(func: KFunction2<Return, P, W>): IntermediateCallable2CallContext<Return, P, W> =
+      IntermediateCallable2CallContextImpl(func, this, base)
 
   operator fun <W, P1, P2> times(
       func: KFunction3<Return, P1, P2, W>
-  ): Callable3CallContext<Return, P1, P2, W> = Function3CallContext(func, this, base)
+  ): IntermediateCallable3CallContext<Return, P1, P2, W> = IntermediateCallable3CallContextImpl(func, this, base)
 }
 
+/**
+ * Starting point for defining symbolic member calls to [Type]
+ */
 class CallContextBase<Type>() : CallContext<Nothing, Type> {
 
   override val before: CallContext<*, Nothing>? = null
   override val base: CallContextBase<*> = this
   lateinit var dslBuilder: DSLBuilder
-  var debugInfo: String? = null
-
-  override fun toString(): String = debugInfo ?: super.toString()
 
   override operator fun <Return> times(prop: KProperty1<Type, Return>): CallContext<Type, Return> =
-      PropertyCallContext(prop, null, base)
+      PropertyCallContextImpl(prop, null, base)
 
   override operator fun <Return> times(func: KFunction1<Type, Return>): CallContext<Type, Return> =
-      Function1CallContext(func, null, base)
+      Callable1CallContextImpl(func, null, base)
 
   override operator fun <Return, Param> times(
       func: KFunction2<Type, Param, Return>
-  ): Callable2CallContext<Type, Param, Return> = Function2CallContext(func, null, base)
+  ): IntermediateCallable2CallContext<Type, Param, Return> = IntermediateCallable2CallContextImpl(func, null, base)
 
   override operator fun <Return, Param1, Param2> times(
       func: KFunction3<Type, Param1, Param2, Return>
-  ): Callable3CallContext<Type, Param1, Param2, Return> = Function3CallContext(func, null, base)
+  ): IntermediateCallable3CallContext<Type, Param1, Param2, Return> = IntermediateCallable3CallContextImpl(func, null, base)
 }
 
-sealed interface PropAccessibleCallContext<Caller, Return> : CallContext<Caller, Return> {
+/**
+ * Represents a symbolic call to a property [prop]
+ */
+sealed interface PropertyCallContext<Caller, Return> : CallContext<Caller, Return> {
 
   val prop: KProperty1<Caller, Return>
 }
 
+/**
+ * Represents a symbolic call to a 0-ary function [func]
+ */
 sealed interface Callable1CallContext<Caller, Return> : CallContext<Caller, Return> {
 
   val func: KFunction1<Caller, Return>
 }
 
-sealed interface Callable2CallContext<Caller, Param, Return> {
+/**
+ * Represents a symbolic call to a 1-ary function for which the parameter must still be defined
+ */
+sealed interface IntermediateCallable2CallContext<Caller, Param, Return> {
 
-  fun withParam(cc: CallContext<*, Param>): PCallable2CallContext<Caller, Param, Return>
+  fun withParam(cc: CallContext<*, Param>): Callable2CallContext<Caller, Param, Return>
 }
 
-sealed interface PCallable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
+/**
+ * Represents a symbolic call to a 1-ary function [func]
+ */
+sealed interface Callable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
 
   val func: KFunction2<Caller, Param, Return>
   val param: CallContext<*, Param>
 }
 
-sealed interface Callable3CallContext<Caller, Param1, Param2, Return> {
+/**
+ * Represents a symbolic call to a 2-ary function for which the parameters must still be defined
+ */
+sealed interface IntermediateCallable3CallContext<Caller, Param1, Param2, Return> {
 
   fun withParams(
       cc1: CallContext<*, Param1>,
       cc2: CallContext<*, Param2>
-  ): PCallable3CallContext<Caller, Param1, Param2, Return>
+  ): Callable3CallContext<Caller, Param1, Param2, Return>
 }
 
-sealed interface PCallable3CallContext<Caller, Param1, Param2, Return> :
+/**
+ * Represents a symbolic call to a 2-ary function [func]
+ */
+sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
     CallContext<Caller, Return> {
 
   val func: KFunction3<Caller, Param1, Param2, Return>
@@ -106,55 +127,55 @@ sealed interface PCallable3CallContext<Caller, Param1, Param2, Return> :
   val param2: CallContext<*, Param2>
 }
 
-private class PropertyCallContext<Caller, Return>(
+private class PropertyCallContextImpl<Caller, Return>(
     override val prop: KProperty1<Caller, Return>,
     override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>
-) : PropAccessibleCallContext<Caller, Return>
+) : PropertyCallContext<Caller, Return>
 
-private class Function1CallContext<Caller, Return>(
+private class Callable1CallContextImpl<Caller, Return>(
     override val func: KFunction1<Caller, Return>,
     override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>
 ) : Callable1CallContext<Caller, Return>
 
-private class Function2CallContext<Caller, Param, Return>(
+private class IntermediateCallable2CallContextImpl<Caller, Param, Return>(
     private val func: KFunction2<Caller, Param, Return>,
     private val before: CallContext<*, Caller>?,
     private val base: CallContextBase<*>
-) : Callable2CallContext<Caller, Param, Return> {
+) : IntermediateCallable2CallContext<Caller, Param, Return> {
 
-  override fun withParam(cc: CallContext<*, Param>): PCallable2CallContext<Caller, Param, Return> =
-      base.dslBuilder.assertCCAllowed(cc).let { PFunction2CallContext(func, before, base, cc) }
+  override fun withParam(cc: CallContext<*, Param>): Callable2CallContext<Caller, Param, Return> =
+      base.dslBuilder.assertCCAllowed(cc).let { Callable2CallContextImpl(func, before, base, cc) }
 }
 
-private class PFunction2CallContext<Caller, Param, Return>(
+private class Callable2CallContextImpl<Caller, Param, Return>(
     override val func: KFunction2<Caller, Param, Return>,
     override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>,
     override val param: CallContext<*, Param>
-) : PCallable2CallContext<Caller, Param, Return>
+) : Callable2CallContext<Caller, Param, Return>
 
-private class Function3CallContext<Caller, Param1, Param2, Return>(
+private class IntermediateCallable3CallContextImpl<Caller, Param1, Param2, Return>(
     private val func: KFunction3<Caller, Param1, Param2, Return>,
     private val before: CallContext<*, Caller>?,
     private val base: CallContextBase<*>
-) : Callable3CallContext<Caller, Param1, Param2, Return> {
+) : IntermediateCallable3CallContext<Caller, Param1, Param2, Return> {
 
   override fun withParams(
       cc1: CallContext<*, Param1>,
       cc2: CallContext<*, Param2>
-  ): PCallable3CallContext<Caller, Param1, Param2, Return> =
+  ): Callable3CallContext<Caller, Param1, Param2, Return> =
       base.dslBuilder
           .assertCCAllowed(cc1)
           .also { base.dslBuilder.assertCCAllowed(cc2) }
-          .let { PFunction3CallContext(func, before, base, cc1, cc2) }
+          .let { Callable3CallContextImpl(func, before, base, cc1, cc2) }
 }
 
-private class PFunction3CallContext<Caller, Param1, Param2, Return>(
+private class Callable3CallContextImpl<Caller, Param1, Param2, Return>(
     override val func: KFunction3<Caller, Param1, Param2, Return>,
     override val before: CallContext<*, Caller>?,
     override val base: CallContextBase<*>,
     override val param1: CallContext<*, Param1>,
     override val param2: CallContext<*, Param2>
-) : PCallable3CallContext<Caller, Param1, Param2, Return>
+) : Callable3CallContext<Caller, Param1, Param2, Return>

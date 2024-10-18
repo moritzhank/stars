@@ -33,9 +33,9 @@ open class DSLBuilder(
     val name =
         when (cc) {
           is Callable1CallContext<*, *> -> cc.func.name
-          is PCallable2CallContext<*, *, *> -> cc.func.name
-          is PCallable3CallContext<*, *, *, *> -> cc.func.name
-          is PropAccessibleCallContext<*, *> -> cc.prop.name
+          is Callable2CallContext<*, *, *> -> cc.func.name
+          is Callable3CallContext<*, *, *, *> -> cc.func.name
+          is PropertyCallContext<*, *> -> cc.prop.name
           else -> "?"
         }
     return "\"$name\" ($cc)"
@@ -54,8 +54,8 @@ open class DSLBuilder(
       val isRegistered =
           when (currentElem) {
             is Callable1CallContext -> registeredFunctions[currentElem.func] != null
-            is PCallable2CallContext<*, *, *> -> registeredFunctions[currentElem.func] != null
-            is PCallable3CallContext<*, *, *, *> -> registeredFunctions[currentElem.func] != null
+            is Callable2CallContext<*, *, *> -> registeredFunctions[currentElem.func] != null
+            is Callable3CallContext<*, *, *, *> -> registeredFunctions[currentElem.func] != null
             else -> true
           }
       if (!isRegistered) {
