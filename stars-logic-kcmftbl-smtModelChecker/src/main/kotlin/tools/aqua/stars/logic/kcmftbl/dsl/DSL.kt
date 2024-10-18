@@ -25,7 +25,7 @@ import tools.aqua.stars.core.types.*
 class FormulaBuilder(
     allowedCCBs: List<CallContextBase<*>>,
     registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>,
-    val phi: MutableList<Formula> = mutableListOf()
+    private val phi: MutableList<Formula> = mutableListOf()
 ) : DSLBuilder(allowedCCBs, registeredFunctions) {
 
   companion object {
@@ -328,8 +328,8 @@ class FormulaBuilder(
     return deriveFB().apply(init).buildUntil(interval).also { phi.add(it) }
   }
 
-  inline fun <
-      reified E1 : E,
+  fun <
+      E1 : E,
       E : EntityType<E, T, S, U, D>,
       T : TickDataType<E, T, S, U, D>,
       S : SegmentType<E, T, S, U, D>,
@@ -343,8 +343,8 @@ class FormulaBuilder(
     return fb.apply { init(ccb) }.buildForall(ccb).also { phi.add(it) }
   }
 
-  inline fun <
-      reified E1 : E,
+  fun <
+      E1 : E,
       E : EntityType<E, T, S, U, D>,
       T : TickDataType<E, T, S, U, D>,
       S : SegmentType<E, T, S, U, D>,
