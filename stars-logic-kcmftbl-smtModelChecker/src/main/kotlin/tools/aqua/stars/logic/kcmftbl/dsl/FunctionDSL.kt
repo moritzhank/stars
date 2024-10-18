@@ -147,8 +147,8 @@ class FunctionBuilder<Return>(
     assert(funBuilder.funs.size == 1)
     return TFITECond(
         funBuilder.funs[0] as TranslatableFunction<Boolean>,
-        funBuilder.allowedCCBs,
-        registeredFunctions.toMutableMap())
+        this,
+        this.registeredFunctions)
   }
 }
 
@@ -166,18 +166,18 @@ private class T4FuncImpl<Param1, Param2, Param3, Return>(
 ) : T4Function<Param1, Param2, Param3, Return>
 
 class TFITECond<T>(
-    val cond: TranslatableFunction<Boolean>,
-    val allowedCCBs: List<CallContextBase<*>>,
-    val registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>
+    private val cond: TranslatableFunction<Boolean>,
+    private val initialBuilder: FunctionBuilder<T>,
+    private val registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>
 ) {
 
   fun satisfied(init: FunctionBuilder<T>.() -> Unit): TFITEThen<T> {
-    val funBuilder = FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
+    val funBuilder = FunctionBuilder<T>(initialBuilder.allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
     assert(funBuilder.funs.size == 1)
     return TFITEThen(
         cond,
         funBuilder.funs[0] as TranslatableFunction<T>,
-        funBuilder.allowedCCBs,
+        initialBuilder,
         registeredFunctions.toMutableMap())
   }
 }
@@ -185,13 +185,13 @@ class TFITECond<T>(
 class TFITEThen<T>(
     val cond: TranslatableFunction<Boolean>,
     val then: TranslatableFunction<T>,
-    val allowedCCBs: List<CallContextBase<*>>,
+    val initialBuilder: FunctionBuilder<T>,
     val registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>
 ) {
 
   fun otherwise(init: FunctionBuilder<T>.() -> Unit): TFITE<T> {
-    val funBuilder = FunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
+    val funBuilder = FunctionBuilder<T>(initialBuilder.allowedCCBs, registeredFunctions.toMutableMap()).apply(init)
     assert(funBuilder.funs.size == 1)
-    return TFITE(cond, then, funBuilder.funs[0] as TranslatableFunction<T>)
+    return TFITE(cond, then, funBuilder.funs[0] as TranslatableFunction<T>).also{ initialBuilder.funs.add(it) }
   }
 }

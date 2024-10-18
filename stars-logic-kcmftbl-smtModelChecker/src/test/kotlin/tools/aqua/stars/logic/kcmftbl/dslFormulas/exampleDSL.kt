@@ -50,7 +50,6 @@ class exampleDSL {
         }
       }
     }
-    // todo: WHY NO ERROR FOR LIST<VEHICLE>::SIZE ?!?! no function but how to implement
     val testIf = function { t: CCB<TickData> ->
       cond<Int> { // needs fixing: compiler cant infer generic type
             eq { // infix operator not yet available
