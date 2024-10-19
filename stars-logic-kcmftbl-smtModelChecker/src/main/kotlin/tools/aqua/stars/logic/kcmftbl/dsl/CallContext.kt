@@ -26,9 +26,7 @@ import kotlin.reflect.KProperty1
 
 typealias CCB<Type> = CallContextBase<Type>
 
-/**
- * Symbolic representation of a call to a member of [Caller] which returns [Return]
- */
+/** Symbolic representation of a call to a member of [Caller] which returns [Return] */
 sealed interface CallContext<Caller, Return> {
 
   val before: CallContext<*, Caller>?
@@ -40,17 +38,18 @@ sealed interface CallContext<Caller, Return> {
   operator fun <W> times(func: KFunction1<Return, W>): CallContext<Return, W> =
       Callable1CallContextImpl(func, this, base)
 
-  operator fun <W, P> times(func: KFunction2<Return, P, W>): IntermediateCallable2CallContext<Return, P, W> =
+  operator fun <W, P> times(
+      func: KFunction2<Return, P, W>
+  ): IntermediateCallable2CallContext<Return, P, W> =
       IntermediateCallable2CallContextImpl(func, this, base)
 
   operator fun <W, P1, P2> times(
       func: KFunction3<Return, P1, P2, W>
-  ): IntermediateCallable3CallContext<Return, P1, P2, W> = IntermediateCallable3CallContextImpl(func, this, base)
+  ): IntermediateCallable3CallContext<Return, P1, P2, W> =
+      IntermediateCallable3CallContextImpl(func, this, base)
 }
 
-/**
- * Starting point for defining symbolic member calls to [Type]
- */
+/** Starting point for defining symbolic member calls to [Type] */
 class CallContextBase<Type>() : CallContext<Nothing, Type> {
 
   override val before: CallContext<*, Nothing>? = null
@@ -65,49 +64,41 @@ class CallContextBase<Type>() : CallContext<Nothing, Type> {
 
   override operator fun <Return, Param> times(
       func: KFunction2<Type, Param, Return>
-  ): IntermediateCallable2CallContext<Type, Param, Return> = IntermediateCallable2CallContextImpl(func, null, base)
+  ): IntermediateCallable2CallContext<Type, Param, Return> =
+      IntermediateCallable2CallContextImpl(func, null, base)
 
   override operator fun <Return, Param1, Param2> times(
       func: KFunction3<Type, Param1, Param2, Return>
-  ): IntermediateCallable3CallContext<Type, Param1, Param2, Return> = IntermediateCallable3CallContextImpl(func, null, base)
+  ): IntermediateCallable3CallContext<Type, Param1, Param2, Return> =
+      IntermediateCallable3CallContextImpl(func, null, base)
 }
 
-/**
- * Represents a symbolic call to a property [prop]
- */
+/** Represents a symbolic call to a property [prop] */
 sealed interface PropertyCallContext<Caller, Return> : CallContext<Caller, Return> {
 
   val prop: KProperty1<Caller, Return>
 }
 
-/**
- * Represents a symbolic call to a 0-ary function [func]
- */
+/** Represents a symbolic call to a 0-ary function [func] */
 sealed interface Callable1CallContext<Caller, Return> : CallContext<Caller, Return> {
 
   val func: KFunction1<Caller, Return>
 }
 
-/**
- * Represents a symbolic call to a 1-ary function for which the parameter must still be defined
- */
+/** Represents a symbolic call to a 1-ary function for which the parameter must still be defined */
 sealed interface IntermediateCallable2CallContext<Caller, Param, Return> {
 
   fun withParam(cc: CallContext<*, Param>): Callable2CallContext<Caller, Param, Return>
 }
 
-/**
- * Represents a symbolic call to a 1-ary function [func]
- */
+/** Represents a symbolic call to a 1-ary function [func] */
 sealed interface Callable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
 
   val func: KFunction2<Caller, Param, Return>
   val param: CallContext<*, Param>
 }
 
-/**
- * Represents a symbolic call to a 2-ary function for which the parameters must still be defined
- */
+/** Represents a symbolic call to a 2-ary function for which the parameters must still be defined */
 sealed interface IntermediateCallable3CallContext<Caller, Param1, Param2, Return> {
 
   fun withParams(
@@ -116,15 +107,26 @@ sealed interface IntermediateCallable3CallContext<Caller, Param1, Param2, Return
   ): Callable3CallContext<Caller, Param1, Param2, Return>
 }
 
-/**
- * Represents a symbolic call to a 2-ary function [func]
- */
+/** Represents a symbolic call to a 2-ary function [func] */
 sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
     CallContext<Caller, Return> {
 
   val func: KFunction3<Caller, Param1, Param2, Return>
   val param1: CallContext<*, Param1>
   val param2: CallContext<*, Param2>
+}
+
+/** Returns a string formatted as "name (...)" */
+fun CallContext<*, *>.toFormattedString(): String {
+  val name =
+      when (this) {
+        is Callable1CallContext<*, *> -> func.name
+        is Callable2CallContext<*, *, *> -> func.name
+        is Callable3CallContext<*, *, *, *> -> func.name
+        is PropertyCallContext<*, *> -> prop.name
+        else -> "?"
+      }
+  return "\"$name\" ($this)"
 }
 
 private class PropertyCallContextImpl<Caller, Return>(
@@ -146,7 +148,9 @@ private class IntermediateCallable2CallContextImpl<Caller, Param, Return>(
 ) : IntermediateCallable2CallContext<Caller, Param, Return> {
 
   override fun withParam(cc: CallContext<*, Param>): Callable2CallContext<Caller, Param, Return> =
-      base.dslBuilder.assertCCAllowed(cc).let { Callable2CallContextImpl(func, before, base, cc) }
+      base.dslBuilder.assertCallContextAllowed(cc).let {
+        Callable2CallContextImpl(func, before, base, cc)
+      }
 }
 
 private class Callable2CallContextImpl<Caller, Param, Return>(
@@ -167,8 +171,8 @@ private class IntermediateCallable3CallContextImpl<Caller, Param1, Param2, Retur
       cc2: CallContext<*, Param2>
   ): Callable3CallContext<Caller, Param1, Param2, Return> =
       base.dslBuilder
-          .assertCCAllowed(cc1)
-          .also { base.dslBuilder.assertCCAllowed(cc2) }
+          .assertCallContextAllowed(cc1)
+          .also { base.dslBuilder.assertCallContextAllowed(cc2) }
           .let { Callable3CallContextImpl(func, before, base, cc1, cc2) }
 }
 

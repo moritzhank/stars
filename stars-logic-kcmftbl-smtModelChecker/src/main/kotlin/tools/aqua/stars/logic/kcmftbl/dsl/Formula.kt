@@ -25,20 +25,6 @@ data object TT : Formula
 
 data object FF : Formula
 
-// todo: rework
-/*
-data class UnaryPredicate<E1 : EntityType<*, *, *, *, *>>(
-    val ccb: CallContextBase<E1>,
-    val phi: () -> Boolean
-) : Formula
-
-data class BinaryPredicate<E1 : EntityType<*, *, *, *, *>, E2 : EntityType<*, *, *, *, *>>(
-    val ccb1: CallContextBase<E1>,
-    val ccb2: CallContextBase<E2>,
-    val phi: () -> Boolean
-) : Formula
- */
-
 data class Neg(val inner: Formula) : Formula
 
 data class And(val lhs: Formula, val rhs: Formula) : Formula

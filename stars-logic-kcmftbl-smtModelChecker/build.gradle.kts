@@ -37,7 +37,6 @@ task<Exec>("buildDockerImage") {
 
 task<Copy>("copyShadowJar") {
   dependsOn(":stars-logic-kcmftbl-smtModelChecker-dispatcher:shadowJar")
-  from(
-      project(":stars-logic-kcmftbl-smtModelChecker-dispatcher").file("/build/libs/dispatcher.jar"))
+  from(project(":stars-logic-kcmftbl-smtModelChecker-dispatcher").file("build/libs/dispatcher.jar"))
   into("build/resources/main/")
 }

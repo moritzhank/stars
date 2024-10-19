@@ -24,20 +24,20 @@ import tools.aqua.stars.core.types.*
 
 class FormulaBuilder(
     allowedCCBs: List<CallContextBase<*>>,
-    registeredFunctions: MutableMap<KCallable<*>, TranslatableFunction<*>>,
+    registeredFunctions: MutableMap<KCallable<*>, TNFunction<*>>,
     private val phi: MutableList<Formula> = mutableListOf()
 ) : DSLBuilder(allowedCCBs, registeredFunctions) {
 
   companion object {
 
-    // formula with no free variables
+    /** Define formula with no free variables */
     fun formula(init: FormulaBuilder.() -> Unit): Formula {
       val builder = FormulaBuilder(listOf(), mutableMapOf())
       init.invoke(builder)
       return builder.phi[0]
     }
 
-    // formula with one free variable (does not return formula!!)
+    /** Define formula with one free variable (Does not return formula!) */
     fun <
         E1 : E,
         E : EntityType<E, T, S, U, D>,
@@ -55,7 +55,7 @@ class FormulaBuilder(
       }
     }
 
-    // formula with two free variables of same EntityType (does not return formula!!)
+    /** Define formula with two free variables (Does not return formula!) */
     fun <
         E1 : E,
         E : EntityType<E, T, S, U, D>,
@@ -75,39 +75,12 @@ class FormulaBuilder(
     }
   }
 
-  fun deriveFB() = FormulaBuilder(allowedCCBs, registeredFunctions.toMutableMap())
+  private fun deriveFormulaBuilder() =
+      FormulaBuilder(allowedCCBs, registeredFunctions.toMutableMap())
 
-  fun deriveFB(newAllowedCCB: CCB<*>) =
+  private fun deriveFormulaBuilder(newAllowedCCB: CCB<*>) =
       FormulaBuilder(allowedCCBs.plus(newAllowedCCB), registeredFunctions.toMutableMap())
 
-  // todo: rework
-  /*
-  // does formula with one variable hold for given variable
-  fun <
-      E1 : E,
-      E : EntityType<E, T, S, U, D>,
-      T : TickDataType<E, T, S, U, D>,
-      S : SegmentType<E, T, S, U, D>,
-      U : TickUnit<U, D>,
-      D : TickDifference<D>> ((CallContextBase<E1>) -> FormulaBuilder).holds(
-      ccb: CallContextBase<E1>
-  ): Formula = this(ccb).phi[0].also { phi.add(it) }
-
-  // does formula with two variables hold for given variables
-  fun <
-      E1 : E,
-      E2 : E,
-      E : EntityType<E, T, S, U, D>,
-      T : TickDataType<E, T, S, U, D>,
-      S : SegmentType<E, T, S, U, D>,
-      U : TickUnit<U, D>,
-      D : TickDifference<D>> ((CallContextBase<E1>, CallContextBase<E2>) -> FormulaBuilder).holds(
-      ccb1: CallContextBase<E1>,
-      ccb2: CallContextBase<E2>
-  ): Formula = this(ccb1, ccb2).phi[0].also { phi.add(it) }
-  */
-
-  // region build formula elements (check number of passed sub formulae)
   private fun buildNeg(): Neg = assert(phi.size == 1).let { Neg(phi.first()) }
 
   private fun buildAnd(): And = assert(phi.size == 2).let { And(phi[0], phi[1]) }
@@ -158,7 +131,7 @@ class FormulaBuilder(
     return Until(interval, lhs = phi[0], rhs = phi[1])
   }
 
-  fun <
+  private fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
       T : TickDataType<E, T, S, U, D>,
@@ -169,7 +142,7 @@ class FormulaBuilder(
     return Forall(ccb, phi[0])
   }
 
-  fun <
+  private fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
       T : TickDataType<E, T, S, U, D>,
@@ -204,25 +177,18 @@ class FormulaBuilder(
     assert(phi.size == 1)
     return Binding(ccb, term, phi[0])
   }
-  // endregion
 
-  // region formula definitions
-  fun FormulaBuilder.tt(): TT = TT.also { phi.add(it) }
-
-  fun FormulaBuilder.ff(): FF = FF.also { phi.add(it) }
-
-  // todo: rework
-  /*
+  // todo: section start
   fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
       T : TickDataType<E, T, S, U, D>,
       S : SegmentType<E, T, S, U, D>,
       U : TickUnit<U, D>,
-      D : TickDifference<D>> FormulaBuilder.pred(
-      ccb: CallContextBase<E1>,
-      init: () -> Boolean = { true }
-  ): Formula = UnaryPredicate(ccb, init).also { phi.add(it) }
+      D : TickDifference<D>> ((CallContextBase<E1>) -> FormulaBuilder).holds(
+      ccb: CallContextBase<E1>
+  ): Formula = this(ccb).phi[0].also { phi.add(it) }
+
   fun <
       E1 : E,
       E2 : E,
@@ -230,12 +196,16 @@ class FormulaBuilder(
       T : TickDataType<E, T, S, U, D>,
       S : SegmentType<E, T, S, U, D>,
       U : TickUnit<U, D>,
-      D : TickDifference<D>> FormulaBuilder.pred(
+      D : TickDifference<D>> ((CallContextBase<E1>, CallContextBase<E2>) -> FormulaBuilder).holds(
       ccb1: CallContextBase<E1>,
-      ccb2: CallContextBase<E2>,
-      init: () -> Boolean = { true }
-  ): Formula = BinaryPredicate(ccb1, ccb2, init).also { phi.add(it) }
-  */
+      ccb2: CallContextBase<E2>
+  ): Formula = this(ccb1, ccb2).phi[0].also { phi.add(it) }
+  // todo: section end
+
+  fun FormulaBuilder.tt(): TT = TT.also { phi.add(it) }
+
+  fun FormulaBuilder.ff(): FF = FF.also { phi.add(it) }
+
   fun FormulaBuilder.neg(input: Formula): Neg {
     return Neg(input).also { phi.add(it) }
   }
@@ -276,56 +246,56 @@ class FormulaBuilder(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Prev {
-    return deriveFB().apply(init).buildPrev(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildPrev(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.next(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Next {
-    return deriveFB().apply(init).buildNext(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildNext(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.once(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Once {
-    return deriveFB().apply(init).buildOnce(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildOnce(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.historically(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Historically {
-    return deriveFB().apply(init).buildHistorically(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildHistorically(interval).also { phi.add(it) }
   }
 
   fun eventually(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Eventually {
-    return deriveFB().apply(init).buildEventually(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildEventually(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.always(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Always {
-    return deriveFB().apply(init).buildAlways(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildAlways(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.since(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Since {
-    return deriveFB().apply(init).buildSince(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildSince(interval).also { phi.add(it) }
   }
 
   fun FormulaBuilder.until(
       interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): Until {
-    return deriveFB().apply(init).buildUntil(interval).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildUntil(interval).also { phi.add(it) }
   }
 
   fun <
@@ -338,7 +308,7 @@ class FormulaBuilder(
       init: FormulaBuilder.(CallContextBase<E1>) -> Unit = {}
   ): Forall<E1> {
     val ccb = CallContextBase<E1>()
-    val fb = deriveFB(ccb)
+    val fb = deriveFormulaBuilder(ccb)
     ccb.dslBuilder = fb
     return fb.apply { init(ccb) }.buildForall(ccb).also { phi.add(it) }
   }
@@ -353,7 +323,7 @@ class FormulaBuilder(
       init: FormulaBuilder.(CallContextBase<E1>) -> Unit = {}
   ): Exists<E1> {
     val ccb = CallContextBase<E1>()
-    val fb = deriveFB(ccb)
+    val fb = deriveFormulaBuilder(ccb)
     ccb.dslBuilder = fb
     return fb.apply { init(ccb) }.buildExists(ccb).also { phi.add(it) }
   }
@@ -362,28 +332,28 @@ class FormulaBuilder(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): MinPrevalence {
-    return deriveFB().apply(init).buildMinPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildMinPrevalence(fraction).also { phi.add(it) }
   }
 
   fun FormulaBuilder.maxPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): MaxPrevalence {
-    return deriveFB().apply(init).buildMaxPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildMaxPrevalence(fraction).also { phi.add(it) }
   }
 
   fun FormulaBuilder.pastMinPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): PastMinPrevalence {
-    return deriveFB().apply(init).buildPastMinPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildPastMinPrevalence(fraction).also { phi.add(it) }
   }
 
   fun FormulaBuilder.pastMaxPrevalence(
       fraction: Double,
       init: FormulaBuilder.() -> Unit = {}
   ): PastMaxPrevalence {
-    return deriveFB().apply(init).buildPastMaxPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildPastMaxPrevalence(fraction).also { phi.add(it) }
   }
 
   fun <Type> FormulaBuilder.binding(
@@ -391,7 +361,7 @@ class FormulaBuilder(
       init: FormulaBuilder.(CallContextBase<Type>) -> Unit = {}
   ): Binding<Type> {
     val ccb = CallContextBase<Type>()
-    val fb = deriveFB(ccb)
+    val fb = deriveFormulaBuilder(ccb)
     ccb.dslBuilder = fb
     return fb.apply { init(ccb) }.buildBinding(ccb, term).also { phi.add(it) }
   }
@@ -411,33 +381,7 @@ class FormulaBuilder(
   infix fun <Type> Term<Type>.ne(other: Term<Type>): Ne<Type> = Ne(this, other).also { phi.add(it) }
 
   fun <Type> term(cc: CallContext<*, Type>): Variable<Type> =
-      assertCCAllowed(cc).let { Variable(cc) }
+      assertCallContextAllowed(cc).let { Variable(cc) }
 
   fun <Type> const(value: Type): Constant<Type> = Constant(value)
-  // endregion
 }
-
-// todo: rework?!
-/*
-// holds
-fun <
-    E1 : E,
-    E : EntityType<E, T, S, U, D>,
-    T : TickDataType<E, T, S, U, D>,
-    S : SegmentType<E, T, S, U, D>,
-    U : TickUnit<U, D>,
-    D : TickDifference<D>> ((Ref<E1>) -> FormulaBuilder).holds(ref1: Ref<E1>): Formula =
-    this(ref1).phi[0]
-
-fun <
-    E1 : E,
-    E2 : E,
-    E : EntityType<E, T, S, U, D>,
-    T : TickDataType<E, T, S, U, D>,
-    S : SegmentType<E, T, S, U, D>,
-    U : TickUnit<U, D>,
-    D : TickDifference<D>> ((Ref<E1>, Ref<E2>) -> FormulaBuilder).holds(
-    ref1: Ref<E1>,
-    ref2: Ref<E2>
-): Formula = this(ref1, ref2).phi[0]
-*/

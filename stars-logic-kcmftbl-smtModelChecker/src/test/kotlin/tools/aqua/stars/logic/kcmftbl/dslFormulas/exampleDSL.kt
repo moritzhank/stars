@@ -23,7 +23,7 @@ import kotlin.test.Test
 import tools.aqua.stars.data.av.dataclasses.*
 import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
-import tools.aqua.stars.logic.kcmftbl.dsl.FunctionBuilder.Companion.function
+import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
 
 class exampleDSL {
 
@@ -51,7 +51,7 @@ class exampleDSL {
       }
     }
     val testIf = function { t: CCB<TickData> ->
-      cond<Int> { // needs fixing: compiler cant infer generic type
+      branch<Int> { // needs fixing: compiler cant infer generic type
             eq { // infix operator not yet available
               wrap(t * TickData::vehicles * List<Vehicle>::size)
               const(10.0)

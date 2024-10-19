@@ -17,16 +17,27 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-// TFunctions and its implementations sole purpose is the wrapping of TranslatableFunction
-// and making it verifiable for function-registration
+sealed interface TFunction<Return>
 
-sealed interface TFunction<Return> {
+data class TFConstantNumber<T : Number>(val content: T) : TFunction<T>
 
-  val tfunc: TranslatableFunction<Return>
-}
+data class TFConstantBoolean(val content: Boolean) : TFunction<Boolean>
 
-sealed interface T2Function<Param, Return> : TFunction<Return>
+data class TFCallContextWrapper<Return>(
+    val callContext: CallContext<*, Return>,
+) : TFunction<Return>
 
-sealed interface T3Function<Param1, Param2, Return> : TFunction<Return>
+data class TFAdd<T : Number>(val lhs: TFunction<T>, val rhs: TFunction<T>) : TFunction<T>
 
-sealed interface T4Function<Param1, Param2, Param3, Return> : TFunction<Return>
+data class TFEqual<T>(val lhs: TFunction<T>, val rhs: TFunction<T>) : TFunction<Boolean>
+
+data class TFFilter<C, T : Collection<C>>(
+    val collection: CallContext<*, T>,
+    val phi: TFunction<Boolean>
+) : TFunction<Collection<C>>
+
+data class TFBranch<T>(
+    val cond: TFunction<Boolean>,
+    val thenFunction: TFunction<T>,
+    val elseFunction: TFunction<T>
+) : TFunction<T>
