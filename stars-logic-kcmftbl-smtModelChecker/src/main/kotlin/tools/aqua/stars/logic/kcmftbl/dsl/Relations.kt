@@ -17,14 +17,32 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-data class Leq<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula
+data class Leq<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
 
-data class Geq<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula
+  fun copy(): Leq<Type> = Leq(copyTerm(lhs), copyTerm(rhs))
+}
 
-data class Lt<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula
+data class Geq<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
 
-data class Gt<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula
+  fun copy(): Geq<Type> = Geq(copyTerm(lhs), copyTerm(rhs))
+}
 
-data class Eq<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula
+data class Lt<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
 
-data class Ne<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula
+  fun copy(): Lt<Type> = Lt(copyTerm(lhs), copyTerm(rhs))
+}
+
+data class Gt<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
+
+  fun copy(): Gt<Type> = Gt(copyTerm(lhs), copyTerm(rhs))
+}
+
+data class Eq<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
+
+  fun copy(): Eq<Type> = Eq(copyTerm(lhs), copyTerm(rhs))
+}
+
+data class Ne<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
+
+  fun copy(): Ne<Type> = Ne(copyTerm(lhs), copyTerm(rhs))
+}

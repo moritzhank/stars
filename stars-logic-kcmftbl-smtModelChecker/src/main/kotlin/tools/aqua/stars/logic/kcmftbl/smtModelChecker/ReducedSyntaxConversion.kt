@@ -17,49 +17,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
-/** Create deep copy of Formula */
 /*
-fun copyF(f: Formula): Formula {
-  return when (f) {
-    is FF -> f
-    is TT -> f
-    is Neg -> Neg(copyF(f.inner))
-    is And -> And(copyF(f.lhs), copyF(f.rhs))
-    is Or -> Or(copyF(f.lhs), copyF(f.rhs))
-    is Implication -> Implication(copyF(f.lhs), copyF(f.rhs))
-    is Iff -> Iff(copyF(f.lhs), copyF(f.rhs))
-    is Prev -> Prev(f.interval?.copy(), copyF(f.inner))
-    is Next -> Next(f.interval?.copy(), copyF(f.inner))
-    is Once -> Once(f.interval?.copy(), copyF(f.inner))
-    is Historically -> Historically(f.interval?.copy(), copyF(f.inner))
-    is Eventually -> Eventually(f.interval?.copy(), copyF(f.inner))
-    is Always -> Always(f.interval?.copy(), copyF(f.inner))
-    is Since -> Since(f.interval?.copy(), copyF(f.lhs), copyF(f.rhs))
-    is Until -> Until(f.interval?.copy(), copyF(f.lhs), copyF(f.rhs))
-    is Forall -> Forall(copyF(f.inner))
-    is Exists -> Exists(f.inner)
-    is MinPrevalence -> MinPrevalence(f.fraction, copyF(f.inner))
-    is PastMinPrevalence -> PastMinPrevalence(f.fraction, copyF(f.inner))
-    is MaxPrevalence -> MaxPrevalence(f.fraction, copyF(f.inner))
-    is PastMaxPrevalence -> PastMaxPrevalence(f.fraction, copyF(f.inner))
-    is Binding<*> -> Binding(copyT(f.bindTerm), copyF(f.inner))
-    is Leq<*> -> Leq(copyT(f.lhs), copyT(f.rhs))
-    is Geq<*> -> Geq(copyT(f.lhs), copyT(f.rhs))
-    is Lt<*> -> Lt(copyT(f.lhs), copyT(f.rhs))
-    is Gt<*> -> Gt(copyT(f.lhs), copyT(f.rhs))
-    is Eq<*> -> Eq(copyT(f.lhs), copyT(f.rhs))
-    is Ne<*> -> Ne(copyT(f.lhs), copyT(f.rhs))
-  }
-}
-
-/** Create deep copy of [Term] */
-fun <T> copyT(t: Term<out T>): Term<T> {
-  return when (t) {
-    is Constant -> Constant(t.value)
-    is Variable -> Variable(t.phi)
-  }
-}
-
 fun toReducedSyntax(f: Formula, propagateNeg: Boolean = false): Formula {
   return when (f) {
     // Recursion anchor

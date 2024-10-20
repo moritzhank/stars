@@ -178,7 +178,6 @@ class FormulaBuilder(
     return Binding(ccb, term, phi[0])
   }
 
-  // todo: section start
   fun <
       E1 : E,
       E : EntityType<E, T, S, U, D>,
@@ -187,7 +186,7 @@ class FormulaBuilder(
       U : TickUnit<U, D>,
       D : TickDifference<D>> ((CallContextBase<E1>) -> FormulaBuilder).holds(
       ccb: CallContextBase<E1>
-  ): Formula = this(ccb).phi[0].also { phi.add(it) }
+  ): Formula = this(ccb).phi[0].also { phi.add(copyFormula(it)) }
 
   fun <
       E1 : E,
@@ -199,8 +198,7 @@ class FormulaBuilder(
       D : TickDifference<D>> ((CallContextBase<E1>, CallContextBase<E2>) -> FormulaBuilder).holds(
       ccb1: CallContextBase<E1>,
       ccb2: CallContextBase<E2>
-  ): Formula = this(ccb1, ccb2).phi[0].also { phi.add(it) }
-  // todo: section end
+  ): Formula = this(ccb1, ccb2).phi[0].also { phi.add(copyFormula(it)) }
 
   fun FormulaBuilder.tt(): TT = TT.also { phi.add(it) }
 

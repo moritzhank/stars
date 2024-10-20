@@ -20,7 +20,7 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-// Copied from: https://stackoverflow.com/a/41495542 and modified
+// Copied and modified from https://stackoverflow.com/a/41495542
 fun String.runCommand(workingDir: File, timeOutInMS: Long = 60 * 60 * 1000): String? {
   try {
     val parts = this.split("\\s".toRegex())
