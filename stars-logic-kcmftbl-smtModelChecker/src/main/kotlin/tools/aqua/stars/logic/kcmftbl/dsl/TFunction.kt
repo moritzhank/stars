@@ -29,7 +29,8 @@ data class TFCallContextWrapper<Return>(
 
 data class TFAdd<T : Number>(val lhs: TFunction<T>, val rhs: TFunction<T>) : TFunction<T>
 
-data class TFEqual<T>(val lhs: TFunction<T>, val rhs: TFunction<T>) : TFunction<Boolean>
+data class TFComparison<T>(val lhs: TFunction<T>, val rhs: TFunction<T>, val relation: Relation) :
+    TFunction<Boolean>
 
 data class TFFilter<C, T : Collection<C>>(
     val collection: CallContext<*, T>,

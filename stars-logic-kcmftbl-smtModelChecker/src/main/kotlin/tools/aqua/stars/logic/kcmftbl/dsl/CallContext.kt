@@ -50,8 +50,9 @@ sealed interface CallContext<Caller, Return> {
 }
 
 /** Starting point for defining symbolic member calls to [Type] */
-class CallContextBase<Type>() : CallContext<Nothing, Type> {
+class CallContextBase<Type> : CallContext<Nothing, Type> {
 
+  var debugInfo: String? = null
   override val before: CallContext<*, Nothing>? = null
   override val base: CallContextBase<*> = this
   lateinit var dslBuilder: DSLBuilder
@@ -71,6 +72,8 @@ class CallContextBase<Type>() : CallContext<Nothing, Type> {
       func: KFunction3<Type, Param1, Param2, Return>
   ): IntermediateCallable3CallContext<Type, Param1, Param2, Return> =
       IntermediateCallable3CallContextImpl(func, null, base)
+
+  override fun toString() = debugInfo ?: super.toString()
 }
 
 /** Represents a symbolic call to a property [prop] */

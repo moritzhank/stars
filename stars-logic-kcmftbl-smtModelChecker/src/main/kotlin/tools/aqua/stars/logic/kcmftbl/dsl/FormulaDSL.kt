@@ -48,7 +48,7 @@ class FormulaBuilder(
         init: FormulaBuilder.(CallContextBase<E1>) -> Unit
     ): (CallContextBase<E1>) -> FormulaBuilder {
       return { ccb: CallContextBase<E1> ->
-        val builder = FormulaBuilder(listOf(), mutableMapOf())
+        val builder = FormulaBuilder(listOf(ccb), mutableMapOf())
         ccb.dslBuilder = builder
         init.invoke(builder, ccb)
         builder
@@ -66,7 +66,7 @@ class FormulaBuilder(
         init: FormulaBuilder.(CallContextBase<E1>, CallContextBase<E1>) -> Unit
     ): (CallContextBase<E1>, CallContextBase<E1>) -> FormulaBuilder {
       return { ccb1: CallContextBase<E1>, ccb2: CallContextBase<E1> ->
-        val builder = FormulaBuilder(listOf(), mutableMapOf())
+        val builder = FormulaBuilder(listOf(ccb1, ccb2), mutableMapOf())
         ccb1.dslBuilder = builder
         ccb2.dslBuilder = builder
         init.invoke(builder, ccb1, ccb2)
@@ -198,7 +198,10 @@ class FormulaBuilder(
       D : TickDifference<D>> ((CallContextBase<E1>, CallContextBase<E2>) -> FormulaBuilder).holds(
       ccb1: CallContextBase<E1>,
       ccb2: CallContextBase<E2>
-  ): Formula = this(ccb1, ccb2).phi[0].also { phi.add(copyFormula(it)) }
+  ): Formula {
+    val x = this(ccb1, ccb2)
+    return x.phi[0].also { phi.add(copyFormula(it)) }
+  }
 
   fun FormulaBuilder.tt(): TT = TT.also { phi.add(it) }
 

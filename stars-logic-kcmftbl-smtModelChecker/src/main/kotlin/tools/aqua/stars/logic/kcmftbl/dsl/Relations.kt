@@ -46,3 +46,12 @@ data class Ne<Type>(val lhs: Term<Type>, val rhs: Term<Type>) : Formula {
 
   fun copy(): Ne<Type> = Ne(copyTerm(lhs), copyTerm(rhs))
 }
+
+enum class Relation {
+  Leq,
+  Geq,
+  Lt,
+  Gt,
+  Eq,
+  Ne
+}
