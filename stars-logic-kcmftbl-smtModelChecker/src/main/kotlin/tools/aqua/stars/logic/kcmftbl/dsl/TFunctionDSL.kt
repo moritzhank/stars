@@ -21,6 +21,8 @@ package tools.aqua.stars.logic.kcmftbl.dsl
 
 import kotlin.reflect.KCallable
 
+// Important: The TFunction-DSL cannot contain infix operators, because this would conflict with the
+// correctness of the return type
 class TFunctionBuilder<Return>(
     allowedCCBs: List<CallContextBase<*>>,
     registeredFunctions: MutableMap<KCallable<*>, TNFunction<*>>,
@@ -102,45 +104,39 @@ class TFunctionBuilder<Return>(
   fun TFunctionBuilder<Return>.wrap(cc: CallContext<*, Return>): TFunction<Return> =
       buildCallContextWrapper(cc).also { funs.add(it) }
 
-  fun <T : Number> const(content: T) = TFConstantNumber(content).also { funs.add(it) }
+  fun <T : Number> TFunctionBuilder<T>.const(content: T) =
+      TFConstantNumber(content).also { funs.add(it) }
 
-  fun const(content: Boolean) = TFConstantBoolean(content).also { funs.add(it) }
+  fun TFunctionBuilder<Boolean>.const(content: Boolean) =
+      TFConstantBoolean(content).also { funs.add(it) }
 
   private fun <T> comparison(
-      cc1: CallContext<*, T>,
-      cc2: CallContext<*, T>,
+      init: TFunctionBuilder<T>.() -> Unit,
       relation: Relation
   ): TFComparison<T> {
-    val funcBuilder = TFunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())
-    funcBuilder.funs.add(buildCallContextWrapper(cc1))
-    funcBuilder.funs.add(buildCallContextWrapper(cc2))
-    return funcBuilder.buildComparison<T>(relation).also { funs.add(it) }
-  }
-
-  fun <T> TFunctionBuilder<Boolean>.eq(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> {
     return TFunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())
         .apply(init)
-        .buildComparison<T>(Relation.Eq)
+        .buildComparison<T>(relation)
         .also { funs.add(it) }
   }
 
-  infix fun <T> CallContext<*, T>.leq(other: CallContext<*, T>): TFunction<Boolean> =
-      comparison(this, other, Relation.Leq)
+  fun <T> TFunctionBuilder<Boolean>.leq(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> =
+      comparison(init, Relation.Leq)
 
-  infix fun <T> CallContext<*, T>.geq(other: CallContext<*, T>): TFunction<Boolean> =
-      comparison(this, other, Relation.Geq)
+  fun <T> TFunctionBuilder<Boolean>.geq(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> =
+      comparison(init, Relation.Geq)
 
-  infix fun <T> CallContext<*, T>.lt(other: CallContext<*, T>): TFunction<Boolean> =
-      comparison(this, other, Relation.Lt)
+  fun <T> TFunctionBuilder<Boolean>.lt(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> =
+      comparison(init, Relation.Lt)
 
-  infix fun <T> CallContext<*, T>.gt(other: CallContext<*, T>): TFunction<Boolean> =
-      comparison(this, other, Relation.Gt)
+  fun <T> TFunctionBuilder<Boolean>.gt(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> =
+      comparison(init, Relation.Gt)
 
-  infix fun <T> CallContext<*, T>.eq(other: CallContext<*, T>): TFunction<Boolean> =
-      comparison(this, other, Relation.Eq)
+  fun <T> TFunctionBuilder<Boolean>.eq(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> =
+      comparison(init, Relation.Eq)
 
-  infix fun <T> CallContext<*, T>.ne(other: CallContext<*, T>): TFunction<Boolean> =
-      comparison(this, other, Relation.Ne)
+  fun <T> TFunctionBuilder<Boolean>.ne(init: TFunctionBuilder<T>.() -> Unit): TFComparison<T> =
+      comparison(init, Relation.Ne)
 
   fun <T : Number> TFunctionBuilder<T>.add(init: TFunctionBuilder<T>.() -> Unit): TFAdd<T> {
     return TFunctionBuilder<T>(allowedCCBs, registeredFunctions.toMutableMap())

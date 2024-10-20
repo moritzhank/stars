@@ -25,14 +25,17 @@ import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
 import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
 
-class exampleDSL {
+class ExampleDSL {
 
   @Test
   fun monitors() {
 
     val vehiclesInBlock = function { t: CCB<TickData>, b: CCB<Block> ->
       filter(t * TickData::vehicles) { v: CCB<Vehicle> ->
-        v * Vehicle::lane * Lane::road * Road::block eq b
+        eq {
+          wrap(v * Vehicle::lane * Lane::road * Road::block)
+          wrap(b)
+        }
       }
     }
     val hasMidTrafficDensity = formula {
@@ -51,14 +54,14 @@ class exampleDSL {
       }
     }
     val testIf = function { t: CCB<TickData> ->
-      branch<Int> { // needs fixing: compiler cant infer generic type
-            eq { // infix operator not yet available
+      branch {
+            eq {
               wrap(t * TickData::vehicles * List<Vehicle>::size)
-              const(10.0)
+              wrap(t * TickData::vehicles * List<Vehicle>::size)
             }
           }
           .satisfied { const(10.0) }
-          .otherwise { const(5.0) }
+          .otherwise { const(20.0) }
     }
     /*
     val hasMidTrafficDensityPred = formula {
