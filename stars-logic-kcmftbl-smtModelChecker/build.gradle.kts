@@ -21,6 +21,7 @@ dependencies {
   implementation(kotlin("reflect"))
   implementation(project(":stars-core"))
   implementation(project(":stars-logic-kcmftbl"))
+  implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0")
   testImplementation(project(mapOf("path" to ":stars-data-av")))
   testImplementation(project(":stars-data-av", "test"))
 }

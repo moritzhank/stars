@@ -17,12 +17,12 @@
 
 package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
-import kotlin.math.sign
-import kotlin.test.Test
 import tools.aqua.stars.data.av.dataclasses.Lane
 import tools.aqua.stars.data.av.dataclasses.Vehicle
 import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
+import kotlin.math.sign
+import kotlin.test.Test
 
 class OvertakingPredicateExample {
 
@@ -31,20 +31,6 @@ class OvertakingPredicateExample {
     val onSameRoad = formula { v1: CCB<Vehicle>, v2: CCB<Vehicle> ->
       term(v1 * Vehicle::lane * Lane::road) eq term(v2 * Vehicle::lane * Lane::road)
     }
-    // todo
-    /*val signFunction = function { i1: CCB<Int> ->
-      branch {
-        eq {
-          const(0)
-          wrap(i1)
-        }
-      }.satisfied {
-        const(0)
-      }.otherwise {
-        branch {
-        }
-       }
-    }*/
     val sameDirection = formula { v1: CCB<Vehicle>, v2: CCB<Vehicle> ->
       onSameRoad.holds(v1, v2) and
           (term(v1 * Vehicle::lane * Lane::laneId * Int::sign) eq
@@ -59,10 +45,5 @@ class OvertakingPredicateExample {
         }
       }
     }
-  }
-
-  @Test
-  fun test() {
-    val x = Int::sign
   }
 }
