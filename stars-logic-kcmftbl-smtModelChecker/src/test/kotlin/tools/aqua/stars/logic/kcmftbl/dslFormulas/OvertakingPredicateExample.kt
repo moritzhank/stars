@@ -17,12 +17,12 @@
 
 package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
+import kotlin.math.sign
+import kotlin.test.Test
 import tools.aqua.stars.data.av.dataclasses.Lane
 import tools.aqua.stars.data.av.dataclasses.Vehicle
 import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
-import kotlin.math.sign
-import kotlin.test.Test
 
 class OvertakingPredicateExample {
 

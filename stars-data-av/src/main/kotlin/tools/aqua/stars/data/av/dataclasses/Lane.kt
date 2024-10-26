@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for lanes.
@@ -57,7 +57,7 @@ data class Lane(
     var contactAreas: List<ContactArea>,
     var trafficLights: List<StaticTrafficLight>,
     var laneDirection: LaneDirection,
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(Lane::laneId)

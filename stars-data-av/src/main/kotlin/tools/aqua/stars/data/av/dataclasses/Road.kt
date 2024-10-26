@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Json object for roads.
@@ -28,7 +28,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property lanes List of [Lane]s on this road.
  */
 data class Road(var id: Int, val isJunction: Boolean, val block: Block, var lanes: List<Lane>) :
-    SmtTranslatable() {
+    SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(Road::id)

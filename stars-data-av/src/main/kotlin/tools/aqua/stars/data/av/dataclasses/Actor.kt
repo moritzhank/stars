@@ -18,11 +18,11 @@
 package tools.aqua.stars.data.av.dataclasses
 
 import tools.aqua.stars.core.types.EntityType
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /** Abstract actor data class. */
 sealed class Actor :
-    SmtTranslatable(),
+    SmtTranslatableBase(),
     EntityType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   /**

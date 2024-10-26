@@ -21,16 +21,16 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 interface ObjectReference
 
-class Ref(val ref: SmtTranslatable) : ObjectReference
+class Ref(val ref: SmtTranslatableBase) : ObjectReference
 
 class Val<T>(val value: T) : ObjectReference
 
 class Lst<T>(val id: Int, val primitiveSmtSort: PrimitiveSmtSort, val list: Collection<T>) :
     ObjectReference
 
-class RefLst(val id: Int, val genericType: String, val list: Collection<SmtTranslatable>) :
+class RefLst(val id: Int, val genericType: String, val list: Collection<SmtTranslatableBase>) :
     ObjectReference
 
 class Enm(val value: Enum<*>) : ObjectReference
 
-class ObjectRepresentation(val ref: SmtTranslatable, val member: Map<String, ObjectReference>)
+class ObjectRepresentation(val ref: SmtTranslatableBase, val member: Map<String, ObjectReference>)

@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for lane midpoints.
@@ -30,7 +30,7 @@ data class LaneMidpoint(
     val distanceToStart: Double,
     val location: Location,
     val rotation: Rotation,
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(LaneMidpoint::distanceToStart)

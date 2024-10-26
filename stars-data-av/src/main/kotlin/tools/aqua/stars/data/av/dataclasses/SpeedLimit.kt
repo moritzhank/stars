@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for speed limits.
@@ -30,7 +30,7 @@ data class SpeedLimit(
     val speedLimit: Double,
     val fromDistanceFromStart: Double,
     val toDistanceFromStart: Double
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(SpeedLimit::speedLimit)

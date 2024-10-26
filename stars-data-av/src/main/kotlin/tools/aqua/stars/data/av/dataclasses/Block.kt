@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for road blocks.
@@ -30,7 +30,7 @@ data class Block(
     val fileName: String,
     val id: String,
     var roads: List<Road>,
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerString(Block::id)

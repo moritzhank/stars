@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for road touching points.
@@ -40,7 +40,7 @@ data class ContactArea(
     val lane2: Lane,
     val lane2StartPos: Double,
     val lane2EndPos: Double
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerString(ContactArea::id)

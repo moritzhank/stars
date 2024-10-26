@@ -25,7 +25,7 @@ import kotlin.time.measureTime
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectReference
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 private fun testObjectRepresentationTranslationPerformance(): Pair<Duration, Duration> {
   val timeSegLoad: Duration?
@@ -48,7 +48,7 @@ fun main() {
     val testRun = testObjectRepresentationTranslationPerformance()
     segLoadTimes.add(testRun.component1())
     translateTimes.add(testRun.component2())
-    SmtTranslatable.resetIds()
+    SmtTranslatableBase.resetIds()
   }
   val timesSegLoadMean = segLoadTimes.map { it.toDouble(DurationUnit.SECONDS) }.mean()
   val timesTranslationMean = translateTimes.map { it.toDouble(DurationUnit.MILLISECONDS) }.mean()

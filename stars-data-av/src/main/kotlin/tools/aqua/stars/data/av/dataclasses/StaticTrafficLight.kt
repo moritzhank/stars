@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for static traffic lights.
@@ -32,7 +32,7 @@ data class StaticTrafficLight(
     val location: Location,
     val rotation: Rotation,
     val stopLocations: List<Location>,
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(StaticTrafficLight::id)

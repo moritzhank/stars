@@ -18,7 +18,7 @@
 package tools.aqua.stars.data.av.dataclasses
 
 import tools.aqua.stars.core.types.TickUnit
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Implementation of the [TickUnit] interface for 'milliseconds' units.
@@ -26,7 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property tickMillis Current tick value in milliseconds.
  */
 data class TickDataUnitMilliseconds(val tickMillis: Long) :
-    SmtTranslatable(), TickUnit<TickDataUnitMilliseconds, TickDataDifferenceMilliseconds> {
+    SmtTranslatableBase(), TickUnit<TickDataUnitMilliseconds, TickDataDifferenceMilliseconds> {
 
   override fun registerMembers() {
     registerNumber(TickDataUnitMilliseconds::tickMillis)

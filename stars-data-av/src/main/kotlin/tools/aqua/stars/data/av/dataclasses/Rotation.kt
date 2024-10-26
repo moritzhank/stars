@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for rotations.
@@ -26,7 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property yaw The yaw.
  * @property roll The roll.
  */
-data class Rotation(val pitch: Double, val yaw: Double, val roll: Double) : SmtTranslatable() {
+data class Rotation(val pitch: Double, val yaw: Double, val roll: Double) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(Rotation::pitch)

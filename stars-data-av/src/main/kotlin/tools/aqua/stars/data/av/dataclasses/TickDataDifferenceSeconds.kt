@@ -18,7 +18,7 @@
 package tools.aqua.stars.data.av.dataclasses
 
 import tools.aqua.stars.core.types.TickDifference
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Implementation of the [TickDifference] interface for 'seconds' units.
@@ -26,7 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property differenceSeconds Difference in seconds.
  */
 class TickDataDifferenceSeconds(val differenceSeconds: Double) :
-    SmtTranslatable(), TickDifference<TickDataDifferenceSeconds> {
+    SmtTranslatableBase(), TickDifference<TickDataDifferenceSeconds> {
 
   override fun registerMembers() {
     registerNumber(TickDataDifferenceSeconds::differenceSeconds)

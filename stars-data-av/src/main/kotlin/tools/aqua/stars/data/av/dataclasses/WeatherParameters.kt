@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for weather parameters.
@@ -52,7 +52,7 @@ data class WeatherParameters(
     val scatteringIntensity: Double,
     val mieScatteringScale: Double,
     val rayleighScatteringScale: Double,
-) : SmtTranslatable() {
+) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerEnum(WeatherParameters::type)

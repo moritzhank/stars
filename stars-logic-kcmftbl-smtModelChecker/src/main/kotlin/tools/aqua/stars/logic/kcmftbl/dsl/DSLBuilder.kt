@@ -19,10 +19,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-import kotlin.reflect.KCallable
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KFunction2
-import kotlin.reflect.KFunction3
+import kotlin.reflect.*
 
 /** Base for [FormulaBuilder] and [TFunctionBuilder] */
 open class DSLBuilder(

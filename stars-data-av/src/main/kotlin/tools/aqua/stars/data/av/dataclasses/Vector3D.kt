@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Data class for 3D vector.
@@ -26,7 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
-data class Vector3D(val x: Double, val y: Double, val z: Double) : SmtTranslatable() {
+data class Vector3D(val x: Double, val y: Double, val z: Double) : SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(Vector3D::x)

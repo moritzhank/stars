@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Json object for traffic lights.
@@ -27,7 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property relatedOpenDriveId The related open drive identifier.
  */
 data class TrafficLight(var id: Int, var state: TrafficLightState, val relatedOpenDriveId: Int) :
-    SmtTranslatable() {
+    SmtTranslatableBase() {
 
   override fun registerMembers() {
     registerNumber(TrafficLight::id)

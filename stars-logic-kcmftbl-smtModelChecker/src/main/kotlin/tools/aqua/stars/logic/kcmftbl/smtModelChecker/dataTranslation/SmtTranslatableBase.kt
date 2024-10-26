@@ -21,7 +21,7 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 import kotlin.reflect.KProperty1
 
-abstract class SmtTranslatable {
+abstract class SmtTranslatableBase {
 
   private var smtId: Int? = null
   private var smtType: String? = null
@@ -48,7 +48,7 @@ abstract class SmtTranslatable {
     registeredMembers[name] = objRef
   }
 
-  protected inline fun <T1 : SmtTranslatable, reified T2 : SmtTranslatable> T1.registerCollection(
+  protected inline fun <T1 : SmtTranslatableBase, reified T2 : SmtTranslatableBase> T1.registerCollection(
       prop: KProperty1<T1, Collection<T2>>
   ) {
     val t2KClass = T2::class
@@ -57,48 +57,48 @@ abstract class SmtTranslatable {
     }
     prop.get(this).let {
       RefLst(uniqueId(), t2KClass.simpleName!!, it).let {
-        this@SmtTranslatable.registerMember(prop.name, it)
+        this@SmtTranslatableBase.registerMember(prop.name, it)
       }
     }
   }
 
-  protected fun <T1 : SmtTranslatable, T2 : SmtTranslatable> T1.register(prop: KProperty1<T1, T2>) =
+  protected fun <T1 : SmtTranslatableBase, T2 : SmtTranslatableBase> T1.register(prop: KProperty1<T1, T2>) =
       prop.get(this).let { Ref(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerBoolean(prop: KProperty1<T1, Boolean>) =
+  protected fun <T1 : SmtTranslatableBase> T1.registerBoolean(prop: KProperty1<T1, Boolean>) =
       prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerNumber(prop: KProperty1<T1, Number>) =
+  protected fun <T1 : SmtTranslatableBase> T1.registerNumber(prop: KProperty1<T1, Number>) =
       prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerString(prop: KProperty1<T1, String>) =
+  protected fun <T1 : SmtTranslatableBase> T1.registerString(prop: KProperty1<T1, String>) =
       prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerEnum(prop: KProperty1<T1, Enum<*>>) =
+  protected fun <T1 : SmtTranslatableBase> T1.registerEnum(prop: KProperty1<T1, Enum<*>>) =
       prop.get(this).let { Enm(it).let { registeredMembers[prop.name] = it } }
 
-  protected fun <T1 : SmtTranslatable> T1.registerBooleanCollection(
+  protected fun <T1 : SmtTranslatableBase> T1.registerBooleanCollection(
       prop: KProperty1<T1, Collection<Boolean>>
   ) =
       prop.get(this).let {
         Lst(uniqueId(), PrimitiveSmtSort.BOOL, it).let { registeredMembers[prop.name] = it }
       }
 
-  protected fun <T1 : SmtTranslatable> T1.registerIntCollection(
+  protected fun <T1 : SmtTranslatableBase> T1.registerIntCollection(
       prop: KProperty1<T1, Collection<Int>>
   ) =
       prop.get(this).let {
         Lst(uniqueId(), PrimitiveSmtSort.INT, it).let { registeredMembers[prop.name] = it }
       }
 
-  protected fun <T1 : SmtTranslatable> T1.registerDoubleCollection(
+  protected fun <T1 : SmtTranslatableBase> T1.registerDoubleCollection(
       prop: KProperty1<T1, Collection<Double>>
   ) =
       prop.get(this).let {
         Lst(uniqueId(), PrimitiveSmtSort.REAL, it).let { registeredMembers[prop.name] = it }
       }
 
-  protected fun <T1 : SmtTranslatable> T1.registerStringCollection(
+  protected fun <T1 : SmtTranslatableBase> T1.registerStringCollection(
       prop: KProperty1<T1, Collection<String>>
   ) =
       prop.get(this).let {

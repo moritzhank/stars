@@ -18,7 +18,7 @@
 package tools.aqua.stars.data.av.dataclasses
 
 import tools.aqua.stars.core.types.TickDataType
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
  * Json format containing data for current tick.
@@ -38,7 +38,7 @@ data class TickData(
     val weather: WeatherParameters,
     val daytime: Daytime
 ) :
-    SmtTranslatable(),
+    SmtTranslatableBase(),
     TickDataType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
   override fun registerMembers() {
