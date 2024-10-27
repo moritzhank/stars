@@ -48,9 +48,8 @@ abstract class SmtTranslatableBase {
     registeredMembers[name] = objRef
   }
 
-  protected inline fun <T1 : SmtTranslatableBase, reified T2 : SmtTranslatableBase> T1.registerCollection(
-      prop: KProperty1<T1, Collection<T2>>
-  ) {
+  protected inline fun <T1 : SmtTranslatableBase, reified T2 : SmtTranslatableBase> T1
+      .registerCollection(prop: KProperty1<T1, Collection<T2>>) {
     val t2KClass = T2::class
     require(t2KClass.isData) {
       "${t2KClass.simpleName} has to be a data class. Only collections of data classes can be registered."
@@ -62,8 +61,9 @@ abstract class SmtTranslatableBase {
     }
   }
 
-  protected fun <T1 : SmtTranslatableBase, T2 : SmtTranslatableBase> T1.register(prop: KProperty1<T1, T2>) =
-      prop.get(this).let { Ref(it).let { registeredMembers[prop.name] = it } }
+  protected fun <T1 : SmtTranslatableBase, T2 : SmtTranslatableBase> T1.register(
+      prop: KProperty1<T1, T2>
+  ) = prop.get(this).let { Ref(it).let { registeredMembers[prop.name] = it } }
 
   protected fun <T1 : SmtTranslatableBase> T1.registerBoolean(prop: KProperty1<T1, Boolean>) =
       prop.get(this).let { Val(it).let { registeredMembers[prop.name] = it } }

@@ -28,13 +28,12 @@ import kotlin.reflect.KClass
  */
 
 /** Maps classes to values without classloader leak */
-class ClassValueCache<T>(val compute: (KClass<*>) -> T?) {
+class ClassValueCache<T> {
 
   private val classValue = ClassValueReferences<CacheEntry<T>>()
 
-  fun get(key: KClass<Any>): T? {
-    return classValue.getOrSet(key.java) { CacheEntry(compute(key)) }.content
-  }
+  fun getOrSet(key: KClass<*>, factory: () -> T): T =
+      classValue.getOrSet(key.java) { CacheEntry(factory()) }.content
 }
 
 private class ClassValueReferences<T> : ClassValue<MutableSoftReference<T>>() {
@@ -52,7 +51,7 @@ private class ClassValueReferences<T> : ClassValue<MutableSoftReference<T>>() {
   }
 }
 
-private class CacheEntry<T>(@JvmField val content: T?)
+private class CacheEntry<T>(@JvmField val content: T)
 
 private class MutableSoftReference<T> {
 
