@@ -17,15 +17,19 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
+import kotlin.reflect.KClass
 import kotlinx.metadata.isNotDefault
 import kotlinx.metadata.jvm.KotlinClassMetadata
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationAnnotation>()
 
-internal inline fun <reified T> smtTranslationAnnotation(): SmtTranslationAnnotation =
-    SMT_TRANSLATION_CACHE.getOrSet(T::class) {
+internal inline fun <reified T : Any> smtTranslationAnnotation(): SmtTranslationAnnotation =
+    smtTranslationAnnotation(T::class)
+
+internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslationAnnotation =
+    SMT_TRANSLATION_CACHE.getOrSet(kClass) {
       val legalProperties = mutableListOf<String>()
-      (KotlinClassMetadata.readStrict(T::class.java.getAnnotation(Metadata::class.java))
+      (KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
               as KotlinClassMetadata.Class)
           .kmClass
           .properties
@@ -34,7 +38,19 @@ internal inline fun <reified T> smtTranslationAnnotation(): SmtTranslationAnnota
               legalProperties.add(it.name)
             }
           }
-      SmtTranslationAnnotation(legalProperties.toTypedArray())
+      SmtTranslationAnnotation(kClass.qualifiedName, legalProperties.toTypedArray())
     }
 
-class SmtTranslationAnnotation(val legalArguments: Array<String> = arrayOf())
+internal class SmtTranslationAnnotation(
+    private val qualifiedCallerName: String?,
+    private val legalProperties: Array<String> = arrayOf()
+) {
+
+  fun isLegalProperty(name: String): Boolean = legalProperties.contains(name)
+
+  fun requireLegalProperty(propName: String) {
+    require(isLegalProperty(propName)) {
+      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters."
+    }
+  }
+}

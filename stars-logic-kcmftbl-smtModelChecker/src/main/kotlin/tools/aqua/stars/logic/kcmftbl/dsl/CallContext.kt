@@ -19,10 +19,8 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KFunction2
-import kotlin.reflect.KFunction3
-import kotlin.reflect.KProperty1
+import kotlin.reflect.*
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.smtTranslationAnnotation
 
 typealias CCB<Type> = CallContextBase<Type>
 
@@ -30,50 +28,28 @@ typealias CCB<Type> = CallContextBase<Type>
 sealed interface CallContext<Caller, Return> {
 
   val before: CallContext<*, Caller>?
-  val base: CallContextBase<*>
-
-  operator fun <W> times(prop: KProperty1<Return, W>): CallContext<Return, W> =
-      PropertyCallContextImpl(prop, this, base)
 
   operator fun <W> times(func: KFunction1<Return, W>): CallContext<Return, W> =
-      Callable1CallContextImpl(func, this, base)
+      Callable1CallContextImpl(func, this)
 
   operator fun <W, P> times(
       func: KFunction2<Return, P, W>
   ): IntermediateCallable2CallContext<Return, P, W> =
-      IntermediateCallable2CallContextImpl(func, this, base)
+      IntermediateCallable2CallContextImpl(func, this, base())
 
   operator fun <W, P1, P2> times(
       func: KFunction3<Return, P1, P2, W>
   ): IntermediateCallable3CallContext<Return, P1, P2, W> =
-      IntermediateCallable3CallContextImpl(func, this, base)
-}
+      IntermediateCallable3CallContextImpl(func, this, base())
 
-/** Starting point for defining symbolic member calls to [Type] */
-class CallContextBase<Type> : CallContext<Nothing, Type> {
-
-  var debugInfo: String? = null
-  override val before: CallContext<*, Nothing>? = null
-  override val base: CallContextBase<*> = this
-  lateinit var dslBuilder: DSLBuilder
-
-  override operator fun <Return> times(prop: KProperty1<Type, Return>): CallContext<Type, Return> =
-      PropertyCallContextImpl(prop, null, base)
-
-  override operator fun <Return> times(func: KFunction1<Type, Return>): CallContext<Type, Return> =
-      Callable1CallContextImpl(func, null, base)
-
-  override operator fun <Return, Param> times(
-      func: KFunction2<Type, Param, Return>
-  ): IntermediateCallable2CallContext<Type, Param, Return> =
-      IntermediateCallable2CallContextImpl(func, null, base)
-
-  override operator fun <Return, Param1, Param2> times(
-      func: KFunction3<Type, Param1, Param2, Return>
-  ): IntermediateCallable3CallContext<Type, Param1, Param2, Return> =
-      IntermediateCallable3CallContextImpl(func, null, base)
-
-  override fun toString() = debugInfo ?: super.toString()
+  fun base(): CallContextBase<*> {
+    val before = this.before
+    if (before == null) {
+      require(this is CallContextBase<*>) { "No CallContextBase was found." }
+      return this
+    }
+    return before.base()
+  }
 }
 
 /** Represents a symbolic call to a property [prop] */
@@ -119,6 +95,59 @@ sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
   val param2: CallContext<*, Param2>
 }
 
+/** Starting point for defining symbolic member calls to [Type] */
+class CallContextBase<Type> : CallContext<Nothing, Type> {
+
+  var debugInfo: String? = null
+  override val before: CallContext<*, Nothing>? = null
+  lateinit var dslBuilder: DSLBuilder
+
+  override operator fun <Return> times(func: KFunction1<Type, Return>): CallContext<Type, Return> =
+      Callable1CallContextImpl(func, null)
+
+  override operator fun <Return, Param> times(
+      func: KFunction2<Type, Param, Return>
+  ): IntermediateCallable2CallContext<Type, Param, Return> =
+      IntermediateCallable2CallContextImpl(func, null, base())
+
+  override operator fun <Return, Param1, Param2> times(
+      func: KFunction3<Type, Param1, Param2, Return>
+  ): IntermediateCallable3CallContext<Type, Param1, Param2, Return> =
+      IntermediateCallable3CallContextImpl(func, null, base())
+
+  override fun toString() = debugInfo ?: super.toString()
+}
+
+// Operator for representing a property call on CallContext.
+// To perform the property legality check, this function must be an extension function with reified
+// Return.
+inline operator fun <Caller, reified Return : Any, W> CallContext<Caller, Return>.times(
+    prop: KProperty1<Return, W>
+): CallContext<Return, W> = this.callProperty(prop, Return::class)
+
+// Operator for representing a property call on CallContextBase.
+// To perform the property legality check, this function must be an extension function with reified
+// Return.
+inline operator fun <reified Return : Any, W> CallContextBase<Return>.times(
+    prop: KProperty1<Return, W>
+): CallContext<Return, W> = this.callProperty(prop, Return::class)
+
+/**
+ * Realises a symbolic call to a property [prop] and checks if the property is legal (Not intended
+ * for direct use)
+ */
+fun <Caller : Any, Return> CallContext<*, Caller>.callProperty(
+    prop: KProperty1<Caller, Return>,
+    callerClass: KClass<Caller>
+): PropertyCallContext<Caller, Return> {
+  smtTranslationAnnotation(callerClass).requireLegalProperty(prop.name)
+  return if (this is CallContextBase<Caller>) {
+    PropertyCallContextImpl(prop, null)
+  } else {
+    PropertyCallContextImpl(prop, this)
+  }
+}
+
 /** Returns a string formatted as "name (...)" */
 fun CallContext<*, *>.toFormattedString(): String {
   val name =
@@ -134,14 +163,12 @@ fun CallContext<*, *>.toFormattedString(): String {
 
 private class PropertyCallContextImpl<Caller, Return>(
     override val prop: KProperty1<Caller, Return>,
-    override val before: CallContext<*, Caller>?,
-    override val base: CallContextBase<*>
+    override val before: CallContext<*, Caller>?
 ) : PropertyCallContext<Caller, Return>
 
 private class Callable1CallContextImpl<Caller, Return>(
     override val func: KFunction1<Caller, Return>,
-    override val before: CallContext<*, Caller>?,
-    override val base: CallContextBase<*>
+    override val before: CallContext<*, Caller>?
 ) : Callable1CallContext<Caller, Return>
 
 private class IntermediateCallable2CallContextImpl<Caller, Param, Return>(
@@ -152,14 +179,13 @@ private class IntermediateCallable2CallContextImpl<Caller, Param, Return>(
 
   override fun withParam(cc: CallContext<*, Param>): Callable2CallContext<Caller, Param, Return> =
       base.dslBuilder.assertCallContextAllowed(cc).let {
-        Callable2CallContextImpl(func, before, base, cc)
+        Callable2CallContextImpl(func, before, cc)
       }
 }
 
 private class Callable2CallContextImpl<Caller, Param, Return>(
     override val func: KFunction2<Caller, Param, Return>,
     override val before: CallContext<*, Caller>?,
-    override val base: CallContextBase<*>,
     override val param: CallContext<*, Param>
 ) : Callable2CallContext<Caller, Param, Return>
 
@@ -176,13 +202,12 @@ private class IntermediateCallable3CallContextImpl<Caller, Param1, Param2, Retur
       base.dslBuilder
           .assertCallContextAllowed(cc1)
           .also { base.dslBuilder.assertCallContextAllowed(cc2) }
-          .let { Callable3CallContextImpl(func, before, base, cc1, cc2) }
+          .let { Callable3CallContextImpl(func, before, cc1, cc2) }
 }
 
 private class Callable3CallContextImpl<Caller, Param1, Param2, Return>(
     override val func: KFunction3<Caller, Param1, Param2, Return>,
     override val before: CallContext<*, Caller>?,
-    override val base: CallContextBase<*>,
     override val param1: CallContext<*, Param1>,
     override val param2: CallContext<*, Param2>
 ) : Callable3CallContext<Caller, Param1, Param2, Return>
