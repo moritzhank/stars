@@ -17,7 +17,10 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
+
 /** Data class for weather types. */
+@Serializable
 enum class WeatherType {
   Clear,
   Cloudy,

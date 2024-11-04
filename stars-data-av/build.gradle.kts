@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-plugins { id("tools.aqua.stars.library-conventions") }
+plugins {
+  id("tools.aqua.stars.library-conventions")
+  kotlin("plugin.serialization") version "2.0.20"
+}
 
 mavenMetadata {
   name.set("STARS Data AV")
@@ -26,6 +29,7 @@ mavenMetadata {
 dependencies {
   implementation(project(":stars-core"))
   implementation(project(":stars-logic-kcmftbl-smtModelChecker"))
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3")
   testImplementation(project(":stars-logic-kcmftbl"))
 }
 

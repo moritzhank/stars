@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -27,6 +28,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property rotation The [Rotation] of the traffic light.
  * @property stopLocations List of stop locations as [Location]s.
  */
+@Serializable
 data class StaticTrafficLight(
     var id: Int,
     val location: Location,

@@ -17,7 +17,10 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
+
 /** Enum for the current daytime. */
+@Serializable
 enum class Daytime {
   Noon,
   Sunset

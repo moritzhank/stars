@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property fromDistanceFromStart Distance from the start of speed limit start.
  * @property toDistanceFromStart Distance from the start of speed limit end.
  */
+@Serializable
 data class SpeedLimit(
     val speedLimit: Double,
     val fromDistanceFromStart: Double,

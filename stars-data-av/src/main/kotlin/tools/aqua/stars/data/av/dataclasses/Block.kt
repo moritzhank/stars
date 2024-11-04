@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property id Identifier of the road block.
  * @property roads Roads incorporated in this block.
  */
+@Serializable
 data class Block(
     val fileName: String,
     val id: String,

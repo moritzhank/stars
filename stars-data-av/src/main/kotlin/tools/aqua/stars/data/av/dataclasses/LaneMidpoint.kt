@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property location The [Location] of the midpoint.
  * @property rotation The [Rotation] of the midpoint.
  */
+@Serializable
 data class LaneMidpoint(
     val distanceToStart: Double,
     val location: Location,

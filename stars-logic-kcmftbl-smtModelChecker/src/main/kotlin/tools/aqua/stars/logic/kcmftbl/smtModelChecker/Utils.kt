@@ -19,9 +19,6 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
 import java.io.File
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KProperty1
-import kotlinx.metadata.isNotDefault
-import kotlinx.metadata.jvm.KotlinClassMetadata
 
 // Copied and modified from https://stackoverflow.com/a/41495542
 fun String.runCommand(workingDir: File, timeOutInMS: Long = 60 * 60 * 1000): String? {
@@ -42,27 +39,4 @@ fun String.runCommand(workingDir: File, timeOutInMS: Long = 60 * 60 * 1000): Str
     e.printStackTrace()
     return null
   }
-}
-
-// Adapted from
-// https://discuss.kotlinlang.org/t/reflection-and-properties-checking-for-custom-getters-setters/22457/2
-/** Returns false if the property does not have a default getter, or if it cannot be determined */
-inline fun <reified Receiver, reified Property> KProperty1<Receiver, Property>.hasDefaultGetter():
-    Boolean {
-  val meta = Receiver::class.java.getAnnotation(Metadata::class.java) ?: return false
-  val metadataAnnotation =
-      Metadata(
-          kind = meta.kind,
-          metadataVersion = meta.metadataVersion,
-          data1 = meta.data1,
-          data2 = meta.data2,
-          extraString = meta.extraString,
-          packageName = meta.packageName,
-          extraInt = meta.extraInt)
-  return !((KotlinClassMetadata.readStrict(metadataAnnotation) as KotlinClassMetadata.Class)
-      .kmClass
-      .properties
-      .find { it.name == this.name }
-      ?.getter
-      ?.isNotDefault ?: true)
 }

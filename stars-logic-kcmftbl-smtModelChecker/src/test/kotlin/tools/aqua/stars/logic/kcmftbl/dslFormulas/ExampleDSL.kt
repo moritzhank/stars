@@ -24,12 +24,12 @@ import tools.aqua.stars.data.av.dataclasses.*
 import tools.aqua.stars.logic.kcmftbl.dsl.CCB
 import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
 import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
+import tools.aqua.stars.logic.kcmftbl.dsl.times
 
 class ExampleDSL {
 
   @Test
   fun monitors() {
-
     val vehiclesInBlock = function { t: CCB<TickData>, b: CCB<Block> ->
       filter(t * TickData::vehicles) { v: CCB<Vehicle> ->
         eq {

@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-plugins { id("tools.aqua.stars.library-conventions") }
+plugins {
+  id("tools.aqua.stars.library-conventions")
+}
 
 dependencies {
   implementation(project(":stars-core"))

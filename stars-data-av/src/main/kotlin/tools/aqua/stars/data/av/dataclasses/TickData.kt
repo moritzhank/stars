@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.core.types.TickDataType
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
@@ -30,6 +31,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property weather The current [WeatherParameters].
  * @property daytime The current [Daytime].
  */
+@Serializable
 data class TickData(
     override val currentTick: TickDataUnitSeconds,
     override var entities: List<Actor>,

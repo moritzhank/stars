@@ -17,10 +17,12 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.core.types.EntityType
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /** Abstract actor data class. */
+@Serializable
 sealed class Actor :
     SmtTranslatableBase(),
     EntityType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {

@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.core.types.TickDifference
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
@@ -25,6 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  *
  * @property differenceMillis Difference in milliseconds.
  */
+@Serializable
 data class TickDataDifferenceMilliseconds(val differenceMillis: Long) :
     SmtTranslatableBase(), TickDifference<TickDataDifferenceMilliseconds> {
 

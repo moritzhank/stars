@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -41,6 +42,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property laneDirection The [LaneDirection] of this [Lane].
  */
 @Suppress("MemberVisibilityCanBePrivate")
+@Serializable
 data class Lane(
     val laneId: Int,
     var road: Road,

@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -27,6 +28,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property block The [Block] of the [Lane].
  * @property lanes List of [Lane]s on this road.
  */
+@Serializable
 data class Road(var id: Int, val isJunction: Boolean, val block: Block, var lanes: List<Lane>) :
     SmtTranslatableBase() {
 

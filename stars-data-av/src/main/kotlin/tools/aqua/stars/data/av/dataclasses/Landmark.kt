@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -34,6 +35,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property location The [Location] of the landmark.
  * @property rotation The [Rotation] of the landmark.
  */
+@Serializable
 data class Landmark(
     val id: Int,
     val name: String,

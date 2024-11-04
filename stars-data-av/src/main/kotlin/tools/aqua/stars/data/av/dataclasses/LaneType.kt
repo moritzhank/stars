@@ -17,11 +17,14 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
+
 /**
  * Data class for lane types.
  *
  * @property value Internal json value.
  */
+@Serializable
 enum class LaneType(val value: Int) {
   Any(-2),
   Bidirectional(512),

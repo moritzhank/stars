@@ -21,6 +21,7 @@ package tools.aqua.stars.data.av.dataclasses
 
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlinx.serialization.Serializable
 
 /**
  * Data class for vehicles.
@@ -38,6 +39,7 @@ import kotlin.math.sqrt
  * @property acceleration The current acceleration m/s².
  * @property angularVelocity The current angular velocity.
  */
+@Serializable
 data class Vehicle(
     override val id: Int,
     override val tickData: TickData,

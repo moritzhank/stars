@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property yaw The yaw.
  * @property roll The roll.
  */
+@Serializable
 data class Rotation(val pitch: Double, val yaw: Double, val roll: Double) : SmtTranslatableBase() {
 
   override fun registerMembers() {

@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property state The current state oif the traffic light.
  * @property relatedOpenDriveId The related open drive identifier.
  */
+@Serializable
 data class TrafficLight(var id: Int, var state: TrafficLightState, val relatedOpenDriveId: Int) :
     SmtTranslatableBase() {
 

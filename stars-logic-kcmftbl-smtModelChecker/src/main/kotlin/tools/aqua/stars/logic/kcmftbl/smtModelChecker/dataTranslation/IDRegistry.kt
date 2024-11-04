@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS Project Authors
+ * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,14 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.dataclasses
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-import kotlinx.serialization.Serializable
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
+class IDRegistry {
 
-/**
- * Data class for contact lane info.
- *
- * @property lane The [Lane].
- */
-@Serializable
-data class ContactLaneInfo(
-    val lane: Lane,
-) : SmtTranslatableBase() {
+  private var nextId = 0
+  private val objToID = mutableMapOf<Any, Int>()
 
-  override fun registerMembers() {
-    register(ContactLaneInfo::lane)
-  }
+  fun hasID(obj: Any) = objToID[obj] != null
+
+  fun get(obj: Any) = objToID.getOrPut(obj) { nextId++ }
 }

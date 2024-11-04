@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -31,6 +32,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property lane2StartPos Start position on lane 2.
  * @property lane2EndPos End position on lane 2.
  */
+@Serializable
 data class ContactArea(
     val id: String,
     val contactLocation: Location,

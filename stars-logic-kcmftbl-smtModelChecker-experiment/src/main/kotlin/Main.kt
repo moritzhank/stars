@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectReference
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.runSmtSolver
+import tools.aqua.stars.data.av.dataclasses.Segment
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.test
 
 fun main() {
+  /*
   val result = mutableListOf<ObjectRepresentation>()
   val resultCapturedTypes = mutableSetOf<String>()
   val resultCapturedTypesToMembers = mutableMapOf<String, MutableMap<String, ObjectReference>>()
@@ -29,4 +28,7 @@ fun main() {
 
   val smtlibProgram = generateSmtLib(result, resultCapturedTypes, resultCapturedTypesToMembers)
   println(runSmtSolver(smtlibProgram))
+   */
+  val t: Segment = ExperimentLoader.loadTestSegment()
+  test(t)
 }

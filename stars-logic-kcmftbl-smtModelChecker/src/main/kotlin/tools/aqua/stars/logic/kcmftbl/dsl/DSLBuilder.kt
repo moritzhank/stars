@@ -30,7 +30,7 @@ open class DSLBuilder(
   /** Assert that a CallContext [callContext] is legal in the current context */
   fun assertCallContextAllowed(callContext: CallContext<*, *>) {
     // Is callContext's CallContextBase allowed?
-    if (!allowedCCBs.contains(callContext.base)) {
+    if (!allowedCCBs.contains(callContext.base())) {
       throw AssertionError("${callContext.toFormattedString()}} is not allowed in this context.")
     }
     // Are all function calls registered?

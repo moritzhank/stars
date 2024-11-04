@@ -17,7 +17,10 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
+
 /** Enum for [Lane] directions. */
+@Serializable
 enum class LaneDirection {
   STRAIGHT,
   LEFT_TURN,

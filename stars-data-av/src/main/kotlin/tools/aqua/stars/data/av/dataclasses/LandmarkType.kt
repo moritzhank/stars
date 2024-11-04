@@ -17,11 +17,14 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
+
 /**
  * Data class for landmark types.
  *
  * @property value Internal json value.
  */
+@Serializable
 enum class LandmarkType(val value: Int) {
   Danger(101),
   LanesMerging(121),

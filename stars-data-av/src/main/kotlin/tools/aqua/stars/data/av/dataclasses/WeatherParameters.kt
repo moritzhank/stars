@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -37,6 +38,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property mieScatteringScale The scale of mie scattering.
  * @property rayleighScatteringScale The scale of rayleigh scattering.
  */
+@Serializable
 data class WeatherParameters(
     val type: WeatherType,
     val cloudiness: Double,

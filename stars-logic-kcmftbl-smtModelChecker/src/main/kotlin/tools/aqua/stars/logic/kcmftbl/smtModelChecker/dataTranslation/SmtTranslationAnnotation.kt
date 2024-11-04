@@ -28,14 +28,17 @@ internal inline fun <reified T : Any> smtTranslationAnnotation(): SmtTranslation
 
 internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslationAnnotation =
     SMT_TRANSLATION_CACHE.getOrSet(kClass) {
-      val legalProperties = mutableListOf<String>()
+      val legalProperties = mutableListOf<SmtTranslationAnnotation.Property>()
+      // Part below is adapted from
+      // https://discuss.kotlinlang.org/t/reflection-and-properties-checking-for-custom-getters-setters/22457/2
       (KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
               as KotlinClassMetadata.Class)
           .kmClass
           .properties
           .forEach {
             if (!it.getter.isNotDefault) {
-              legalProperties.add(it.name)
+              legalProperties.add(
+                  SmtTranslationAnnotation.Property(it.name, it.javaClass.smtPrimitive()))
             }
           }
       SmtTranslationAnnotation(kClass.qualifiedName, legalProperties.toTypedArray())
@@ -43,14 +46,16 @@ internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslati
 
 internal class SmtTranslationAnnotation(
     private val qualifiedCallerName: String?,
-    private val legalProperties: Array<String> = arrayOf()
+    private val legalProperties: Array<Property> = arrayOf()
 ) {
 
-  fun isLegalProperty(name: String): Boolean = legalProperties.contains(name)
+  fun isLegalProperty(name: String): Boolean = legalProperties.any { it.name == name }
 
   fun requireLegalProperty(propName: String) {
     require(isLegalProperty(propName)) {
-      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters."
+      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters. Annotating the property with SMTIgnore can solve this."
     }
   }
+
+  class Property(val name: String, val smtPrimitive: SmtPrimitive?)
 }

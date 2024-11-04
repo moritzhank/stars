@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
 /**
@@ -26,6 +27,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property y The y ordinate.
  * @property z The z ordinate.
  */
+@Serializable
 data class Location(val x: Double, val y: Double, val z: Double) : SmtTranslatableBase() {
 
   override fun registerMembers() {

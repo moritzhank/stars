@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
@@ -27,6 +28,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property simulationRunId Identifier of the simulation run.
  * @property segmentSource Source identifier.
  */
+@Serializable
 data class Segment(
     val mainInitList: List<TickData>,
     val simulationRunId: String = "",

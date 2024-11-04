@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.data.av.dataclasses
 
+import kotlinx.serialization.Serializable
 import tools.aqua.stars.core.types.TickUnit
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
@@ -25,6 +26,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  *
  * @property tickSeconds Current tick value in seconds.
  */
+@Serializable
 class TickDataUnitSeconds(val tickSeconds: Double) :
     SmtTranslatableBase(), TickUnit<TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
