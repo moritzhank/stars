@@ -15,27 +15,32 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
+package tools.aqua.stars.logic.kcmftbl.dsl
 
-enum class PrimitiveSmtSort(val smtSortName: String) {
+import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
 
-  BOOL("Bool"),
-  INT("Int"),
-  REAL("Real"),
-  STRING("String")
-}
+sealed class PredefinedFunctions {
 
-fun primitiveSmtSort(obj: Any): PrimitiveSmtSort {
-  val simpleName = obj::class.simpleName
-  val result =
-      when (simpleName) {
-        "Boolean" -> PrimitiveSmtSort.BOOL
-        "Int" -> PrimitiveSmtSort.INT
-        "Float" -> PrimitiveSmtSort.REAL
-        "Double" -> PrimitiveSmtSort.REAL
-        "String" -> PrimitiveSmtSort.STRING
-        else -> null
-      }
-  requireNotNull(result) { "$obj has no primitive smt-type." }
-  return result
+  companion object {
+
+    val IntSignFunction = function { int: CCB<Int> ->
+      branch {
+            eq {
+              wrap(int)
+              const(0)
+            }
+          }
+          .satisfied { const(10) }
+          .otherwise {
+            branch {
+                  gt {
+                    wrap(int)
+                    const(0)
+                  }
+                }
+                .satisfied { const(1) }
+                .otherwise { const(-1) }
+          }
+    }
+  }
 }

@@ -17,79 +17,72 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.AbstractEncoder
-import kotlinx.serialization.encoding.CompositeEncoder
-import kotlinx.serialization.modules.EmptySerializersModule
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.serializer
+// fun generateSmtLib(
+//    objRepresentation: MutableList<ObjectRepresentation>,
+//    capturedTypes: MutableSet<String>,
+//    capturedTypesToMember: MutableMap<String, MutableMap<String, ObjectReference>>
+// ): String {
+//  val result = StringBuilder()
+//  // Generate general datatypes
+//  result.appendLine("; General datatypes")
+//  result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
+//  result.appendLine()
+//  // Generate sort declarations
+//  result.appendLine("; Sort declarations")
+//  for (capturedType in capturedTypes) {
+//    result.appendLine("(declare-sort $capturedType 0)")
+//  }
+//  result.appendLine()
+//  // Generate member declarations
+//  result.appendLine("; Member declarations")
+//  for (capturedType in capturedTypes) {
+//    result.appendLine("; Member declaration for $capturedType")
+//    for (entry in capturedTypesToMember[capturedType]!!.entries) {
+//      val name = entry.component1()
+//      when (val objRef = entry.component2()) {
+//        is Enm -> {
+//          result.appendLine(
+//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) Int)")
+//        }
+//        is Val<*> -> {
+//          val primitiveSort = primitiveSmtSort(objRef.value!!).smtSortName
+//          result.appendLine(
+//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType)
+// $primitiveSort)")
+//        }
+//        is Ref -> {
+//          val refSort = objRef.ref.getSmtType()!!
+//          result.appendLine(
+//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) $refSort)")
+//        }
+//        is Lst<*> -> {
+//          val primitiveSort = objRef.primitiveSmtSort.smtSortName
+//          result.appendLine(
+//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
+// $primitiveSort))")
+//        }
+//        is RefLst -> {
+//          val refSort = objRef.genericType
+//          result.appendLine(
+//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
+// $refSort))")
+//        }
+//        else -> {
+//          throw IllegalArgumentException("$objRef is no valid ObjectReference.")
+//        }
+//      }
+//    }
+//  }
+//  result.appendLine()
+//  result.appendLine("; Declaration of individuals")
+//  for (objRep in objRepresentation) {
+//    val name = "obj_${objRep.ref.getSmtId()}"
+//    val type = objRep.ref.getSmtType()
+//    result.appendLine("(declare-const $name $type)")
+//  }
+//  result.appendLine()
+//  result.appendLine("(check-sat)")
+//  return result.toString()
+// }
 
-// Test
-inline fun <reified T : Any> test(ref: T) {
-  val serializersModule = EmptySerializersModule()
-  val serializer = serializersModule.serializer<T>()
-  test(serializer, ref)
-}
-
-fun <T : Any> test(serializer: SerializationStrategy<T>, ref: T) {
-  val idRegistry = IDRegistry()
-  val result = mutableListOf<SmtIntermediateRepresentation>()
-  val encoder = SmtDataEncoder(
-      result,
-      mutableSetOf(),
-      idRegistry,
-      SmtIntermediateRepresentation.Reference(idRegistry.get(ref))
-  )
-  serializer.serialize(encoder, ref)
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-internal class SmtDataEncoder(
-    private val result: MutableList<SmtIntermediateRepresentation>,
-    private val capturedSorts: MutableSet<String>,
-    private val idRegistry: IDRegistry,
-    private val current: SmtIntermediateRepresentation,
-    override val serializersModule: SerializersModule = EmptySerializersModule()
-) : AbstractEncoder() {
-
-  //Check if element should be encoded
-  override fun <T> encodeSerializableElement(
-    descriptor: SerialDescriptor,
-    index: Int,
-    serializer: SerializationStrategy<T>,
-    value: T
-  ) {
-    require(value is Any)
-    if (!idRegistry.hasID(value)) {
-      encodeSerializableValue(serializer, value)
-    }
-  }
-
-  //Check if (nullable) element should be encoded
-  override fun <T : Any> encodeNullableSerializableElement(
-    descriptor: SerialDescriptor,
-    index: Int,
-    serializer: SerializationStrategy<T>,
-    value: T?
-  ) {
-    if (value != null && !idRegistry.hasID(value)) {
-      encodeSerializableValue(serializer, value)
-    }
-  }
-
-  override fun encodeValue(value: Any) {
-    // distinguish between modes and primitive value
-    println("--encodeValue($value)")
-  }
-
-  override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-    println("beginStructure(${descriptor.serialName})")
-    return this
-  }
-
-  override fun endStructure(descriptor: SerialDescriptor) {
-    println("endStructure(${descriptor.serialName})")
-  }
-}
+// private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }

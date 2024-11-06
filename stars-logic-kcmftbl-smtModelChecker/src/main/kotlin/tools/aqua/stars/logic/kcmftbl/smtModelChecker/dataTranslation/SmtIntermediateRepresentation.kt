@@ -17,17 +17,66 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-sealed class SmtIntermediateRepresentation {
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.modules.EmptySerializersModule
+import kotlinx.serialization.serializer
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataEncoder
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataSerializationMode
 
-  class Reference(val refID: Int) : SmtIntermediateRepresentation()
+/** Represents a serialized member of [SmtIntermediateRepresentation] */
+sealed class SmtIntermediateMember {
 
-  class Value<T>(val value: T) : SmtIntermediateRepresentation()
+  class Reference(val refID: Int) : SmtIntermediateMember()
 
-  class ValueList<T>(val refID: Int, val primitive: SmtPrimitive, val list: MutableCollection<T>) :
-      SmtIntermediateRepresentation()
+  class Value(val value: Any, val primitive: SmtPrimitive) : SmtIntermediateMember()
 
-  class ReferenceList<T>(val refID: Int, val list: MutableCollection<Int>) :
-      SmtIntermediateRepresentation()
+  class EnumValue(val value: Enum<*>) : SmtIntermediateMember()
 
-  class EnumValue(val value: Enum<*>) : SmtIntermediateRepresentation()
+  sealed class List(val refID: Int) : SmtIntermediateMember() {
+
+    class ValueList(refID: Int, val primitive: SmtPrimitive, val list: MutableCollection<Any>) :
+        List(refID)
+
+    class ReferenceList(refID: Int, val list: MutableCollection<Int>) : List(refID)
+
+    class EmptyList(refID: Int) : List(refID)
+  }
+}
+
+/** Represents the serialization of [ref] */
+class SmtIntermediateRepresentation(
+    val ref: SmtTranslatableBase,
+    val members: MutableMap<String, SmtIntermediateMember> = mutableMapOf()
+)
+
+/** Generate the intermediate representation of [ref] */
+inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
+    ref: T
+): List<SmtIntermediateRepresentation> {
+  val serializersModule = EmptySerializersModule()
+  val serializer = serializersModule.serializer<T>()
+  return getSmtIntermediateRepresentation(serializer, ref)
+}
+
+/** Generate the intermediate representation of [ref] */
+fun <T : SmtTranslatableBase> getSmtIntermediateRepresentation(
+    serializer: SerializationStrategy<T>,
+    ref: T
+): List<SmtIntermediateRepresentation> {
+  val result = mutableListOf<SmtIntermediateRepresentation>()
+  val capturedSorts = mutableSetOf<String>()
+  val encoder =
+      SmtDataEncoder(
+          result,
+          capturedSorts,
+          mutableMapOf(),
+          EmptySerializersModule(),
+          SmtIntermediateRepresentation(ref),
+          -1,
+          arrayOf(),
+          null,
+          SmtDataSerializationMode.DEFAULT,
+          ref)
+  serializer.serialize(encoder, ref)
+  return result
 }

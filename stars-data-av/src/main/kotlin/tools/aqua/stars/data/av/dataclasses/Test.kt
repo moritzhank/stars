@@ -15,14 +15,11 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
+package tools.aqua.stars.data.av.dataclasses
 
-class IDRegistry {
+import kotlinx.serialization.Serializable
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
-  private var nextId = 0
-  private val objToID = mutableMapOf<Any, Int>()
+@Serializable class Test(val name: String, val age: Int, val color: Color) : SmtTranslatableBase()
 
-  fun hasID(obj: Any) = objToID[obj] != null
-
-  fun get(obj: Any) = objToID.getOrPut(obj) { nextId++ }
-}
+@Serializable class Color(val name: String) : SmtTranslatableBase()

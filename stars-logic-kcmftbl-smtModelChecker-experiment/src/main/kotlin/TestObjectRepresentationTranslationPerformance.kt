@@ -15,55 +15,47 @@
  * limitations under the License.
  */
 
-import java.io.File
-import java.io.FileWriter
 import kotlin.math.log10
 import kotlin.math.pow
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.measureTime
-import tools.aqua.stars.data.av.dataclasses.Segment
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectReference
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.ObjectRepresentation
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
-private fun testObjectRepresentationTranslationPerformance(): Pair<Duration, Duration> {
-  val timeSegLoad: Duration?
-  val timeTranslate: Duration?
-  var testSegment: Segment?
-  timeSegLoad = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
-  val result = mutableListOf<ObjectRepresentation>()
-  val resultCapturedTypes = mutableSetOf<String>()
-  val resultCapturedTypesToMembers = mutableMapOf<String, MutableMap<String, ObjectReference>>()
-  timeTranslate = measureTime {
-    testSegment?.toObjectRepresentation(result, resultCapturedTypes, resultCapturedTypesToMembers)
-  }
-  return Pair(timeSegLoad, timeTranslate)
-}
-
-fun main() {
-  val segLoadTimes = mutableListOf<Duration>()
-  val translateTimes = mutableListOf<Duration>()
-  for (i in 0..0) {
-    val testRun = testObjectRepresentationTranslationPerformance()
-    segLoadTimes.add(testRun.component1())
-    translateTimes.add(testRun.component2())
-    SmtTranslatableBase.resetIds()
-  }
-  val timesSegLoadMean = segLoadTimes.map { it.toDouble(DurationUnit.SECONDS) }.mean()
-  val timesTranslationMean = translateTimes.map { it.toDouble(DurationUnit.MILLISECONDS) }.mean()
-  val timesSegLoadGMean = segLoadTimes.map { it.toDouble(DurationUnit.SECONDS) }.gmean()
-  val timesTranslationGMean = translateTimes.map { it.toDouble(DurationUnit.MILLISECONDS) }.gmean()
-  val x = FileWriter(File("experiment_times.txt"))
-  x.append(
-      "SegLoad: $segLoadTimes\n" +
-          "Translation: $translateTimes\n" +
-          "Mean SegLoad: ${timesSegLoadMean}s\n" +
-          "Geom. Mean SegLoad: ${timesSegLoadGMean}s\n" +
-          "Mean Translation: ${timesTranslationMean}ms\n" +
-          "Geom. Mean Translation: ${timesTranslationGMean}ms\n")
-  x.close()
-}
+// private fun testObjectRepresentationTranslationPerformance(): Pair<Duration, Duration> {
+//  val timeSegLoad: Duration?
+//  val timeTranslate: Duration?
+//  var testSegment: Segment?
+//  timeSegLoad = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
+//  val result = mutableListOf<ObjectRepresentation>()
+//  val resultCapturedTypes = mutableSetOf<String>()
+//  val resultCapturedTypesToMembers = mutableMapOf<String, MutableMap<String, ObjectReference>>()
+//  timeTranslate = measureTime {
+//    testSegment?.toObjectRepresentation(result, resultCapturedTypes, resultCapturedTypesToMembers)
+//  }
+//  return Pair(timeSegLoad, timeTranslate)
+// }
+//
+// fun main() {
+//  val segLoadTimes = mutableListOf<Duration>()
+//  val translateTimes = mutableListOf<Duration>()
+//  for (i in 0..0) {
+//    val testRun = testObjectRepresentationTranslationPerformance()
+//    segLoadTimes.add(testRun.component1())
+//    translateTimes.add(testRun.component2())
+//    SmtTranslatableBase.resetIds()
+//  }
+//  val timesSegLoadMean = segLoadTimes.map { it.toDouble(DurationUnit.SECONDS) }.mean()
+//  val timesTranslationMean = translateTimes.map { it.toDouble(DurationUnit.MILLISECONDS) }.mean()
+//  val timesSegLoadGMean = segLoadTimes.map { it.toDouble(DurationUnit.SECONDS) }.gmean()
+//  val timesTranslationGMean = translateTimes.map { it.toDouble(DurationUnit.MILLISECONDS)
+// }.gmean()
+//  val x = FileWriter(File("experiment_times.txt"))
+//  x.append(
+//      "SegLoad: $segLoadTimes\n" +
+//          "Translation: $translateTimes\n" +
+//          "Mean SegLoad: ${timesSegLoadMean}s\n" +
+//          "Geom. Mean SegLoad: ${timesSegLoadGMean}s\n" +
+//          "Mean Translation: ${timesTranslationMean}ms\n" +
+//          "Geom. Mean Translation: ${timesTranslationGMean}ms\n")
+//  x.close()
+// }
 
 private fun Collection<Double>.mean() = sum() / size
 

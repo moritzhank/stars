@@ -20,11 +20,26 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 import kotlin.reflect.KClass
 import kotlinx.metadata.isNotDefault
 import kotlinx.metadata.jvm.KotlinClassMetadata
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.ClassValueCache
+
+/** Contains a list of legal (translation-related) properties of a class. */
+internal class SmtTranslationAnnotation(
+    private val qualifiedCallerName: String?,
+    private val legalProperties: Array<Property> = arrayOf()
+) {
+
+  private fun isLegalProperty(name: String): Boolean = legalProperties.any { it.name == name }
+
+  fun requireLegalProperty(propName: String) {
+    require(isLegalProperty(propName)) {
+      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters. Annotating the property with SMTIgnore can solve this."
+    }
+  }
+
+  class Property(val name: String, val smtPrimitive: SmtPrimitive?)
+}
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationAnnotation>()
-
-internal inline fun <reified T : Any> smtTranslationAnnotation(): SmtTranslationAnnotation =
-    smtTranslationAnnotation(T::class)
 
 internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslationAnnotation =
     SMT_TRANSLATION_CACHE.getOrSet(kClass) {
@@ -43,19 +58,3 @@ internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslati
           }
       SmtTranslationAnnotation(kClass.qualifiedName, legalProperties.toTypedArray())
     }
-
-internal class SmtTranslationAnnotation(
-    private val qualifiedCallerName: String?,
-    private val legalProperties: Array<Property> = arrayOf()
-) {
-
-  fun isLegalProperty(name: String): Boolean = legalProperties.any { it.name == name }
-
-  fun requireLegalProperty(propName: String) {
-    require(isLegalProperty(propName)) {
-      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters. Annotating the property with SMTIgnore can solve this."
-    }
-  }
-
-  class Property(val name: String, val smtPrimitive: SmtPrimitive?)
-}

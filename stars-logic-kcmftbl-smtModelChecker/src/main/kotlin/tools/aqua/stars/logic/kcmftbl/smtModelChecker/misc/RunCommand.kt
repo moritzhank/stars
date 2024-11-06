@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc
 
 import java.io.File
 import java.util.concurrent.TimeUnit

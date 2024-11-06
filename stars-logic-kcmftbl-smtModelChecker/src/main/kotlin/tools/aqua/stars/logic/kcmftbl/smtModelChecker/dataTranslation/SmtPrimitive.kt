@@ -34,3 +34,13 @@ fun Class<*>.smtPrimitive(): SmtPrimitive? =
       "String" -> SmtPrimitive.STRING
       else -> null
     }
+
+fun Any.smtPrimitive(): SmtPrimitive? =
+    when (this) {
+      is Boolean -> SmtPrimitive.BOOL
+      is Int -> SmtPrimitive.INT
+      is Float -> SmtPrimitive.REAL
+      is Double -> SmtPrimitive.REAL
+      is String -> SmtPrimitive.STRING
+      else -> null
+    }

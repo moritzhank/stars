@@ -15,22 +15,9 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
-
-interface ObjectReference
-
-class Ref(val ref: SmtTranslatableBase) : ObjectReference
-
-class Val<T>(val value: T) : ObjectReference
-
-class Lst<T>(val id: Int, val primitiveSmtSort: PrimitiveSmtSort, val list: Collection<T>) :
-    ObjectReference
-
-class RefLst(val id: Int, val genericType: String, val list: Collection<SmtTranslatableBase>) :
-    ObjectReference
-
-class Enm(val value: Enum<*>) : ObjectReference
-
-class ObjectRepresentation(val ref: SmtTranslatableBase, val member: Map<String, ObjectReference>)
+enum class SmtDataSerializationMode {
+  DEFAULT,
+  LIST
+}

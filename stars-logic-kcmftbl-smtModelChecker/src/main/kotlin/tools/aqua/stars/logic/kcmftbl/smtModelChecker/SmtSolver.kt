@@ -22,6 +22,7 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 import java.io.File
 import java.util.UUID
 import tools.aqua.stars.logic.kcmftbl.dsl.CallContext
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.runCommand
 
 enum class SmtSolver(val solverName: String) {
   CVC5("cvc5"),

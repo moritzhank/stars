@@ -54,22 +54,4 @@ data class WeatherParameters(
     val scatteringIntensity: Double,
     val mieScatteringScale: Double,
     val rayleighScatteringScale: Double,
-) : SmtTranslatableBase() {
-
-  override fun registerMembers() {
-    registerEnum(WeatherParameters::type)
-    registerNumber(WeatherParameters::cloudiness)
-    registerNumber(WeatherParameters::precipitation)
-    registerNumber(WeatherParameters::precipitationDeposits)
-    registerNumber(WeatherParameters::windIntensity)
-    registerNumber(WeatherParameters::sunAzimuthAngle)
-    registerNumber(WeatherParameters::sunAltitudeAngle)
-    registerNumber(WeatherParameters::fogDensity)
-    registerNumber(WeatherParameters::fogDistance)
-    registerNumber(WeatherParameters::wetness)
-    registerNumber(WeatherParameters::fogFalloff)
-    registerNumber(WeatherParameters::scatteringIntensity)
-    registerNumber(WeatherParameters::mieScatteringScale)
-    registerNumber(WeatherParameters::rayleighScatteringScale)
-  }
-}
+) : SmtTranslatableBase() {}

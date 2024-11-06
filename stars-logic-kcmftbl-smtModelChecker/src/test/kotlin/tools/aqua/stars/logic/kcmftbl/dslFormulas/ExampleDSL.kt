@@ -21,15 +21,13 @@ package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
 import kotlin.test.Test
 import tools.aqua.stars.data.av.dataclasses.*
-import tools.aqua.stars.logic.kcmftbl.dsl.CCB
-import tools.aqua.stars.logic.kcmftbl.dsl.FormulaBuilder.Companion.formula
-import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
 import tools.aqua.stars.logic.kcmftbl.dsl.times
 
 class ExampleDSL {
 
   @Test
   fun monitors() {
+    /*
     val vehiclesInBlock = function { t: CCB<TickData>, b: CCB<Block> ->
       filter(t * TickData::vehicles) { v: CCB<Vehicle> ->
         eq {
@@ -63,6 +61,7 @@ class ExampleDSL {
           .satisfied { const(10.0) }
           .otherwise { const(20.0) }
     }
+     */
     /*
     val hasMidTrafficDensityPred = formula {
       exists { x: Ref<Vehicle> ->

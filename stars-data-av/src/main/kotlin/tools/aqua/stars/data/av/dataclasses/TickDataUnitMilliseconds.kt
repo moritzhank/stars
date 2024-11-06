@@ -30,10 +30,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
 data class TickDataUnitMilliseconds(val tickMillis: Long) :
     SmtTranslatableBase(), TickUnit<TickDataUnitMilliseconds, TickDataDifferenceMilliseconds> {
 
-  override fun registerMembers() {
-    registerNumber(TickDataUnitMilliseconds::tickMillis)
-  }
-
   override fun compareTo(other: TickDataUnitMilliseconds): Int =
       this.tickMillis.compareTo(other.tickMillis)
 

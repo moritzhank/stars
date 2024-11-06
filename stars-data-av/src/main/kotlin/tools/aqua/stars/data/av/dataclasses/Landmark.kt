@@ -48,19 +48,4 @@ data class Landmark(
     val text: String,
     val location: Location,
     val rotation: Rotation
-) : SmtTranslatableBase() {
-
-  override fun registerMembers() {
-    registerNumber(Landmark::id)
-    registerString(Landmark::name)
-    registerNumber(Landmark::distance)
-    registerNumber(Landmark::s)
-    registerString(Landmark::country)
-    registerEnum(Landmark::type)
-    registerNumber(Landmark::value)
-    registerString(Landmark::unit)
-    registerString(Landmark::text)
-    register(Landmark::location)
-    register(Landmark::rotation)
-  }
-}
+) : SmtTranslatableBase() {}

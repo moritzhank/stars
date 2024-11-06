@@ -61,24 +61,6 @@ data class Lane(
     var laneDirection: LaneDirection,
 ) : SmtTranslatableBase() {
 
-  override fun registerMembers() {
-    registerNumber(Lane::laneId)
-    register(Lane::road)
-    registerEnum(Lane::laneType)
-    registerNumber(Lane::laneWidth)
-    registerNumber(Lane::laneLength)
-    registerCollection(Lane::predecessorLanes)
-    registerCollection(Lane::successorLanes)
-    registerCollection(Lane::intersectingLanes)
-    registerCollection(Lane::yieldLanes)
-    registerCollection(Lane::laneMidpoints)
-    registerCollection(Lane::speedLimits)
-    registerCollection(Lane::landmarks)
-    registerCollection(Lane::contactAreas)
-    registerCollection(Lane::trafficLights)
-    registerEnum(Lane::laneDirection)
-  }
-
   /** Whether this [Lane] turns left. */
   val isTurningLeft: Boolean
     get() = laneDirection == LaneDirection.LEFT_TURN

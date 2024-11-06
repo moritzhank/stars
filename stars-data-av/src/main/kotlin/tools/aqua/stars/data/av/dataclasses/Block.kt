@@ -34,11 +34,6 @@ data class Block(
     var roads: List<Road>,
 ) : SmtTranslatableBase() {
 
-  override fun registerMembers() {
-    registerString(Block::id)
-    registerCollection(Block::roads)
-  }
-
   override fun toString(): String = id
 
   override fun hashCode(): Int = id.hashCode()

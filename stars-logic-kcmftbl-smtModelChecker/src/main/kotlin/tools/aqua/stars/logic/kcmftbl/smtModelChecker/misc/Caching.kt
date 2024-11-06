@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc
 
 import java.lang.ref.SoftReference
 import kotlin.reflect.KClass

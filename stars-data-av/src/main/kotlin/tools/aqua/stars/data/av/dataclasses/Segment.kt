@@ -18,6 +18,7 @@
 package tools.aqua.stars.data.av.dataclasses
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
 
@@ -37,12 +38,9 @@ data class Segment(
     SmtTranslatableBase(),
     SegmentType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
-  override fun registerMembers() {
-    registerCollection(Segment::tickData)
-  }
-
   override val tickData: List<TickData> = mainInitList.onEach { it.segment = this }
 
+  @Transient
   override val ticks: Map<TickDataUnitSeconds, TickData> = tickData.associateBy { it.currentTick }
 
   override val primaryEntityId: Int
@@ -61,7 +59,7 @@ data class Segment(
     }
 
   /** Cache for all vehicle IDs. */
-  private val vehicleIdsCache = mutableListOf<Int>()
+  @Transient private val vehicleIdsCache = mutableListOf<Int>()
 
   /** All vehicle IDs of the segment. */
   val vehicleIds: List<Int>
@@ -76,7 +74,7 @@ data class Segment(
     }
 
   /** Cache for all pedestrian IDs. */
-  private val pedestrianIdsCache = mutableListOf<Int>()
+  @Transient private val pedestrianIdsCache = mutableListOf<Int>()
 
   /** All pedestrian IDs of the segment. */
   @Suppress("unused")

@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
+import kotlin.time.measureTime
 import tools.aqua.stars.data.av.dataclasses.Segment
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.test
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
 
 fun main() {
   /*
@@ -30,5 +31,5 @@ fun main() {
   println(runSmtSolver(smtlibProgram))
    */
   val t: Segment = ExperimentLoader.loadTestSegment()
-  test(t)
+  println(measureTime { getSmtIntermediateRepresentation(t) })
 }

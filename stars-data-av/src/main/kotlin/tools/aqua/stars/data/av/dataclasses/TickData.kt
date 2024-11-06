@@ -43,18 +43,6 @@ data class TickData(
     SmtTranslatableBase(),
     TickDataType<Actor, TickData, Segment, TickDataUnitSeconds, TickDataDifferenceSeconds> {
 
-  override fun registerMembers() {
-    register(TickData::currentTick)
-    // registerCollection(TickData::entities)
-    registerCollection(TickData::trafficLights)
-    registerCollection(TickData::blocks)
-    register(TickData::weather)
-    registerEnum(TickData::daytime)
-    register(TickData::segment)
-    registerCollection(TickData::vehicles)
-    registerCollection(TickData::pedestrians)
-  }
-
   override lateinit var segment: Segment
 
   /** Name-Alias for [entities]. */
