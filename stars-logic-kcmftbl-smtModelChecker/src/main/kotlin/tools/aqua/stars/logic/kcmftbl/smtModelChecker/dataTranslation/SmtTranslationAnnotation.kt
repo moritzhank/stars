@@ -17,9 +17,12 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
+import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
+import kotlin.reflect.javaType
 import kotlinx.metadata.isNotDefault
 import kotlinx.metadata.jvm.KotlinClassMetadata
+import kotlinx.serialization.Transient
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.ClassValueCache
 
 /** Contains a list of legal (translation-related) properties of a class. */
@@ -36,11 +39,14 @@ internal class SmtTranslationAnnotation(
     }
   }
 
-  class Property(val name: String, val smtPrimitive: SmtPrimitive?)
+  fun getLegalProperties() = legalProperties
+
+  class Property(val name: String, val clazz: Class<*>?)
 }
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationAnnotation>()
 
+@OptIn(ExperimentalStdlibApi::class)
 internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslationAnnotation =
     SMT_TRANSLATION_CACHE.getOrSet(kClass) {
       val legalProperties = mutableListOf<SmtTranslationAnnotation.Property>()
@@ -50,10 +56,22 @@ internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslati
               as KotlinClassMetadata.Class)
           .kmClass
           .properties
-          .forEach {
-            if (!it.getter.isNotDefault) {
-              legalProperties.add(
-                  SmtTranslationAnnotation.Property(it.name, it.javaClass.smtPrimitive()))
+          .forEach { kmProperty ->
+            if (!kmProperty.getter.isNotDefault) {
+              val propertyName = kmProperty.name
+              val member = kClass.members.first { it.name == propertyName }
+              if (!member.annotations.any { it is Transient }) {
+                val memberReturnType = member.returnType.javaType
+                var memberClass: Class<*>? = null
+                if (memberReturnType !is ParameterizedType) {
+                  memberClass = memberReturnType as Class<*>
+                }
+                // Override enums to be integers
+                if (memberClass?.isEnum == true) {
+                  memberClass = Int::class.java
+                }
+                legalProperties.add(SmtTranslationAnnotation.Property(propertyName, memberClass))
+              }
             }
           }
       SmtTranslationAnnotation(kClass.qualifiedName, legalProperties.toTypedArray())

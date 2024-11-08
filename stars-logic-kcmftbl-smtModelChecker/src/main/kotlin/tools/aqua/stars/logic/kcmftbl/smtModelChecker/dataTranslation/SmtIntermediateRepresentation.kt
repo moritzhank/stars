@@ -17,8 +17,9 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
+import kotlin.reflect.KClass
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.modules.EmptySerializersModule
+import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataEncoder
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataSerializationMode
@@ -29,8 +30,6 @@ sealed class SmtIntermediateMember {
   class Reference(val refID: Int) : SmtIntermediateMember()
 
   class Value(val value: Any, val primitive: SmtPrimitive) : SmtIntermediateMember()
-
-  class EnumValue(val value: Enum<*>) : SmtIntermediateMember()
 
   sealed class List(val refID: Int) : SmtIntermediateMember() {
 
@@ -49,28 +48,38 @@ class SmtIntermediateRepresentation(
     val members: MutableMap<String, SmtIntermediateMember> = mutableMapOf()
 )
 
-/** Generate the intermediate representation of [ref] */
+/**
+ * Generate the intermediate representation of [ref]
+ *
+ * @param capturedClasses All classes found will be added to this set
+ */
 inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
-    ref: T
+    serializersModule: SerializersModule,
+    ref: T,
+    capturedClasses: MutableSet<KClass<*>>,
 ): List<SmtIntermediateRepresentation> {
-  val serializersModule = EmptySerializersModule()
   val serializer = serializersModule.serializer<T>()
-  return getSmtIntermediateRepresentation(serializer, ref)
+  return getSmtIntermediateRepresentation(serializer, serializersModule, ref, capturedClasses)
 }
 
-/** Generate the intermediate representation of [ref] */
+/**
+ * Generate the intermediate representation of [ref]
+ *
+ * @param capturedClasses All classes found will be added to this set
+ */
 fun <T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializer: SerializationStrategy<T>,
-    ref: T
+    serializersModule: SerializersModule,
+    ref: T,
+    capturedClasses: MutableSet<KClass<*>>
 ): List<SmtIntermediateRepresentation> {
   val result = mutableListOf<SmtIntermediateRepresentation>()
-  val capturedSorts = mutableSetOf<String>()
   val encoder =
       SmtDataEncoder(
           result,
-          capturedSorts,
+          capturedClasses,
           mutableMapOf(),
-          EmptySerializersModule(),
+          serializersModule,
           SmtIntermediateRepresentation(ref),
           -1,
           arrayOf(),

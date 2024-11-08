@@ -17,9 +17,11 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.SerializationStrategy
+import kotlin.reflect.KClass
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.encoding.AbstractEncoder
+import kotlinx.serialization.internal.AbstractPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
 
@@ -27,7 +29,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
 @ExperimentalSerializationApi
 internal abstract class AbstractSmtDataEncoder(
     protected val result: MutableList<SmtIntermediateRepresentation>,
-    protected val capturedSorts: MutableSet<String>,
+    protected val capturedClasses: MutableSet<KClass<*>>,
     protected val visitedSmtIDs: MutableMap<Int, Boolean>,
     override val serializersModule: SerializersModule,
     protected var nextSerializable: Any? = null
@@ -38,7 +40,11 @@ internal abstract class AbstractSmtDataEncoder(
 
   abstract fun encodePrimitiveValue(value: Any, primitive: SmtPrimitive?)
 
+  @OptIn(InternalSerializationApi::class)
   final override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
+    requireNotNull(value) {
+      "The current serialized value should not be null. This is probably a bug in kotlinx.serialization."
+    }
     nextSerializable = null
     if (value is SmtTranslatableBase) {
       val smtID = value.getSmtID()
@@ -48,7 +54,15 @@ internal abstract class AbstractSmtDataEncoder(
       }
     }
     nextSerializable = value
-    super.encodeSerializableValue(serializer, value)
+    // Get correct serializer for polymorphic classes
+    val descriptor = serializer.descriptor
+    if (descriptor.kind == PolymorphicKind.SEALED) {
+      @Suppress("UNCHECKED_CAST") val casted = serializer as AbstractPolymorphicSerializer<Any>
+      val actual = casted.findPolymorphicSerializer(this, value)
+      super.encodeSerializableValue(actual, value)
+    } else {
+      super.encodeSerializableValue(serializer, value)
+    }
   }
 
   final override fun encodeValue(value: Any) {

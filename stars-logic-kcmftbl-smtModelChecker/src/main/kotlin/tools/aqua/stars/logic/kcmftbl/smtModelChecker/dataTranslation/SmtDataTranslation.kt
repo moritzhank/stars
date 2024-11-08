@@ -17,72 +17,93 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-// fun generateSmtLib(
-//    objRepresentation: MutableList<ObjectRepresentation>,
-//    capturedTypes: MutableSet<String>,
-//    capturedTypesToMember: MutableMap<String, MutableMap<String, ObjectReference>>
-// ): String {
-//  val result = StringBuilder()
-//  // Generate general datatypes
-//  result.appendLine("; General datatypes")
-//  result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
-//  result.appendLine()
-//  // Generate sort declarations
-//  result.appendLine("; Sort declarations")
-//  for (capturedType in capturedTypes) {
-//    result.appendLine("(declare-sort $capturedType 0)")
-//  }
-//  result.appendLine()
-//  // Generate member declarations
-//  result.appendLine("; Member declarations")
-//  for (capturedType in capturedTypes) {
-//    result.appendLine("; Member declaration for $capturedType")
-//    for (entry in capturedTypesToMember[capturedType]!!.entries) {
-//      val name = entry.component1()
-//      when (val objRef = entry.component2()) {
-//        is Enm -> {
-//          result.appendLine(
-//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) Int)")
-//        }
-//        is Val<*> -> {
-//          val primitiveSort = primitiveSmtSort(objRef.value!!).smtSortName
-//          result.appendLine(
-//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType)
-// $primitiveSort)")
-//        }
-//        is Ref -> {
-//          val refSort = objRef.ref.getSmtType()!!
-//          result.appendLine(
-//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) $refSort)")
-//        }
-//        is Lst<*> -> {
-//          val primitiveSort = objRef.primitiveSmtSort.smtSortName
-//          result.appendLine(
-//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
-// $primitiveSort))")
-//        }
-//        is RefLst -> {
-//          val refSort = objRef.genericType
-//          result.appendLine(
-//              "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
-// $refSort))")
-//        }
-//        else -> {
-//          throw IllegalArgumentException("$objRef is no valid ObjectReference.")
-//        }
-//      }
-//    }
-//  }
-//  result.appendLine()
-//  result.appendLine("; Declaration of individuals")
-//  for (objRep in objRepresentation) {
-//    val name = "obj_${objRep.ref.getSmtId()}"
-//    val type = objRep.ref.getSmtType()
-//    result.appendLine("(declare-const $name $type)")
-//  }
-//  result.appendLine()
-//  result.appendLine("(check-sat)")
-//  return result.toString()
-// }
+import kotlin.reflect.KClass
 
-// private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }
+fun generateSmtLib(
+    intermediateRepresentation: List<SmtIntermediateRepresentation>,
+    capturedClasses: MutableSet<KClass<*>>
+): String {
+  val result = StringBuilder()
+  generatePredefinedDatatypes(result)
+  // Generate sort declarations
+  result.appendLine("; Sort declarations")
+  for (capturedClass in capturedClasses) {
+    val annotation = smtTranslationAnnotation(capturedClass)
+    val sortName = capturedClass.simpleName!!
+    result.appendLine("(declare-sort $sortName 0)")
+  }
+  result.appendLine()
+  // Generate member declarations
+  for (capturedClass in capturedClasses) {
+    val annotation = smtTranslationAnnotation(capturedClass)
+    val sortName = capturedClass.simpleName!!
+    result.appendLine("; Member declarations for $sortName")
+    for (property in annotation.getLegalProperties()) {
+      val propName = property.name
+      // property.clazz is null for all parameterised classes
+      if (property.clazz != null) {
+        val smtPrimitive = property.clazz.smtPrimitive()
+        // smtPrimitive is null for all non-primitive classes
+        if (smtPrimitive != null) {
+          result.appendLine(
+              "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) ${smtPrimitive.smtPrimitiveSortName})")
+        } else {
+          val returnSortName = property.clazz.simpleName
+          result.appendLine(
+              "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) $returnSortName)")
+        }
+      } else {
+        result.appendLine(";[parameterized] $propName")
+        // TODO
+      }
+
+      //
+      //      when (val objRef = entry.component2()) {
+      //        is Val<*> -> {
+      //          val primitiveSort = primitiveSmtSort(objRef.value!!).smtSortName
+      //
+      //        }
+      //        is Ref -> {
+      //          val refSort = objRef.ref.getSmtType()!!
+      //          result.appendLine(
+      //            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) $refSort)")
+      //        }
+      //        is Lst<*> -> {
+      //          val primitiveSort = objRef.primitiveSmtSort.smtSortName
+      //          result.appendLine(
+      //            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
+      //            $primitiveSort))")
+      //        }
+      //        is RefLst -> {
+      //          val refSort = objRef.genericType
+      //          result.appendLine(
+      //            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
+      //            $refSort))")
+      //        }
+      //        else -> {
+      //          throw IllegalArgumentException("$objRef is no valid ObjectReference.")
+      //        }
+      //      }
+    }
+
+    result.appendLine()
+  }
+  // Generate declaration of individuals
+  result.appendLine("; Declaration of individuals")
+  for (intermediate in intermediateRepresentation) {
+    val name = "ind_${intermediate.ref.getSmtID()}"
+    val sortName = intermediate.ref::class.simpleName!!
+    result.appendLine("(declare-const $name $sortName)")
+  }
+  result.appendLine()
+  result.appendLine("(check-sat)")
+  return result.toString()
+}
+
+private fun generatePredefinedDatatypes(result: StringBuilder) {
+  result.appendLine("; Predefined datatypes")
+  result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
+  result.appendLine()
+}
+
+private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }

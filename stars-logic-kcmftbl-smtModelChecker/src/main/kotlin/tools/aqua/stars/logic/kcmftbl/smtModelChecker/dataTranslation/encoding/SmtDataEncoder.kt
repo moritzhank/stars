@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
+import kotlin.reflect.KClass
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -29,7 +30,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
 @OptIn(ExperimentalSerializationApi::class)
 internal class SmtDataEncoder(
     result: MutableList<SmtIntermediateRepresentation>,
-    capturedSorts: MutableSet<String>,
+    capturedClasses: MutableSet<KClass<*>>,
     visitedSmtIDs: MutableMap<Int, Boolean>,
     serializersModule: SerializersModule,
     // Changing parameters
@@ -41,7 +42,7 @@ internal class SmtDataEncoder(
     nextSerializable: Any? = null,
 ) :
     AbstractSmtDataEncoder(
-        result, capturedSorts, visitedSmtIDs, serializersModule, nextSerializable) {
+        result, capturedClasses, visitedSmtIDs, serializersModule, nextSerializable) {
 
   private fun setMember(member: SmtIntermediateMember) {
     requireNotNull(current) {
@@ -71,7 +72,7 @@ internal class SmtDataEncoder(
     }
     return SmtDataEncoder(
         result,
-        capturedSorts,
+        capturedClasses,
         visitedSmtIDs,
         serializersModule,
         intermediateRepresentation,
@@ -108,7 +109,7 @@ internal class SmtDataEncoder(
     }
     return SmtDataEncoder(
         result,
-        capturedSorts,
+        capturedClasses,
         visitedSmtIDs,
         serializersModule,
         null,
@@ -174,6 +175,7 @@ internal class SmtDataEncoder(
       val className = nextSerializable::class.simpleName ?: "<unknown_class>"
       "The class \"$className\" (Accessed via member \"$memberName\") has to inherit from SmtTranslatableBase in order to be serialized."
     }
+    capturedClasses.add(nextSerializable::class)
     return encodeSmtTranslatableBase(
         nextSerializable, descriptor.elementNames.toList().toTypedArray())
   }

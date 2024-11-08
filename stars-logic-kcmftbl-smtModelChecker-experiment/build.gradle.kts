@@ -23,4 +23,5 @@ dependencies {
   implementation(project(":stars-logic-kcmftbl-smtModelChecker"))
   implementation(project(":stars-data-av"))
   implementation(project(":stars-importer-carla"))
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3")
 }
