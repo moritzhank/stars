@@ -53,39 +53,12 @@ fun generateSmtLib(
               "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) $returnSortName)")
         }
       } else {
-        result.appendLine(";[parameterized] $propName")
-        // TODO
+        val firstTypeArgument = property.firstTypeArgument
+        requireNotNull(firstTypeArgument) { TODO() }
+        val elementTypeName = firstTypeArgument.smtPrimitive()?.smtPrimitiveSortName ?: firstTypeArgument.simpleName
+        result.appendLine("(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) (List $elementTypeName))")
       }
-
-      //
-      //      when (val objRef = entry.component2()) {
-      //        is Val<*> -> {
-      //          val primitiveSort = primitiveSmtSort(objRef.value!!).smtSortName
-      //
-      //        }
-      //        is Ref -> {
-      //          val refSort = objRef.ref.getSmtType()!!
-      //          result.appendLine(
-      //            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) $refSort)")
-      //        }
-      //        is Lst<*> -> {
-      //          val primitiveSort = objRef.primitiveSmtSort.smtSortName
-      //          result.appendLine(
-      //            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
-      //            $primitiveSort))")
-      //        }
-      //        is RefLst -> {
-      //          val refSort = objRef.genericType
-      //          result.appendLine(
-      //            "(declare-fun ${capturedType.firstCharLower()}_$name ($capturedType) (List
-      //            $refSort))")
-      //        }
-      //        else -> {
-      //          throw IllegalArgumentException("$objRef is no valid ObjectReference.")
-      //        }
-      //      }
     }
-
     result.appendLine()
   }
   // Generate declaration of individuals
@@ -94,7 +67,30 @@ fun generateSmtLib(
     val name = "ind_${intermediate.ref.getSmtID()}"
     val sortName = intermediate.ref::class.simpleName!!
     result.appendLine("(declare-const $name $sortName)")
+    // Define members
+    intermediate.members.keys.forEach { memberName ->
+      val propName = "${sortName.firstCharLower()}_$memberName"
+      when (val intermediateMember = intermediate.members.getValue(memberName)) {
+        is SmtIntermediateMember.Value -> {
+          val value = correctFormat(intermediateMember.value)
+          result.appendLine("(assert (= ($propName $name) ${value}))")
+        }
+        is SmtIntermediateMember.Reference -> {
+          val refName = "ind_${intermediateMember.refID}"
+          result.appendLine("(assert (= ($propName $name) $refName))")
+        }
+        is SmtIntermediateMember.List -> {
+          val listName = "list_${intermediateMember.refID}"
+          result.appendLine(";(assert (= ($propName $name) $listName))")
+        }
+      }
+    }
   }
+  // Generate lists
+  //(assert (= list-car-1 (cons car-123 (cons car-1234 (cons car-12345 nil)))))
+
+  // Generate distinct statement for every sort?!
+
   result.appendLine()
   result.appendLine("(check-sat)")
   return result.toString()
@@ -107,3 +103,12 @@ private fun generatePredefinedDatatypes(result: StringBuilder) {
 }
 
 private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }
+
+private fun correctFormat(value: Any): Any {
+  return when (value) {
+    is String -> "\"$value\""
+    is Double -> value.toBigDecimal().toPlainString()
+    is Float -> value.toBigDecimal().toPlainString()
+    else -> value
+  }
+}

@@ -35,13 +35,13 @@ internal class SmtTranslationAnnotation(
 
   fun requireLegalProperty(propName: String) {
     require(isLegalProperty(propName)) {
-      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters. Annotating the property with SMTIgnore can solve this."
+      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters."
     }
   }
 
   fun getLegalProperties() = legalProperties
 
-  class Property(val name: String, val clazz: Class<*>?)
+  class Property(val name: String, val clazz: Class<*>?, val firstTypeArgument: Class<*>? = null)
 }
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationAnnotation>()
@@ -63,14 +63,17 @@ internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslati
               if (!member.annotations.any { it is Transient }) {
                 val memberReturnType = member.returnType.javaType
                 var memberClass: Class<*>? = null
+                var memberFirstTypeArg: Class<*>? = null
                 if (memberReturnType !is ParameterizedType) {
                   memberClass = memberReturnType as Class<*>
+                } else if(memberReturnType.rawType.typeName == List::class.java.name) {
+                  memberFirstTypeArg = memberReturnType.actualTypeArguments[0] as Class<*>
                 }
                 // Override enums to be integers
                 if (memberClass?.isEnum == true) {
                   memberClass = Int::class.java
                 }
-                legalProperties.add(SmtTranslationAnnotation.Property(propertyName, memberClass))
+                legalProperties.add(SmtTranslationAnnotation.Property(propertyName, memberClass, memberFirstTypeArg))
               }
             }
           }

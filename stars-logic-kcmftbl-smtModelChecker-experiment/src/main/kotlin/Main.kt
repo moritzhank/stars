@@ -22,18 +22,21 @@ import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
+import java.io.FileWriter
 
 fun main() {
   val t: Segment = ExperimentLoader.loadTestSegment()
-  println("Finished.")
+  println("Finished reading.")
   val serializersModule = EmptySerializersModule()
   val capturedClasses = mutableSetOf<KClass<*>>()
   var intermediateRepresentation: List<SmtIntermediateRepresentation> = listOf()
-  println(
-      measureTime {
-        intermediateRepresentation =
-            getSmtIntermediateRepresentation(serializersModule, t, capturedClasses)
-      })
-  println()
-  println(generateSmtLib(intermediateRepresentation, capturedClasses))
+  val intermediateRepresentationTime = measureTime {
+    intermediateRepresentation =
+      getSmtIntermediateRepresentation(serializersModule, t, capturedClasses)
+  }
+  println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
+  println("Size of intermediate representation: ${intermediateRepresentation.size}")
+  val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses)
+  println("Generated SmtLib lines: ${smtLib.length}")
+  FileWriter("test.txt").write(smtLib)
 }
