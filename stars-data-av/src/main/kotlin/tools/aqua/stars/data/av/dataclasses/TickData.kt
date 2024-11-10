@@ -19,7 +19,9 @@ package tools.aqua.stars.data.av.dataclasses
 
 import kotlinx.serialization.Serializable
 import tools.aqua.stars.core.types.TickDataType
+import tools.aqua.stars.data.av.serializer.TickDataSerializer
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtAllowNonTrivialGetter
 
 /**
  * Json format containing data for current tick.
@@ -31,7 +33,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property weather The current [WeatherParameters].
  * @property daytime The current [Daytime].
  */
-@Serializable
+@Serializable(with = TickDataSerializer::class)
 data class TickData(
     override val currentTick: TickDataUnitSeconds,
     override var entities: List<Actor>,
@@ -54,11 +56,13 @@ data class TickData(
     get() = actors.firstOrNull { it is Vehicle && it.isEgo } as Vehicle
 
   /** All vehicles. */
+  @SmtAllowNonTrivialGetter
   val vehicles: List<Vehicle>
     get() = actors.filterIsInstance<Vehicle>()
 
   /** All pedestrians. */
   @Suppress("unused")
+  @SmtAllowNonTrivialGetter
   val pedestrians: List<Pedestrian>
     get() = actors.filterIsInstance<Pedestrian>()
 

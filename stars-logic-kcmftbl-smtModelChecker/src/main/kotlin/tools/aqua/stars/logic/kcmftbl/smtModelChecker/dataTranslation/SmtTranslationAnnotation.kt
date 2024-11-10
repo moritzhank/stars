@@ -19,63 +19,121 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.javaType
 import kotlinx.metadata.isNotDefault
 import kotlinx.metadata.jvm.KotlinClassMetadata
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtAllowNonTrivialGetter
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.ClassValueCache
 
-/** Contains a list of legal (translation-related) properties of a class. */
+/** Contains a list of translatable properties of a class. */
 internal class SmtTranslationAnnotation(
-    private val qualifiedCallerName: String?,
-    private val legalProperties: Array<Property> = arrayOf()
+    private val translationName: String,
+    private val properties: Array<Property>
 ) {
 
-  private fun isLegalProperty(name: String): Boolean = legalProperties.any { it.name == name }
+  fun isTranslatableProperty(name: String): Boolean = properties.any { it.name == name }
 
-  fun requireLegalProperty(propName: String) {
-    require(isLegalProperty(propName)) {
-      "The property \"${qualifiedCallerName ?: "?"}.${propName}\" can not be translated. This can happen, for example, due to non-trivial getters."
+  fun requireTranslatableProperty(propName: String) {
+    require(isTranslatableProperty(propName)) {
+      "The property \"$translationName.$propName\" can not be translated. This can happen, for example, due to non-trivial getters."
     }
   }
 
-  fun getLegalProperties() = legalProperties
+  fun getTranslatableProperties() = properties
 
-  class Property(val name: String, val clazz: Class<*>?, val firstTypeArgument: Class<*>? = null)
+  class Property(
+      val name: String,
+      val nonTrivialGetter: Boolean,
+      val clazz: Class<*>?,
+      val listTypeArgumentClass: Class<*>? = null
+  )
 }
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationAnnotation>()
 
+internal fun getQualifiedName(kClass: KClass<*>): String {
+  val name = kClass.qualifiedName
+  requireNotNull(name) { "No qualified name could be found for \"$kClass\"." }
+  return name
+}
+
 @OptIn(ExperimentalStdlibApi::class)
 internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslationAnnotation =
     SMT_TRANSLATION_CACHE.getOrSet(kClass) {
-      val legalProperties = mutableListOf<SmtTranslationAnnotation.Property>()
-      // Part below is adapted from
+      val translationName: String =
+          kClass.findAnnotation<SerialName>()?.value ?: getQualifiedName(kClass)
+      val tranlatableProperties = mutableListOf<SmtTranslationAnnotation.Property>()
+      // The Part below is adapted from
       // https://discuss.kotlinlang.org/t/reflection-and-properties-checking-for-custom-getters-setters/22457/2
-      (KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
-              as KotlinClassMetadata.Class)
-          .kmClass
-          .properties
-          .forEach { kmProperty ->
-            if (!kmProperty.getter.isNotDefault) {
-              val propertyName = kmProperty.name
-              val member = kClass.members.first { it.name == propertyName }
-              if (!member.annotations.any { it is Transient }) {
-                val memberReturnType = member.returnType.javaType
-                var memberClass: Class<*>? = null
-                var memberFirstTypeArg: Class<*>? = null
-                if (memberReturnType !is ParameterizedType) {
-                  memberClass = memberReturnType as Class<*>
-                } else if(memberReturnType.rawType.typeName == List::class.java.name) {
-                  memberFirstTypeArg = memberReturnType.actualTypeArguments[0] as Class<*>
-                }
-                // Override enums to be integers
-                if (memberClass?.isEnum == true) {
-                  memberClass = Int::class.java
-                }
-                legalProperties.add(SmtTranslationAnnotation.Property(propertyName, memberClass, memberFirstTypeArg))
-              }
-            }
+      val kmProperties =
+          (KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
+                  as KotlinClassMetadata.Class)
+              .kmClass
+              .properties
+      for (kmProperty in kmProperties) {
+        val kProperty = kClass.memberProperties.find { it.name == kmProperty.name }!!
+        if (kProperty.hasAnnotation<Transient>()) {
+          continue
+        }
+        var nonTrivialGetter = false
+        if (kmProperty.getter.isNotDefault) {
+          if (!kProperty.hasAnnotation<SmtAllowNonTrivialGetter>()) {
+            continue
           }
-      SmtTranslationAnnotation(kClass.qualifiedName, legalProperties.toTypedArray())
+          nonTrivialGetter = true
+        }
+        val returnType = kProperty.returnType.javaType
+        var listTypeArgumentClass: Class<*>? = null
+        var clazz: Class<*> =
+            when (returnType) {
+              is Class<*> -> {
+                if (!returnType.isTranslatable()) {
+                  continue
+                }
+                returnType
+              }
+              is ParameterizedType -> {
+                if (returnType.rawType.typeName != List::class.java.name) {
+                  continue
+                }
+                val listType = returnType.actualTypeArguments.firstOrNull()
+                // Lists with complex type arguments are not yet supported.
+                if (listType == null || listType !is Class<*>) {
+                  continue
+                }
+                if (!listType.isTranslatable()) {
+                  continue
+                }
+                listTypeArgumentClass = listType
+                returnType.rawType as Class<*>
+              }
+              else ->
+                  error(
+                      "Could not retrieve the class of the property \"$translationName.${kProperty.name}\".")
+            }
+        // Override enums to be integers
+        if (clazz.isEnum) {
+          clazz = Int::class.java
+        }
+        tranlatableProperties.add(
+            SmtTranslationAnnotation.Property(
+                kProperty.name, nonTrivialGetter, clazz, listTypeArgumentClass))
+      }
+      SmtTranslationAnnotation(translationName, tranlatableProperties.toTypedArray())
     }
+
+private fun Class<*>.isTranslatable(): Boolean {
+  return !this.isSealed && !this.isInterface
+}
+
+fun getTranslatableProperties(kClass: KClass<*>): List<String> {
+  val a = smtTranslationAnnotation(kClass)
+  val result = mutableListOf<String>()
+  a.getTranslatableProperties().fold(result) { list, prop -> list.apply { add(prop.name) } }
+  return result
+}

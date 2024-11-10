@@ -37,8 +37,6 @@ sealed class SmtIntermediateMember {
         List(refID)
 
     class ReferenceList(refID: Int, val list: MutableCollection<Int>) : List(refID)
-
-    class EmptyList(refID: Int) : List(refID)
   }
 }
 

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.dataclasses
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
-import kotlinx.serialization.Serializable
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTranslatableBase
-
-@Serializable class Test(val name: String, val age: Int, val color: Color) : SmtTranslatableBase()
-
-@Serializable class Color(val name: String) : SmtTranslatableBase()
+/**
+ * If you want to allow non-trivial getters, you will need to write a custom serializer that
+ * includes the property with the custom getter. Important: The Smt-translation process requires the
+ * members to be in the order of their declaration.
+ */
+@Target(AnnotationTarget.PROPERTY) annotation class SmtAllowNonTrivialGetter

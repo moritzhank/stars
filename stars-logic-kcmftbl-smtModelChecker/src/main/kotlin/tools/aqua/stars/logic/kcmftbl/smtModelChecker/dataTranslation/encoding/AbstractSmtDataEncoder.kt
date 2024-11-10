@@ -19,13 +19,14 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
 import kotlin.reflect.KClass
 import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.PolymorphicKind
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.encoding.AbstractEncoder
-import kotlinx.serialization.internal.AbstractPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
 
-/** Abstracts the handling of the next serializable value (Management of [nextSerializable]) */
+/** Abstracts the verification and handling of the next serializable value ([nextSerializable]) */
 @ExperimentalSerializationApi
 internal abstract class AbstractSmtDataEncoder(
     protected val result: MutableList<SmtIntermediateRepresentation>,
@@ -40,29 +41,66 @@ internal abstract class AbstractSmtDataEncoder(
 
   abstract fun encodePrimitiveValue(value: Any, primitive: SmtPrimitive?)
 
-  @OptIn(InternalSerializationApi::class)
-  final override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
+  private fun requireSameRegisteredElements(
+      descriptor: SerialDescriptor,
+      smtAnnotation: SmtTranslationAnnotation,
+      lazyMessage: (List<String>, List<String>) -> Any
+  ) {
+    val descriptorElementNames = descriptor.elementNames.toList()
+    val annotationElementNames =
+        smtAnnotation.getTranslatableProperties().fold(mutableListOf<String>()) { list, elem ->
+          list.apply { add(elem.name) }
+        } as List<String>
+    require(descriptorElementNames == annotationElementNames) {
+      lazyMessage(annotationElementNames, descriptorElementNames)
+    }
+  }
+
+  /** Verifies all requirements for serialized elements and handles already visited elements */
+  final override fun <T> encodeSerializableElement(
+      descriptor: SerialDescriptor,
+      index: Int,
+      serializer: SerializationStrategy<T>,
+      value: T
+  ) {
+    nextSerializable = null
     requireNotNull(value) {
       "The current serialized value should not be null. This is probably a bug in kotlinx.serialization."
     }
-    nextSerializable = null
-    if (value is SmtTranslatableBase) {
+    val elemDescriptor = descriptor.getElementDescriptor(index)
+    if (elemDescriptor.kind == StructureKind.CLASS) {
+      require(value is SmtTranslatableBase) {
+        val className = value::class.simpleName ?: "<unknown_class>"
+        val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
+        "The class \"$className\" (Accessed via \"$memberName\") has to inherit from SmtTranslatableBase in order to be serialized."
+      }
+      // TODO: Is this also verified for root object?
+      requireSameRegisteredElements(elemDescriptor, value.getSmtTranslationAnnotation()) { l1, l2 ->
+        val className = value::class.simpleName ?: "<unknown_class>"
+        val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
+        "The list of expected members does not match the serialised members for \"$className\" (Accessed via \"$memberName\"). Expected: $l1. Found: $l2. This may be due to incorrect configuration of a custom serializer or missing @Transient annotations."
+      }
       val smtID = value.getSmtID()
       if (visitedSmtIDs[smtID] == true) {
         encodeAlreadyVisitedMember(SmtIntermediateMember.Reference(smtID))
         return
       }
+      require(elemDescriptor.kind != StructureKind.LIST) {
+        val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
+        "Generic (except lists), anonymous and polymorphic classes can not be translated. You can solve this by annotating \"$memberName}\" with @Transient."
+      }
     }
     nextSerializable = value
-    // Get correct serializer for polymorphic classes
-    val descriptor = serializer.descriptor
-    if (descriptor.kind == PolymorphicKind.SEALED) {
-      @Suppress("UNCHECKED_CAST") val casted = serializer as AbstractPolymorphicSerializer<Any>
-      val actual = casted.findPolymorphicSerializer(this, value)
-      super.encodeSerializableValue(actual, value)
-    } else {
-      super.encodeSerializableValue(serializer, value)
-    }
+    super.encodeSerializableElement(descriptor, index, serializer, value)
+  }
+
+  final override fun <T : Any> encodeNullableSerializableElement(
+      descriptor: SerialDescriptor,
+      index: Int,
+      serializer: SerializationStrategy<T>,
+      value: T?
+  ) {
+    TODO()
   }
 
   final override fun encodeValue(value: Any) {

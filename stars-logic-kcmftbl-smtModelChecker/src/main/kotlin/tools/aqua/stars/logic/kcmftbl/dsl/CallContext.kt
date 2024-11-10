@@ -140,7 +140,7 @@ fun <Caller : Any, Return> CallContext<*, Caller>.callProperty(
     prop: KProperty1<Caller, Return>,
     callerClass: KClass<Caller>
 ): PropertyCallContext<Caller, Return> {
-  smtTranslationAnnotation(callerClass).requireLegalProperty(prop.name)
+  smtTranslationAnnotation(callerClass).requireTranslatableProperty(prop.name)
   return if (this is CallContextBase<Caller>) {
     PropertyCallContextImpl(prop, null)
   } else {

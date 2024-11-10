@@ -38,7 +38,7 @@ fun generateSmtLib(
     val annotation = smtTranslationAnnotation(capturedClass)
     val sortName = capturedClass.simpleName!!
     result.appendLine("; Member declarations for $sortName")
-    for (property in annotation.getLegalProperties()) {
+    for (property in annotation.getTranslatableProperties()) {
       val propName = property.name
       // property.clazz is null for all parameterised classes
       if (property.clazz != null) {
@@ -53,10 +53,12 @@ fun generateSmtLib(
               "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) $returnSortName)")
         }
       } else {
-        val firstTypeArgument = property.firstTypeArgument
+        val firstTypeArgument = property.listTypeArgumentClass
         requireNotNull(firstTypeArgument) { TODO() }
-        val elementTypeName = firstTypeArgument.smtPrimitive()?.smtPrimitiveSortName ?: firstTypeArgument.simpleName
-        result.appendLine("(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) (List $elementTypeName))")
+        val elementTypeName =
+            firstTypeArgument.smtPrimitive()?.smtPrimitiveSortName ?: firstTypeArgument.simpleName
+        result.appendLine(
+            "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) (List $elementTypeName))")
       }
     }
     result.appendLine()
@@ -87,7 +89,7 @@ fun generateSmtLib(
     }
   }
   // Generate lists
-  //(assert (= list-car-1 (cons car-123 (cons car-1234 (cons car-12345 nil)))))
+  // (assert (= list-car-1 (cons car-123 (cons car-1234 (cons car-12345 nil)))))
 
   // Generate distinct statement for every sort?!
 

@@ -19,7 +19,6 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
 import kotlin.reflect.KClass
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.descriptors.elementNames
@@ -33,7 +32,7 @@ internal class SmtDataEncoder(
     capturedClasses: MutableSet<KClass<*>>,
     visitedSmtIDs: MutableMap<Int, Boolean>,
     serializersModule: SerializersModule,
-    // Changing parameters
+    // Changing parameters:
     private val current: SmtIntermediateRepresentation?,
     private var currentMemberIndex: Int,
     private val memberNames: Array<String>,
@@ -44,10 +43,12 @@ internal class SmtDataEncoder(
     AbstractSmtDataEncoder(
         result, capturedClasses, visitedSmtIDs, serializersModule, nextSerializable) {
 
+  private val defaultErrorMessage = {
+    "An unexpected error occurred during the serialization of an object."
+  }
+
   private fun setMember(member: SmtIntermediateMember) {
-    requireNotNull(current) {
-      "An unexpected error occurred during the serialization of an object."
-    }
+    requireNotNull(current, defaultErrorMessage)
     current.members[memberNames[currentMemberIndex++]] = member
   }
 
@@ -59,6 +60,7 @@ internal class SmtDataEncoder(
     visitedSmtIDs[smtID] = true
     val intermediateRepresentation = SmtIntermediateRepresentation(obj)
     if (serializationMode == SmtDataSerializationMode.DEFAULT) {
+      // currentMemberIndex is zero for the root object
       if (currentMemberIndex >= 0) {
         setMember(SmtIntermediateMember.Reference(smtID))
       }
@@ -87,20 +89,27 @@ internal class SmtDataEncoder(
       "An unexpected error occurred during the serialization of a list."
     }
     val newSmtID = SmtTranslatableBase.uniqueSmtID()
+    // Nested lists are not allowed up to this point (so current is not null)
+    val typeArgument =
+        current!!
+            .ref
+            .getSmtTranslationAnnotation()
+            .getTranslatableProperties()
+            .getOrNull(currentMemberIndex)
+            ?.listTypeArgumentClass
+    requireNotNull(typeArgument, defaultErrorMessage) // TODO: Change error message
+    val primitive = typeArgument.smtPrimitive()
     val intermediateListMember =
-        if (nextSerializable.size == 0) {
-          SmtIntermediateMember.List.EmptyList(newSmtID)
+        if (primitive != null) {
+          SmtIntermediateMember.List.ValueList(newSmtID, primitive, mutableListOf())
         } else {
-          val primitiveOfFirstElement = nextSerializable.first()!!.smtPrimitive()
-          if (primitiveOfFirstElement != null) {
-            SmtIntermediateMember.List.ValueList(newSmtID, primitiveOfFirstElement, mutableListOf())
-          } else {
-            SmtIntermediateMember.List.ReferenceList(newSmtID, mutableListOf())
-          }
+          SmtIntermediateMember.List.ReferenceList(newSmtID, mutableListOf())
         }
     if (serializationMode == SmtDataSerializationMode.DEFAULT) {
       setMember(intermediateListMember)
     } else {
+      // This branch should not be taken, because nested lists are not allowed up to this point
+      require(false, defaultErrorMessage)
       val listMembers = this.listMembers
       require(listMembers is SmtIntermediateMember.List.ReferenceList) {
         "An unexpected error occurred during the serialization of a nested list."
@@ -119,13 +128,6 @@ internal class SmtDataEncoder(
         SmtDataSerializationMode.LIST)
   }
 
-  private fun getCurrentMemberNameFullQualified(): String {
-    requireNotNull(current) { "Could not access members." }
-    val memberName = memberNames.getOrNull(currentMemberIndex) ?: "<unknown_member>"
-    val className = current.ref::class.simpleName ?: "<unknown_class>"
-    return "$className.$memberName"
-  }
-
   override fun encodeAlreadyVisitedMember(member: SmtIntermediateMember.Reference) {
     if (serializationMode == SmtDataSerializationMode.DEFAULT) {
       setMember(member)
@@ -139,7 +141,7 @@ internal class SmtDataEncoder(
   }
 
   override fun encodePrimitiveValue(value: Any, primitive: SmtPrimitive?) {
-    // TODO: What about enums? They are currently encoded as ints.
+    // TODO: Enums are currently encoded as ints
     if (serializationMode == SmtDataSerializationMode.DEFAULT) {
       requireNotNull(primitive) { "An unexpected non-primitive value has occurred." }
       setMember(SmtIntermediateMember.Value(value, primitive))
@@ -157,24 +159,16 @@ internal class SmtDataEncoder(
 
   override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
     val nextSerializable = this.nextSerializable
-    requireNotNull(nextSerializable) {
-      "An unexpected error occurred during the serialization of an object."
-    }
+    requireNotNull(nextSerializable, defaultErrorMessage)
     // Encode list
     if (descriptor.kind == StructureKind.LIST) {
       return encodeNextSerializableAsList()
     }
-    // Throw error when encoding maps or singletons
+    // Throw error when encoding elements other than lists and classes
     val kind = descriptor.kind
-    require(kind == StructureKind.CLASS || kind == PolymorphicKind.SEALED) {
-      "Maps or singletons can not be translated. You can solve this by annotating \"${getCurrentMemberNameFullQualified()}\" with @Transient."
-    }
+    require(kind == StructureKind.CLASS, defaultErrorMessage)
     // Encode class
-    require(nextSerializable is SmtTranslatableBase) {
-      val memberName = "${descriptor.serialName}.${descriptor.getElementName(currentMemberIndex)}"
-      val className = nextSerializable::class.simpleName ?: "<unknown_class>"
-      "The class \"$className\" (Accessed via member \"$memberName\") has to inherit from SmtTranslatableBase in order to be serialized."
-    }
+    require(nextSerializable is SmtTranslatableBase, defaultErrorMessage)
     capturedClasses.add(nextSerializable::class)
     return encodeSmtTranslatableBase(
         nextSerializable, descriptor.elementNames.toList().toTypedArray())

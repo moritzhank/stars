@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import java.io.FileWriter
 import kotlin.reflect.KClass
 import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
@@ -22,7 +23,6 @@ import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
-import java.io.FileWriter
 
 fun main() {
   val t: Segment = ExperimentLoader.loadTestSegment()
@@ -32,7 +32,7 @@ fun main() {
   var intermediateRepresentation: List<SmtIntermediateRepresentation> = listOf()
   val intermediateRepresentationTime = measureTime {
     intermediateRepresentation =
-      getSmtIntermediateRepresentation(serializersModule, t, capturedClasses)
+        getSmtIntermediateRepresentation(serializersModule, t, capturedClasses)
   }
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
