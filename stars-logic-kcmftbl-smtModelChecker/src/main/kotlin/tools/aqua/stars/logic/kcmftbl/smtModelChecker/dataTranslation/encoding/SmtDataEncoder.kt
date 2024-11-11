@@ -90,6 +90,7 @@ internal class SmtDataEncoder(
     }
     val newSmtID = SmtTranslatableBase.uniqueSmtID()
     // Nested lists are not allowed up to this point (so current is not null)
+    // TODO: Performance hit of about 300ms
     val typeArgument =
         current!!
             .ref
