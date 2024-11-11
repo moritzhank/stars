@@ -22,7 +22,8 @@ import kotlin.math.pow
 //  val timeSegLoad: Duration?
 //  val timeTranslate: Duration?
 //  var testSegment: Segment?
-//  timeSegLoad = measureTime { testSegment = ExperimentLoader.loadTestSegment() }
+//  timeSegLoad = measureTime { testSegment =
+// tools.aqua.stars.logic.kcmftbl.smtModelChecker.ExperimentLoader.loadTestSegment() }
 //  val result = mutableListOf<ObjectRepresentation>()
 //  val resultCapturedTypes = mutableSetOf<String>()
 //  val resultCapturedTypesToMembers = mutableMapOf<String, MutableMap<String, ObjectReference>>()
@@ -32,7 +33,7 @@ import kotlin.math.pow
 //  return Pair(timeSegLoad, timeTranslate)
 // }
 //
-// fun main() {
+// fun tools.aqua.stars.logic.kcmftbl.smtModelChecker.main() {
 //  val segLoadTimes = mutableListOf<Duration>()
 //  val translateTimes = mutableListOf<Duration>()
 //  for (i in 0..0) {

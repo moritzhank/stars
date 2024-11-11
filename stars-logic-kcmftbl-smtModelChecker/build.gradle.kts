@@ -26,6 +26,7 @@ dependencies {
   implementation(project(":stars-logic-kcmftbl"))
   implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3")
+  implementation("io.ktor:ktor-network:2.3.12")
   testImplementation(project(mapOf("path" to ":stars-data-av")))
   testImplementation(project(":stars-data-av", "test"))
 }

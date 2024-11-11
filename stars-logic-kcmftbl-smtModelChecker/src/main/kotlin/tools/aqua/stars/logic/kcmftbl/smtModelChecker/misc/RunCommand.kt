@@ -34,7 +34,7 @@ fun String.runCommand(workingDir: File, timeOutInMS: Long = 60 * 60 * 1000): Str
     if (proc.exitValue() != 0)
         throw IllegalStateException(
             "Error executing a command:${System.lineSeparator()}${proc.errorStream.bufferedReader().readText()}")
-    return proc.inputStream.bufferedReader().readText()
+    return proc.inputReader().readText()
   } catch (e: Exception) {
     e.printStackTrace()
     return null

@@ -52,7 +52,9 @@ tasks.compileJava {
   targetCompatibility = "1.8"
 }
 
-tasks.jar { manifest { attributes["Main-Class"] = "MainKt" } }
+tasks.jar {
+  manifest { attributes["Main-Class"] = "tools.aqua.stars.logic.kcmftbl.smtModelChecker.MainKt" }
+}
 
 tasks.shadowJar {
   archiveBaseName.set("dispatcher")

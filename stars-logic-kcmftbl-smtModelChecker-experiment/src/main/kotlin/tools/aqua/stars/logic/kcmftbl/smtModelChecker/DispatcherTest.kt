@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 The STARS Project Authors
+ * Copyright 2024 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-plugins { id("tools.aqua.stars.library-conventions") }
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
-dependencies {
-  implementation(project(":stars-core"))
-  implementation(project(":stars-logic-kcmftbl"))
-  implementation(project(":stars-logic-kcmftbl-smtModelChecker"))
-  implementation(project(":stars-data-av"))
-  implementation(project(":stars-importer-carla"))
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+import kotlinx.coroutines.runBlocking
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dispatcherClient.DispatcherTCPContext
+
+fun main() {
+  val ctx = DispatcherTCPContext.open()
+  runBlocking {
+    println(ctx!!.sendMessage("cvc5\n(check-sat)\n\$EOF\$\n"))
+  }
+  ctx!!.close()
 }
