@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import java.io.FileWriter
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker
+
 import kotlin.reflect.KClass
 import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
@@ -37,6 +38,8 @@ fun main() {
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
   val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses)
-  println("Generated SmtLib lines: ${smtLib.length}")
-  FileWriter("test.txt").write(smtLib)
+  println("Generated SmtLib lines: ${smtLib.lines().size}")
+  println("Running solver ...")
+  val result: String = runSmtSolver(smtLib)
+  println("Finished.\n$result")
 }
