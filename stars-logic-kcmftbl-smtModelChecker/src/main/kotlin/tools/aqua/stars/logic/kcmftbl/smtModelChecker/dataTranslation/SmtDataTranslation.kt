@@ -28,6 +28,8 @@ private fun generatePredefinedDatatypes(result: StringBuilder, solver: SmtSolver
   result.appendLine()
 }
 
+private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }
+
 private fun correctFormat(value: Any): Any {
   return when (value) {
     is String -> "\"$value\""
@@ -63,29 +65,43 @@ private fun calculateMemberNameToIntermediates(
 }
 
 private fun <T> generateITEStructure(
-    list: MutableList<T>,
+    list: Collection<T>,
     varName: String,
     ifStr: (T) -> String,
-    thenStr: (T) -> String
+    thenStr: (T) -> String,
+    defaultValue: String? = null
 ): String {
-  var iteStructureFront = StringBuilder("")
+  val iteStructureFront = StringBuilder("")
   var bracketsNeeded = 0
-  var firstElem = list.first()
+  val firstElem = list.first()
   list.forEachIndexed { index, elem ->
-    if (index != 0) {
+    // Skip first element if no default is given
+    val skip = defaultValue == null && index == 0
+    if (!skip) {
       iteStructureFront.append("(ite (= $varName ${ifStr(elem)}) ${thenStr(elem)} ")
       bracketsNeeded++
     }
   }
-  iteStructureFront.append("${thenStr(firstElem)}${")".repeat(bracketsNeeded)}")
+  if (defaultValue == null) {
+    iteStructureFront.append("${thenStr(firstElem)}${")".repeat(bracketsNeeded)}")
+  } else {
+    iteStructureFront.append("$defaultValue${")".repeat(bracketsNeeded)}")
+  }
   return iteStructureFront.toString()
 }
 
+/** Captures information about a member needed for translation */
 private class SmtDataTranslationIntermediate(
+    /** Sort of the object that contains the member represented by this class */
     val containerSort: String,
     val memberType: SmtIntermediateMemberType,
+    /** Type of the member represented by this class */
     val memberClass: Class<*>,
     val listArgumentClass: Class<*>?,
+    /**
+     * The Pair contains the id of the individual that has the member (Represented by this class)
+     * and the corresponding implementation (SmtIntermediateMember).
+     */
     val members: MutableList<Pair<Int, SmtIntermediateMember>> = mutableListOf()
 )
 
@@ -124,18 +140,20 @@ fun generateSmtLib(
   }
   result.appendLine()
 
-  // TODO: Is this necessary? This is a real performance hit for smt-solvers.
+  // TODO: These are necessary but they are a heavy performance hit
   // Generate distinct statement for every sort and their individuals
-  /*
   result.appendLine("; Distinct statements for all sorts and their individuals")
   for (sortKClass in capturedClasses) {
+    // TODO: For debugging purposes
+    if (sortKClass.simpleName != "TickData") {
+      continue
+    }
     val intermediates = intermediateRepresentation.filter { it.ref::class == sortKClass }
     val listOfIndividuals = intermediates.fold(StringBuilder()) { str, elem -> str.append("ind_${elem.ref.getSmtID()} ") }
     result.appendLine("(assert (distinct ${listOfIndividuals.toString().dropLast(1)}))")
   }
   result.appendLine()
   // TODO: If necessary, also to be generated for ListRef
-   */
 
   // Generate member definitions
   result.appendLine("; Member definitions")
@@ -157,7 +175,7 @@ fun generateSmtLib(
                 })
         val returnSort = intermediate.memberClass.smtPrimitive()!!.smtPrimitiveSortName
         result.appendLine(
-            "(define-fun $memberName ((x ${intermediate.containerSort})) $returnSort $iteStructure)")
+            "(define-fun ${memberName.firstCharLower()} ((x ${intermediate.containerSort})) $returnSort $iteStructure)")
       }
       // Calculate member definition for references
       SmtIntermediateMemberType.REFERENCE -> {
@@ -169,7 +187,7 @@ fun generateSmtLib(
                 { thenPair -> "ind_${(thenPair.second as SmtIntermediateMember.Reference).refID}" })
         val returnSort = intermediate.memberClass.simpleName
         result.appendLine(
-            "(define-fun $memberName ((x ${intermediate.containerSort})) $returnSort $iteStructure)")
+            "(define-fun ${memberName.firstCharLower()} ((x ${intermediate.containerSort})) $returnSort $iteStructure)")
       }
       // Calculate member definition for lists
       SmtIntermediateMemberType.VALUE_LIST,
@@ -182,16 +200,43 @@ fun generateSmtLib(
                 { ifPair -> "ind_${ifPair.first}" },
                 { thenPair -> "list_${(thenPair.second as SmtIntermediateMember.List).refID}" })
         result.appendLine(
-            "(define-fun $memberName ((x ${intermediate.containerSort})) ListRef $iteStructure)")
+            "(define-fun ${memberName.firstCharLower()} ((x ${intermediate.containerSort})) ListRef $iteStructure)")
         // Generate isListElement function
-        // TODO: ITE für jede mögliche ListREF
-        // TODO: ITE für jedes mögliche Element
-        // TODO
         val listArgumentClass = intermediate.listArgumentClass!!
         val listArgumentSort =
             listArgumentClass.smtPrimitive()?.smtPrimitiveSortName ?: listArgumentClass.simpleName
+        // The outer ite structure contains ites over all possible ListRef objects. The inner ite
+        // structure contains ite over all possible elements of the corresponding listRef.
+        val outerITEStructure =
+            generateITEStructure(
+                intermediate.members,
+                "x",
+                { ifPair -> "list_${(ifPair.second as SmtIntermediateMember.List).refID}" },
+                { thenPair ->
+                  when (val member = thenPair.second as SmtIntermediateMember.List) {
+                    is SmtIntermediateMember.List.ValueList -> {
+                      TODO()
+                    }
+                    is SmtIntermediateMember.List.ReferenceList -> {
+                      val refList = member.list
+                      if (!refList.isEmpty()) {
+                        generateITEStructure(
+                          refList,
+                          "y",
+                          { ifElem -> "ind_${ifElem}" },
+                          { thenElem -> "true" },
+                          "false")
+                      } else {
+                        // An empty list has no elements
+                        // TODO: Maybe implement possibility to omit these entries
+                        "false"
+                      }
+                    }
+                  }
+                },
+                "false")
         result.appendLine(
-            ";(define-fun ${memberName}_isElement ((x ListRef) (y $listArgumentSort)) Bool [ITE])")
+            "(define-fun ${memberName.firstCharLower()}_isListElement ((x ListRef) (y $listArgumentSort)) Bool $outerITEStructure)")
       }
     }
   }
