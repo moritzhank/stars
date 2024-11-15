@@ -149,7 +149,10 @@ fun generateSmtLib(
       continue
     }
     val intermediates = intermediateRepresentation.filter { it.ref::class == sortKClass }
-    val listOfIndividuals = intermediates.fold(StringBuilder()) { str, elem -> str.append("ind_${elem.ref.getSmtID()} ") }
+    val listOfIndividuals =
+        intermediates.fold(StringBuilder()) { str, elem ->
+          str.append("ind_${elem.ref.getSmtID()} ")
+        }
     result.appendLine("(assert (distinct ${listOfIndividuals.toString().dropLast(1)}))")
   }
   result.appendLine()
@@ -221,11 +224,11 @@ fun generateSmtLib(
                       val refList = member.list
                       if (!refList.isEmpty()) {
                         generateITEStructure(
-                          refList,
-                          "y",
-                          { ifElem -> "ind_${ifElem}" },
-                          { thenElem -> "true" },
-                          "false")
+                            refList,
+                            "y",
+                            { ifElem -> "ind_${ifElem}" },
+                            { thenElem -> "true" },
+                            "false")
                       } else {
                         // An empty list has no elements
                         // TODO: Maybe implement possibility to omit these entries
