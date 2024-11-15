@@ -21,32 +21,22 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.runCommand
-import java.io.File
 
-class DispatcherTCPContext private constructor(private val port: Int, private val containerID: String) {
-
-  private var closed: Boolean = false
-
-  fun close(): Boolean {
-    if (closed) {
-      return false
-    }
-    val cmdResult = "docker rm -f $containerID".runCommand(File("/"))
-    if (cmdResult != null) {
-      closed = true
-      return  true
-    }
-    return false
-  }
+class DispatcherTCPContext(private val ipAdress: String, private val port: Int) {
 
   suspend fun sendMessage(msg: String): String {
     val selectorManager = SelectorManager(Dispatchers.IO)
-    val socket = aSocket(selectorManager).tcp().connect("127.0.0.1", port)
+    val socket = aSocket(selectorManager).tcp().connect(ipAdress, port)
     val writeChannel = socket.openWriteChannel(autoFlush = true)
     val readChannel = socket.openReadChannel()
     writeChannel.writeStringUtf8(msg)
-    writeChannel.close()
+
+    val lines = msg.lines()
+    lines.forEachIndexed { index, line ->
+      println(index)
+      writeChannel.writeStringUtf8("$line\n")
+    }
+    writeChannel.writeStringUtf8("\$EOF\$\n")
     val readResult: StringBuilder = StringBuilder("")
     while (true) {
       val line = readChannel.readUTF8Line() ?: break
@@ -55,21 +45,5 @@ class DispatcherTCPContext private constructor(private val port: Int, private va
     socket.close()
     selectorManager.close()
     return readResult.toString()
-  }
-
-  companion object {
-
-    private var currentContext: DispatcherTCPContext? = null
-
-    fun open(): DispatcherTCPContext? {
-      if (currentContext == null) {
-        val port = 7500
-        val cmdResult = "docker run -d --publish $port:7500 smt-solver".runCommand(File("/"))
-        if (cmdResult != null) {
-          currentContext = DispatcherTCPContext(port, cmdResult.lines()[0])
-        }
-      }
-      return currentContext
-    }
   }
 }

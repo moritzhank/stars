@@ -24,6 +24,22 @@ import kotlinx.serialization.serializer
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataEncoder
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataSerializationMode
 
+enum class SmtIntermediateMemberType {
+
+  REFERENCE, VALUE, VALUE_LIST, REFERENCE_LIST;
+
+  companion object {
+    fun fromMember(smtIntermediateMember: SmtIntermediateMember): SmtIntermediateMemberType {
+      return when(smtIntermediateMember) {
+        is SmtIntermediateMember.Reference -> REFERENCE
+        is SmtIntermediateMember.Value -> VALUE
+        is SmtIntermediateMember.List.ValueList -> VALUE_LIST
+        is SmtIntermediateMember.List.ReferenceList -> REFERENCE_LIST
+      }
+    }
+  }
+}
+
 /** Represents a serialized member of [SmtIntermediateRepresentation] */
 sealed class SmtIntermediateMember {
 
@@ -55,9 +71,10 @@ inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializersModule: SerializersModule,
     ref: T,
     capturedClasses: MutableSet<KClass<*>>,
+    capturedLists: MutableList<SmtIntermediateMember.List>
 ): List<SmtIntermediateRepresentation> {
   val serializer = serializersModule.serializer<T>()
-  return getSmtIntermediateRepresentation(serializer, serializersModule, ref, capturedClasses)
+  return getSmtIntermediateRepresentation(serializer, serializersModule, ref, capturedClasses, capturedLists)
 }
 
 /**
@@ -69,13 +86,15 @@ fun <T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializer: SerializationStrategy<T>,
     serializersModule: SerializersModule,
     ref: T,
-    capturedClasses: MutableSet<KClass<*>>
+    capturedClasses: MutableSet<KClass<*>>,
+    capturedLists: MutableList<SmtIntermediateMember.List>
 ): List<SmtIntermediateRepresentation> {
   val result = mutableListOf<SmtIntermediateRepresentation>()
   val encoder =
       SmtDataEncoder(
           result,
           capturedClasses,
+          capturedLists,
           mutableMapOf(),
           serializersModule,
           SmtIntermediateRepresentation(ref),

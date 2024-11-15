@@ -30,6 +30,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
 internal class SmtDataEncoder(
     result: MutableList<SmtIntermediateRepresentation>,
     capturedClasses: MutableSet<KClass<*>>,
+    capturedLists: MutableList<SmtIntermediateMember.List>,
     visitedSmtIDs: MutableMap<Int, Boolean>,
     serializersModule: SerializersModule,
     // Changing parameters:
@@ -41,7 +42,7 @@ internal class SmtDataEncoder(
     nextSerializable: Any? = null,
 ) :
     AbstractSmtDataEncoder(
-        result, capturedClasses, visitedSmtIDs, serializersModule, nextSerializable) {
+        result, capturedClasses, capturedLists, visitedSmtIDs, serializersModule, nextSerializable) {
 
   private val defaultErrorMessage = {
     "An unexpected error occurred during the serialization of an object."
@@ -64,7 +65,6 @@ internal class SmtDataEncoder(
       if (currentMemberIndex >= 0) {
         setMember(SmtIntermediateMember.Reference(smtID))
       }
-      result.add(intermediateRepresentation)
     } else {
       val listMembers = this.listMembers
       require(listMembers is SmtIntermediateMember.List.ReferenceList) {
@@ -72,9 +72,11 @@ internal class SmtDataEncoder(
       }
       listMembers.list.add(intermediateRepresentation.ref.getSmtID())
     }
+    result.add(intermediateRepresentation)
     return SmtDataEncoder(
         result,
         capturedClasses,
+        capturedLists,
         visitedSmtIDs,
         serializersModule,
         intermediateRepresentation,
@@ -117,9 +119,11 @@ internal class SmtDataEncoder(
       }
       listMembers.list.add(intermediateListMember.refID)
     }
+    capturedLists.add(intermediateListMember)
     return SmtDataEncoder(
         result,
         capturedClasses,
+        capturedLists,
         visitedSmtIDs,
         serializersModule,
         null,

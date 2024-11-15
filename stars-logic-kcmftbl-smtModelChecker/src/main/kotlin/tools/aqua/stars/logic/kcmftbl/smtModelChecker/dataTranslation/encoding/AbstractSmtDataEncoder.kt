@@ -31,6 +31,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
 internal abstract class AbstractSmtDataEncoder(
     protected val result: MutableList<SmtIntermediateRepresentation>,
     protected val capturedClasses: MutableSet<KClass<*>>,
+    protected val capturedLists: MutableList<SmtIntermediateMember.List>,
     protected val visitedSmtIDs: MutableMap<Int, Boolean>,
     override val serializersModule: SerializersModule,
     protected var nextSerializable: Any? = null
@@ -70,14 +71,14 @@ internal abstract class AbstractSmtDataEncoder(
     val elemDescriptor = descriptor.getElementDescriptor(index)
     if (elemDescriptor.kind == StructureKind.CLASS) {
       require(value is SmtTranslatableBase) {
-        val className = value::class.simpleName ?: "<unknown_class>"
+        val className = value!!::class.simpleName ?: "<unknown_class>"
         val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
         "The class \"$className\" (Accessed via \"$memberName\") has to inherit from SmtTranslatableBase in order to be serialized."
       }
       // TODO: This is not verified for root object
       // TODO: Performance hit of about 250ms
       requireSameRegisteredElements(elemDescriptor, value.getSmtTranslationAnnotation()) { l1, l2 ->
-        val className = value::class.simpleName ?: "<unknown_class>"
+        val className = value!!::class.simpleName ?: "<unknown_class>"
         val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
         "The list of expected members does not match the serialised members for \"$className\" (Accessed via \"$memberName\"). Expected: $l1. Found: $l2. This may be due to incorrect configuration of a custom serializer or missing @Transient annotations."
       }

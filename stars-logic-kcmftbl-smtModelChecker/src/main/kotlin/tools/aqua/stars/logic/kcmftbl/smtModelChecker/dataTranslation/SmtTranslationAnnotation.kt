@@ -49,7 +49,7 @@ internal class SmtTranslationAnnotation(
   class Property(
       val name: String,
       val nonTrivialGetter: Boolean,
-      val clazz: Class<*>?,
+      val clazz: Class<*>,
       val listTypeArgumentClass: Class<*>? = null
   )
 }

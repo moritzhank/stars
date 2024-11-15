@@ -17,90 +17,14 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.SmtSolver
 import kotlin.reflect.KClass
 
-fun generateSmtLib(
-    intermediateRepresentation: List<SmtIntermediateRepresentation>,
-    capturedClasses: MutableSet<KClass<*>>
-): String {
-  val result = StringBuilder()
-  generatePredefinedDatatypes(result)
-  // Generate sort declarations
-  result.appendLine("; Sort declarations")
-  for (capturedClass in capturedClasses) {
-    val annotation = smtTranslationAnnotation(capturedClass)
-    val sortName = capturedClass.simpleName!!
-    result.appendLine("(declare-sort $sortName 0)")
-  }
-  result.appendLine()
-  // Generate member declarations
-  for (capturedClass in capturedClasses) {
-    val annotation = smtTranslationAnnotation(capturedClass)
-    val sortName = capturedClass.simpleName!!
-    result.appendLine("; Member declarations for $sortName")
-    for (property in annotation.getTranslatableProperties()) {
-      val propName = property.name
-      // property.clazz is null for all parameterised classes
-      if (property.clazz != null) {
-        val smtPrimitive = property.clazz.smtPrimitive()
-        // smtPrimitive is null for all non-primitive classes
-        if (smtPrimitive != null) {
-          result.appendLine(
-              "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) ${smtPrimitive.smtPrimitiveSortName})")
-        } else {
-          val returnSortName = property.clazz.simpleName
-          result.appendLine(
-              "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) $returnSortName)")
-        }
-      } else {
-        val firstTypeArgument = property.listTypeArgumentClass
-        requireNotNull(firstTypeArgument) { TODO() }
-        val elementTypeName =
-            firstTypeArgument.smtPrimitive()?.smtPrimitiveSortName ?: firstTypeArgument.simpleName
-        result.appendLine(
-            "(declare-fun ${sortName.firstCharLower()}_$propName ($sortName) (List $elementTypeName))")
-      }
-    }
-    result.appendLine()
-  }
-  // Generate declaration of individuals
-  result.appendLine("; Declaration of individuals")
-  for (intermediate in intermediateRepresentation) {
-    val name = "ind_${intermediate.ref.getSmtID()}"
-    val sortName = intermediate.ref::class.simpleName!!
-    result.appendLine("(declare-const $name $sortName)")
-    // Define members
-    intermediate.members.keys.forEach { memberName ->
-      val propName = "${sortName.firstCharLower()}_$memberName"
-      when (val intermediateMember = intermediate.members.getValue(memberName)) {
-        is SmtIntermediateMember.Value -> {
-          val value = correctFormat(intermediateMember.value)
-          result.appendLine("(assert (= ($propName $name) ${value}))")
-        }
-        is SmtIntermediateMember.Reference -> {
-          val refName = "ind_${intermediateMember.refID}"
-          result.appendLine("(assert (= ($propName $name) $refName))")
-        }
-        is SmtIntermediateMember.List -> {
-          val listName = "list_${intermediateMember.refID}"
-          result.appendLine(";(assert (= ($propName $name) $listName))")
-        }
-      }
-    }
-  }
-  // Generate lists
-  // (assert (= list-car-1 (cons car-123 (cons car-1234 (cons car-12345 nil)))))
-
-  // Generate distinct statement for every sort?!
-
-  result.appendLine()
-  result.appendLine("(check-sat)")
-  return result.toString()
-}
-
-private fun generatePredefinedDatatypes(result: StringBuilder) {
+private fun generatePredefinedDatatypes(result: StringBuilder, solver: SmtSolver) {
   result.appendLine("; Predefined datatypes")
-  result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
+  if (solver != SmtSolver.Z3) {
+    result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
+  }
   result.appendLine()
 }
 
@@ -113,4 +37,163 @@ private fun correctFormat(value: Any): Any {
     is Float -> value.toBigDecimal().toPlainString()
     else -> value
   }
+}
+
+private fun calculateMemberNameToIntermediates(
+  intermediateRepresentation: List<SmtIntermediateRepresentation>,
+  memberNameToIntermediates: MutableMap<String, SmtDataTranslationIntermediate>
+) {
+  for (rep in intermediateRepresentation) {
+    val repKClass = rep.ref::class
+    val annotation = smtTranslationAnnotation(repKClass)
+    val sortName = repKClass.simpleName!!
+    for (prop in annotation.getTranslatableProperties()) {
+      val fullPropName = "${sortName}_${prop.name}"
+      val intermediateMember = rep.members.getValue(prop.name)
+      memberNameToIntermediates.computeIfAbsent(fullPropName) {
+        SmtDataTranslationIntermediate(sortName, SmtIntermediateMemberType.fromMember(intermediateMember), prop.clazz, prop.listTypeArgumentClass)
+      }.members.add(Pair(rep.ref.getSmtID(), intermediateMember))
+    }
+  }
+}
+
+private class SmtDataTranslationIntermediate(
+  val containerSort: String,
+  val memberType: SmtIntermediateMemberType,
+  val memberClass: Class<*>,
+  val listArgumentClass: Class<*>?,
+  val members: MutableList<Pair<Int, SmtIntermediateMember>> = mutableListOf()
+)
+
+fun generateSmtLib(
+    intermediateRepresentation: List<SmtIntermediateRepresentation>,
+    capturedClasses: MutableSet<KClass<*>>,
+    capturedLists: MutableList<SmtIntermediateMember.List>,
+    solver: SmtSolver = SmtSolver.Z3
+): String {
+  val result = StringBuilder()
+  generatePredefinedDatatypes(result, solver)
+
+  // Generate sort declarations
+  result.appendLine("; Sort declarations")
+  for (capturedClass in capturedClasses) {
+    val sortName = capturedClass.simpleName!!
+    result.appendLine("(declare-sort $sortName 0)")
+  }
+  result.appendLine("(declare-sort ListRef 0)")
+  result.appendLine()
+
+  // Generate declaration of all individuals
+  result.appendLine("; Declaration of all individuals")
+  for (intermediate in intermediateRepresentation) {
+    val name = "ind_${intermediate.ref.getSmtID()}"
+    val sortName = intermediate.ref::class.simpleName!!
+    result.appendLine("(declare-const $name $sortName)")
+  }
+  result.appendLine()
+
+  // Generate declaration of all lists
+  result.appendLine("; Declaration of all lists")
+  for (capturedList in capturedLists) {
+    val name = "list_${capturedList.refID}"
+    result.appendLine("(declare-const $name ListRef)")
+  }
+  result.appendLine()
+
+
+  // TODO: Is this necessary? This is a real performance hit for smt-solvers.
+  // Generate distinct statement for every sort and their individuals
+  /*
+  result.appendLine("; Distinct statements for all sorts and their individuals")
+  for (sortKClass in capturedClasses) {
+    val intermediates = intermediateRepresentation.filter { it.ref::class == sortKClass }
+    val listOfIndividuals = intermediates.fold(StringBuilder()) { str, elem -> str.append("ind_${elem.ref.getSmtID()} ") }
+    result.appendLine("(assert (distinct ${listOfIndividuals.toString().dropLast(1)}))")
+  }
+  result.appendLine()
+  // TODO: If necessary, also to be generated for ListRef
+   */
+
+  // Generate member definitions
+  result.appendLine("; Member definitions")
+  val memberNameToIntermediates = mutableMapOf<String, SmtDataTranslationIntermediate>()
+  calculateMemberNameToIntermediates(intermediateRepresentation, memberNameToIntermediates)
+  for (memberName in memberNameToIntermediates.keys) {
+    val intermediate = memberNameToIntermediates.getValue(memberName)
+    require(intermediate.members.size > 0) { "There cannot be an empty list of members." }
+    when(intermediate.memberType) {
+      // Calculate member definition for values
+      SmtIntermediateMemberType.VALUE -> {
+        var iteStructureFront = StringBuilder("")
+        var bracketsNeeded = 0
+        intermediate.members.forEachIndexed { index, pair ->
+          // Skip first index
+          if(index != 0) {
+            val memberSmtID = pair.first
+            val member = pair.second as SmtIntermediateMember.Value
+            val ifIndName = "ind_$memberSmtID"
+            val thenValue = "${correctFormat(member.value)}"
+            iteStructureFront.append("(ite (= x $ifIndName) $thenValue ")
+            bracketsNeeded++
+          }
+        }
+        val firstVal = correctFormat((intermediate.members.first().second as SmtIntermediateMember.Value).value)
+        iteStructureFront.append("$firstVal${")".repeat(bracketsNeeded)}")
+        val returnSort = intermediate.memberClass.smtPrimitive()!!.smtPrimitiveSortName
+        result.appendLine("(define-fun $memberName ((x ${intermediate.containerSort})) $returnSort $iteStructureFront)")
+      }
+      // Calculate member definition for references
+      SmtIntermediateMemberType.REFERENCE -> {
+        var iteStructureFront = StringBuilder("")
+        var bracketsNeeded = 0
+        intermediate.members.forEachIndexed { index, pair ->
+          // Skip first index
+          if(index != 0) {
+            val memberSmtID = pair.first
+            val member = pair.second as SmtIntermediateMember.Reference
+            val ifIndName = "ind_$memberSmtID"
+            val then = "ind_${member.refID}"
+            iteStructureFront.append("(ite (= x $ifIndName) $then ")
+            bracketsNeeded++
+          }
+        }
+        val firstVal = "ind_${(intermediate.members.first().second as SmtIntermediateMember.Reference).refID}"
+        iteStructureFront.append("$firstVal${")".repeat(bracketsNeeded)}")
+        val returnSort = intermediate.memberClass.simpleName
+        result.appendLine("(define-fun $memberName ((x ${intermediate.containerSort})) $returnSort $iteStructureFront)")
+      }
+      // Calculate member definition for lists
+      // TODO: Generate propName_isListElement(list, elem)
+      SmtIntermediateMemberType.VALUE_LIST, SmtIntermediateMemberType.REFERENCE_LIST -> {
+        // Generate ListRef mapping
+        var iteStructureFront = StringBuilder("")
+        var bracketsNeeded = 0
+        intermediate.members.forEachIndexed { index, pair ->
+          // Skip first index
+          if(index != 0) {
+            val memberSmtID = pair.first
+            val member = pair.second as SmtIntermediateMember.List
+            val ifIndName = "ind_$memberSmtID"
+            val then = "list_${member.refID}"
+            iteStructureFront.append("(ite (= x $ifIndName) $then ")
+            bracketsNeeded++
+          }
+        }
+        val firstVal = "list_${(intermediate.members.first().second as SmtIntermediateMember.List).refID}"
+        iteStructureFront.append("$firstVal${")".repeat(bracketsNeeded)}")
+        result.appendLine("(define-fun $memberName ((x ${intermediate.containerSort})) ListRef $iteStructureFront)")
+        // Generate isListElement function
+        // TODO: ITE für jede mögliche ListREF
+          // TODO: ITE für jedes mögliche Element
+        // TODO
+        val listArgumentClass = intermediate.listArgumentClass!!
+        val listArgumentSort = listArgumentClass.smtPrimitive()?.smtPrimitiveSortName ?: listArgumentClass.simpleName
+        result.appendLine(";(define-fun ${memberName}_isElement ((x ListRef) (y $listArgumentSort)) Bool [ITE])")
+      }
+    }
+  }
+
+  result.appendLine()
+  result.appendLine("(check-sat)")
+  return result.toString()
 }

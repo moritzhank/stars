@@ -17,10 +17,12 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
+import java.io.File
 import kotlin.reflect.KClass
 import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
 import tools.aqua.stars.data.av.dataclasses.Segment
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
@@ -30,16 +32,22 @@ fun main() {
   println("Finished reading.")
   val serializersModule = EmptySerializersModule()
   val capturedClasses = mutableSetOf<KClass<*>>()
+  val capturedLists = mutableListOf<SmtIntermediateMember.List>()
   var intermediateRepresentation: List<SmtIntermediateRepresentation> = listOf()
   val intermediateRepresentationTime = measureTime {
     intermediateRepresentation =
-        getSmtIntermediateRepresentation(serializersModule, t, capturedClasses)
+        getSmtIntermediateRepresentation(serializersModule, t, capturedClasses, capturedLists)
   }
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
-  val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses)
+  val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses, capturedLists)
+  File("test.txt").writeText(smtLib)
   println("Generated SmtLib lines: ${smtLib.lines().size}")
   println("Running solver ...")
-  val result: String = runSmtSolver(smtLib)
-  println("Finished.\n$result")
+  // val ctx = DispatcherTCPContext("127.0.0.1", 7500)
+  // val msg = "cvc5\n$smtLib\n\$EOF\$\n"
+  // val result = runBlocking { ctx.sendMessage(msg) }
+  println("========[ Result of the solver ]========")
+  // println(result)
+  println("========================================")
 }
