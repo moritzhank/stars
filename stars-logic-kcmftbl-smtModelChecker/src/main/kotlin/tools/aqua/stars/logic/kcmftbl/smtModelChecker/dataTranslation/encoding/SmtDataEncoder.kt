@@ -42,7 +42,12 @@ internal class SmtDataEncoder(
     nextSerializable: Any? = null,
 ) :
     AbstractSmtDataEncoder(
-        result, capturedClasses, capturedLists, visitedSmtIDs, serializersModule, nextSerializable) {
+        result,
+        capturedClasses,
+        capturedLists,
+        visitedSmtIDs,
+        serializersModule,
+        nextSerializable) {
 
   private val defaultErrorMessage = {
     "An unexpected error occurred during the serialization of an object."

@@ -26,11 +26,14 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.S
 
 enum class SmtIntermediateMemberType {
 
-  REFERENCE, VALUE, VALUE_LIST, REFERENCE_LIST;
+  REFERENCE,
+  VALUE,
+  VALUE_LIST,
+  REFERENCE_LIST;
 
   companion object {
     fun fromMember(smtIntermediateMember: SmtIntermediateMember): SmtIntermediateMemberType {
-      return when(smtIntermediateMember) {
+      return when (smtIntermediateMember) {
         is SmtIntermediateMember.Reference -> REFERENCE
         is SmtIntermediateMember.Value -> VALUE
         is SmtIntermediateMember.List.ValueList -> VALUE_LIST
@@ -74,7 +77,8 @@ inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     capturedLists: MutableList<SmtIntermediateMember.List>
 ): List<SmtIntermediateRepresentation> {
   val serializer = serializersModule.serializer<T>()
-  return getSmtIntermediateRepresentation(serializer, serializersModule, ref, capturedClasses, capturedLists)
+  return getSmtIntermediateRepresentation(
+      serializer, serializersModule, ref, capturedClasses, capturedLists)
 }
 
 /**
