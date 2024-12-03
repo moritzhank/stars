@@ -109,9 +109,13 @@ fun generateSmtLib(
     intermediateRepresentation: List<SmtIntermediateRepresentation>,
     capturedClasses: MutableSet<KClass<*>>,
     capturedLists: MutableList<SmtIntermediateMember.List>,
-    solver: SmtSolver = SmtSolver.Z3
+    solver: SmtSolver = SmtSolver.CVC5
 ): String {
   val result = StringBuilder()
+  if (solver == SmtSolver.CVC5) {
+    result.appendLine("(set-logic ALL)")
+    result.appendLine()
+  }
   generatePredefinedDatatypes(result, solver)
 
   // Generate sort declarations
@@ -144,19 +148,23 @@ fun generateSmtLib(
   // Generate distinct statement for every sort and their individuals
   result.appendLine("; Distinct statements for all sorts and their individuals")
   for (sortKClass in capturedClasses) {
-    // TODO: For debugging purposes
-    if (sortKClass.simpleName != "TickData") {
+    val intermediates = intermediateRepresentation.filter { it.ref::class == sortKClass }
+    if (intermediates.size <= 1) {
       continue
     }
-    val intermediates = intermediateRepresentation.filter { it.ref::class == sortKClass }
     val listOfIndividuals =
         intermediates.fold(StringBuilder()) { str, elem ->
           str.append("ind_${elem.ref.getSmtID()} ")
         }
     result.appendLine("(assert (distinct ${listOfIndividuals.toString().dropLast(1)}))")
   }
+  // Generate distinct statements for every ListRef-object
+  if (capturedLists.size > 1) {
+    val listOfListRefs =
+        capturedLists.fold(StringBuilder()) { str, elem -> str.append("list_${elem.refID} ") }
+    result.appendLine("(assert (distinct ${listOfListRefs.toString().dropLast(1)}))")
+  }
   result.appendLine()
-  // TODO: If necessary, also to be generated for ListRef
 
   // Generate member definitions
   result.appendLine("; Member definitions")
