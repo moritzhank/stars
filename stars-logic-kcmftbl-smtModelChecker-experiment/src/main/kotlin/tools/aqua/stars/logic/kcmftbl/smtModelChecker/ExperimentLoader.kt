@@ -33,7 +33,7 @@ class ExperimentLoader {
       return loadSegments(listOf(wrapper), false, 10, true).first()
     }
 
-    private fun getPathToResource(name: String) =
+    fun getPathToResource(name: String) =
         Paths.get(ExperimentLoader::class.java.getResource(name)!!.toURI())
   }
 }

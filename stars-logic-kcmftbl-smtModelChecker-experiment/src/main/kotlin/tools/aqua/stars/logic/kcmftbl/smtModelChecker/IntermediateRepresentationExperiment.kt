@@ -41,7 +41,7 @@ fun main() {
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
   val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses, capturedLists)
-  File("test.txt").writeText(smtLib)
+  File("test.smt2").writeText(smtLib)
   println("Generated SmtLib lines: ${smtLib.lines().size}")
   println("Running solver ...")
   // val ctx = DispatcherTCPContext("127.0.0.1", 7500)
