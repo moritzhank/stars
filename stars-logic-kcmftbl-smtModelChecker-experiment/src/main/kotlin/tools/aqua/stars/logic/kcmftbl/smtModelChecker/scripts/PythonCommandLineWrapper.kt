@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts
 
+import java.io.IOException
 import kotlin.io.path.absolutePathString
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.ExperimentLoader
 
@@ -27,7 +28,11 @@ internal class PythonCommandLineWrapper {
     private var pythonBaseCmdCache: String? = null
 
     private fun pythonInstalled(name: String): Boolean =
-        ProcessBuilder(name, "--version").start().apply { waitFor() }.exitValue() == 0
+        try {
+          ProcessBuilder(name, "--version").start().apply { waitFor() }.exitValue() == 0
+        } catch (err: IOException) {
+          false
+        }
 
     private fun pythonBaseCmd(): String {
       val pythonBaseCmdCache = this.pythonBaseCmdCache

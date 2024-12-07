@@ -45,7 +45,7 @@ fun runSmtSolver(
   }
   val smtTmpDirPath = getAbsolutePathFromProjectDir("smtTmp")
   File(smtTmpDirPath).mkdir()
-  val smt2FilePath = "$smtTmpDirPath\\${UUID.randomUUID()}.smt2"
+  val smt2FilePath = "$smtTmpDirPath${File.separator}${UUID.randomUUID()}.smt2"
   val smt2File = File(smt2FilePath).apply { writeText(program) }
   val proc = ProcessBuilder(solverBinPath, smt2FilePath, *solverArgs).start().apply { waitFor() }
   val result = proc.inputReader().readText() + proc.errorReader().readText()

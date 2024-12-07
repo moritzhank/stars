@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress("unused", "UNNECESSARY_NOT_NULL_ASSERTION")
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
@@ -36,7 +36,7 @@ open class DSLBuilder(
     // Are all function calls registered?
     var elemBefore: CallContext<*, *>? = callContext
     while (elemBefore != null) {
-      val currentElem = elemBefore.also { elemBefore = elemBefore.before }
+      val currentElem = elemBefore.also { elemBefore = elemBefore!!.before }
       val isRegistered =
           when (currentElem) {
             is Callable1CallContext -> registeredFunctions[currentElem.func] != null

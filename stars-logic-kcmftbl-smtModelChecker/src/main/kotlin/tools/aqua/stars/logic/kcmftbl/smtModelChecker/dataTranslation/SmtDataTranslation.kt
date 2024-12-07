@@ -235,7 +235,7 @@ fun generateSmtLib(
                             refList,
                             "y",
                             { ifElem -> "ind_${ifElem}" },
-                            { thenElem -> "true" },
+                            { _ -> "true" },
                             "false")
                       } else {
                         // An empty list has no elements
