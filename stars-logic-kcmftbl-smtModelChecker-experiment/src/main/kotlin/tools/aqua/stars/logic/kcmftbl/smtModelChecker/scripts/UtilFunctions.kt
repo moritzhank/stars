@@ -20,5 +20,5 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-fun getDateTimeString() =
+fun getDateTimeString(): String =
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd__HH_mm"))

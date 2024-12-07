@@ -28,7 +28,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.getDateTimeString
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.linSpaceArr
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.plotPerf
 
-private val resultFolderName = getAbsolutePathFromProjectDir("experiment\\smtDistinctPerf")
+private val resultFolderName = getAbsolutePathFromProjectDir("experiment${File.separator}smtDistinctPerf")
 
 fun main() {
   File(resultFolderName).mkdirs()
@@ -107,7 +107,7 @@ private fun runExperiment(
         (0 ..< repetitions).fold("") { acc, j -> acc + "${results[i][j]}, " }.dropLast(2)
     csv.appendLine("$numDistinctStatements, $resultTimeCols")
   }
-  val resultCsvFile = File("$resultFolderName\\${solver.solverName}_${getDateTimeString()}.csv")
+  val resultCsvFile = File("$resultFolderName${File.separator}${solver.solverName}_${getDateTimeString()}.csv")
   resultCsvFile.writeText(csv.toString())
   return resultCsvFile.absolutePath
 }

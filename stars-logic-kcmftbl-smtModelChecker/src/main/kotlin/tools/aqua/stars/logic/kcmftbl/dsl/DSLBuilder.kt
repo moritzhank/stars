@@ -36,7 +36,7 @@ open class DSLBuilder(
     // Are all function calls registered?
     var elemBefore: CallContext<*, *>? = callContext
     while (elemBefore != null) {
-      val currentElem = elemBefore.also { elemBefore = elemBefore.before }
+      val currentElem = elemBefore.also { elemBefore = elemBefore!!.before }
       val isRegistered =
           when (currentElem) {
             is Callable1CallContext -> registeredFunctions[currentElem.func] != null
