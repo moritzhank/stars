@@ -26,23 +26,7 @@ dependencies {
   implementation(project(":stars-logic-kcmftbl"))
   implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3")
-  implementation("io.ktor:ktor-network:2.3.12")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
   testImplementation(project(mapOf("path" to ":stars-data-av")))
   testImplementation(project(":stars-data-av", "test"))
-}
-
-tasks.build { dependsOn("buildDockerImage") }
-
-tasks.processResources { dependsOn("copyShadowJar") }
-
-task<Exec>("buildDockerImage") {
-  dependsOn(tasks.processResources)
-  setWorkingDir("build/resources/main/")
-  commandLine("docker", "build", ".", "-t", "smt-solver")
-}
-
-task<Copy>("copyShadowJar") {
-  dependsOn(":stars-logic-kcmftbl-smtModelChecker-dispatcher:shadowJar")
-  from(project(":stars-logic-kcmftbl-smtModelChecker-dispatcher").file("build/libs/dispatcher.jar"))
-  into("build/resources/main/")
 }

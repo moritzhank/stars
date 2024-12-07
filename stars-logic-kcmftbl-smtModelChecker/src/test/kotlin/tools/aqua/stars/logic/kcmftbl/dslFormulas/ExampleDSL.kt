@@ -15,13 +15,9 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused", "unused_variable")
-
 package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
 import kotlin.test.Test
-import tools.aqua.stars.data.av.dataclasses.*
-import tools.aqua.stars.logic.kcmftbl.dsl.times
 
 class ExampleDSL {
 

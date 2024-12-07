@@ -36,8 +36,10 @@ def main():
     if len(sys.argv) > 8:
         plt.plot(data2_x, data2_y, marker="o",label=legend2)
     plt.legend()
-    plt.savefig(saveFile, dpi=300)
-    #plt.show()
+    if saveFile == "<plot>":
+        plt.show()
+    else:
+        plt.savefig(saveFile, dpi=300)
     
 if __name__ == "__main__":
     main()

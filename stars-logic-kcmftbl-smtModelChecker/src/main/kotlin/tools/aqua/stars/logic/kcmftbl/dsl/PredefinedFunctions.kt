@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("Unused")
+
 package tools.aqua.stars.logic.kcmftbl.dsl
 
 import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function

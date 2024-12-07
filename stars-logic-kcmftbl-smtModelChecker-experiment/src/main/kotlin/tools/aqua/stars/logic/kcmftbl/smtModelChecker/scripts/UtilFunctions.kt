@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts
 
-class DispatcherFormatException(msg: String) : IllegalArgumentException(msg)
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+fun getDateTimeString() =
+    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd__HH_mm"))

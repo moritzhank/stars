@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts
 
-class CommandContext(val output: String, val error: String, val exitCode: Int) {
-
-  override fun toString(): String = "[OUT] $output\n[ERR] ${error}\nExited with $exitCode."
+fun linSpaceArr(start: Int, stop: Int, num: Int): List<Int> {
+  val args = arrayOf(start.toString(), stop.toString(), num.toString())
+  val proc = PythonCommandLineWrapper.runScript("linSpaceArr.py", *args)
+  if (proc.exitValue() != 0) {
+    throw RuntimeException(proc.inputReader().readText() + proc.errorReader().readText())
+  }
+  val rawResult = proc.inputReader().readText()
+  return rawResult.split(",").fold(listOf()) { list, str -> list.plus(str.toInt()) }
 }

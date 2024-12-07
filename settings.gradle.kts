@@ -41,5 +41,4 @@ include(
     "stars-data-av",
     "stars-importer-carla",
     "stars-logic-kcmftbl-smtModelChecker",
-    "stars-logic-kcmftbl-smtModelChecker-experiment",
-    "stars-logic-kcmftbl-smtModelChecker-dispatcher")
+    "stars-logic-kcmftbl-smtModelChecker-experiment")

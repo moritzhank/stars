@@ -172,7 +172,7 @@ fun generateSmtLib(
   calculateMemberNameToIntermediates(intermediateRepresentation, memberNameToIntermediates)
   for (memberName in memberNameToIntermediates.keys) {
     val intermediate = memberNameToIntermediates.getValue(memberName)
-    require(intermediate.members.size > 0) { "There cannot be an empty list of members." }
+    require(intermediate.members.isNotEmpty()) { "There cannot be an empty list of members." }
     when (intermediate.memberType) {
       // Calculate member definition for values
       SmtIntermediateMemberType.VALUE -> {

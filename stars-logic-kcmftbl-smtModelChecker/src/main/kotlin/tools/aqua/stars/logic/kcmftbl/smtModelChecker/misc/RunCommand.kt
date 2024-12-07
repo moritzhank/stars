@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("Unused")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc
 
 import java.io.File

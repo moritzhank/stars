@@ -21,35 +21,36 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
 import java.io.File
 import java.util.UUID
-import tools.aqua.stars.logic.kcmftbl.dsl.CallContext
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.runCommand
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getAbsolutePathFromProjectDir
 
 enum class SmtSolver(val solverName: String) {
   CVC5("cvc5"),
   Z3("z3")
 }
 
-fun tryRunSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String? {
-  return try {
-    runSmtSolver(program, solver)
-  } catch (e: Exception) {
-    null
+fun runSmtSolver(
+    program: String,
+    solver: SmtSolver = SmtSolver.CVC5,
+    removeSmt2File: Boolean = true,
+    vararg solverArgs: String
+): String {
+  val settings = SmtSolverSettings.load()
+  requireNotNull(settings) {
+    SmtSolverSettings.generateTemplate()
+    "The file smtSolverSettings.json must be specified."
   }
-}
-
-fun runSmtSolver(program: String, solver: SmtSolver = SmtSolver.CVC5): String {
-  val dockerFileName = "/Dockerfile"
-  val workDir =
-      CallContext::class.java.getResource(dockerFileName)?.path!!.dropLast(dockerFileName.length)
-  val solverName = solver.solverName
-  val generatedFileName = "run-${UUID.randomUUID()}.txt"
-  val generatedFilePath = "$workDir/exchange/$generatedFileName"
-  val generatedFile = File(generatedFilePath)
-  generatedFile.writeText(program)
-  val run =
-      "docker run --rm --mount type=bind,source=$workDir/exchange,target=/root/exchange smt-solver $solverName $generatedFileName"
-          .runCommand(File(workDir))
-  generatedFile.delete()
-  checkNotNull(run) { "Error running the Docker container." }
-  return run
+  val solverBinPath = settings.getPathToSolverBin(solver)
+  require(File(solverBinPath).exists()) {
+    "The specified binary (at \"$solverBinPath\") for ${solver.solverName} does not exist."
+  }
+  val smtTmpDirPath = getAbsolutePathFromProjectDir("smtTmp")
+  File(smtTmpDirPath).mkdir()
+  val smt2FilePath = "$smtTmpDirPath\\${UUID.randomUUID()}.smt2"
+  val smt2File = File(smt2FilePath).apply { writeText(program) }
+  val proc = ProcessBuilder(solverBinPath, smt2FilePath, *solverArgs).start().apply { waitFor() }
+  val result = proc.inputReader().readText() + proc.errorReader().readText()
+  if (removeSmt2File) {
+    smt2File.delete()
+  }
+  return result
 }

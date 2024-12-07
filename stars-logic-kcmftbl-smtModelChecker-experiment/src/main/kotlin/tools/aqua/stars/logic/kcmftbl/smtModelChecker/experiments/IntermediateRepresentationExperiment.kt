@@ -15,20 +15,21 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.smtModelChecker
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.experiments
 
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
 import tools.aqua.stars.data.av.dataclasses.Segment
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.ExperimentLoader
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
 
 fun main() {
-  val t: Segment = ExperimentLoader.loadTestSegment()
+  val t: Segment = ExperimentLoader.Companion.loadTestSegment()
   println("Finished reading.")
   val serializersModule = EmptySerializersModule()
   val capturedClasses = mutableSetOf<KClass<*>>()
@@ -43,11 +44,11 @@ fun main() {
   val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses, capturedLists)
   File("test.smt2").writeText(smtLib)
   println("Generated SmtLib lines: ${smtLib.lines().size}")
-  println("Running solver ...")
+  // println("Running solver ...")
   // val ctx = DispatcherTCPContext("127.0.0.1", 7500)
   // val msg = "cvc5\n$smtLib\n\$EOF\$\n"
   // val result = runBlocking { ctx.sendMessage(msg) }
-  println("========[ Result of the solver ]========")
+  // println("========[ Result of the solver ]========")
   // println(result)
-  println("========================================")
+  // println("========================================")
 }

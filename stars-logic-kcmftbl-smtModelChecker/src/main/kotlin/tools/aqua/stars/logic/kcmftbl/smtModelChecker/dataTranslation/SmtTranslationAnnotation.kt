@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("Unused")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 import java.lang.reflect.ParameterizedType
@@ -67,7 +69,7 @@ internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslati
     SMT_TRANSLATION_CACHE.getOrSet(kClass) {
       val translationName: String =
           kClass.findAnnotation<SerialName>()?.value ?: getQualifiedName(kClass)
-      val tranlatableProperties = mutableListOf<SmtTranslationAnnotation.Property>()
+      val translatableProperties = mutableListOf<SmtTranslationAnnotation.Property>()
       // The Part below is adapted from
       // https://discuss.kotlinlang.org/t/reflection-and-properties-checking-for-custom-getters-setters/22457/2
       val kmProperties =
@@ -120,11 +122,11 @@ internal fun <T : Any> smtTranslationAnnotation(kClass: KClass<T>): SmtTranslati
         if (clazz.isEnum) {
           clazz = Int::class.java
         }
-        tranlatableProperties.add(
+        translatableProperties.add(
             SmtTranslationAnnotation.Property(
                 kProperty.name, nonTrivialGetter, clazz, listTypeArgumentClass))
       }
-      SmtTranslationAnnotation(translationName, tranlatableProperties.toTypedArray())
+      SmtTranslationAnnotation(translationName, translatableProperties.toTypedArray())
     }
 
 private fun Class<*>.isTranslatable(): Boolean {
