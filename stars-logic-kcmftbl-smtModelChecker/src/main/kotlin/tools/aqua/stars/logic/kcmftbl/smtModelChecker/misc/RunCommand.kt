@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-@file:Suppress("Unused")
+@file:Suppress(
+    "Unused",
+    "UndocumentedPublicFunction",
+    "TooGenericExceptionCaught",
+    "PrintStackTrace",
+    "SpreadOperator")
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc
 
@@ -34,7 +39,7 @@ fun String.runCommand(workingDir: File, timeOutInMS: Long = 60 * 60 * 1000): Str
             .start()
     proc.waitFor(timeOutInMS, TimeUnit.MILLISECONDS)
     if (proc.exitValue() != 0)
-        throw IllegalStateException(
+        error(
             "Error executing a command:${System.lineSeparator()}${proc.errorStream.bufferedReader().readText()}")
     return proc.inputReader().readText()
   } catch (e: Exception) {

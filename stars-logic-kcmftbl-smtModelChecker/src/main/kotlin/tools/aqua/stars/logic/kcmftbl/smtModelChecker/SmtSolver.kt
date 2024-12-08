@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress("unused", "UndocumentedPublicProperty")
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
@@ -23,11 +23,13 @@ import java.io.File
 import java.util.UUID
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getAbsolutePathFromProjectDir
 
+/** Captures all supported SMT-Solver. */
 enum class SmtSolver(val solverName: String) {
   CVC5("cvc5"),
   Z3("z3")
 }
 
+/** Run a local SMT-Solver instance. This requires a correct setup "smtSolverSettings.json". */
 fun runSmtSolver(
     program: String,
     solver: SmtSolver = SmtSolver.CVC5,

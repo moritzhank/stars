@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress("unused", "ClassOrdering")
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-/** Ensures that each object has a unique ID */
+/** Ensures that each object has a unique ID. */
 abstract class SmtTranslatableBase {
 
   companion object {
@@ -40,6 +40,6 @@ abstract class SmtTranslatableBase {
     return smtID
   }
 
-  internal fun getSmtTranslationAnnotation(): SmtTranslationAnnotation =
-      smtTranslationAnnotation(this::class)
+  internal fun getSmtTranslationAnnotation(): SmtTranslationClassInfo =
+      smtTranslationClassInfo(this::class)
 }

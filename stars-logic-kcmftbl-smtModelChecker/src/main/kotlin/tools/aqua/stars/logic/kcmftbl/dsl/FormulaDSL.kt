@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress(
+    "unused",
+    "UndocumentedPublicClass",
+    "UndocumentedPublicFunction",
+    "MatchingDeclarationName",
+    "ClassOrdering",
+    "ExpressionBodySyntax")
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
@@ -30,14 +36,14 @@ class FormulaBuilder(
 
   companion object {
 
-    /** Define formula with no free variables */
+    /** Define formula with no free variables. */
     fun formula(init: FormulaBuilder.() -> Unit): Formula {
       val builder = FormulaBuilder(listOf(), mutableMapOf())
       init.invoke(builder)
       return builder.phi[0]
     }
 
-    /** Define formula with one free variable (Does not return formula!) */
+    /** Define formula with one free variable (Does not return formula!). */
     fun <
         E1 : E,
         E : EntityType<E, T, S, U, D>,
@@ -55,7 +61,7 @@ class FormulaBuilder(
       }
     }
 
-    /** Define formula with two free variables (Does not return formula!) */
+    /** Define formula with two free variables (Does not return formula!). */
     fun <
         E1 : E,
         E : EntityType<E, T, S, U, D>,

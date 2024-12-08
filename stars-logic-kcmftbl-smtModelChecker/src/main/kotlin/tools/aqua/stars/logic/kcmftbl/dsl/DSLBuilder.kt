@@ -21,13 +21,13 @@ package tools.aqua.stars.logic.kcmftbl.dsl
 
 import kotlin.reflect.*
 
-/** Base for [FormulaBuilder] and [TFunctionBuilder] */
+/** Base for [FormulaBuilder] and [TFunctionBuilder]. */
 open class DSLBuilder(
     protected val allowedCCBs: List<CCB<*>>,
     protected val registeredFunctions: MutableMap<KCallable<*>, TNFunction<*>>
 ) {
 
-  /** Assert that a CallContext [callContext] is legal in the current context */
+  /** Assert that a CallContext [callContext] is legal in the current context. */
   fun assertCallContextAllowed(callContext: CallContext<*, *>) {
     // Is callContext's CallContextBase allowed?
     if (!allowedCCBs.contains(callContext.base())) {
@@ -50,7 +50,7 @@ open class DSLBuilder(
     }
   }
 
-  /** Register the symbolic representation [func] of the function [callable] */
+  /** Register the symbolic representation [func] of the function [callable. */
   fun <Caller, Return> registerFunction(
       callable: KFunction1<Caller, Return>,
       func: T2Function<Caller, Return>
@@ -58,7 +58,7 @@ open class DSLBuilder(
     registeredFunctions[callable] = func
   }
 
-  /** Register the symbolic representation [func] of the function [callable] */
+  /** Register the symbolic representation [func] of the function [callable]. */
   fun <Caller, Param, Return> registerFunction(
       callable: KFunction2<Caller, Param, Return>,
       func: T3Function<Caller, Param, Return>
@@ -66,7 +66,7 @@ open class DSLBuilder(
     registeredFunctions[callable] = func
   }
 
-  /** Register the symbolic representation [func] of the function [callable] */
+  /** Register the symbolic representation [func] of the function [callable]. */
   fun <Caller, Param1, Param2, Return> registerFunction(
       callable: KFunction3<Caller, Param1, Param2, Return>,
       func: T4Function<Caller, Param1, Param2, Return>

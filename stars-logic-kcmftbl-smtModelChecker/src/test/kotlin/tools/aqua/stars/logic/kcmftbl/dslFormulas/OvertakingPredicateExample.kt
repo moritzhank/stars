@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.logic.kcmftbl.dslFormulas
+@file:Suppress(
+    "unused", "UndocumentedPublicClass", "UndocumentedPublicFunction", "UndocumentedPublicProperty")
 
-import tools.aqua.stars.logic.kcmftbl.dsl.times
+package tools.aqua.stars.logic.kcmftbl.dslFormulas
 
 class OvertakingPredicateExample {
 

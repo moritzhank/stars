@@ -15,16 +15,21 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress(
+    "unused",
+    "UndocumentedPublicClass",
+    "UndocumentedPublicFunction",
+    "UndocumentedPublicProperty",
+    "UseDataClass")
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
 import kotlin.reflect.*
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.smtTranslationAnnotation
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.smtTranslationClassInfo
 
 typealias CCB<Type> = CallContextBase<Type>
 
-/** Symbolic representation of a call to a member of [Caller] which returns [Return] */
+/** Symbolic representation of a call to a member of [Caller] which returns [Return]. */
 sealed interface CallContext<Caller, Return> {
 
   val before: CallContext<*, Caller>?
@@ -52,32 +57,34 @@ sealed interface CallContext<Caller, Return> {
   }
 }
 
-/** Represents a symbolic call to a property [prop] */
+/** Represents a symbolic call to a property [prop]. */
 sealed interface PropertyCallContext<Caller, Return> : CallContext<Caller, Return> {
 
   val prop: KProperty1<Caller, Return>
 }
 
-/** Represents a symbolic call to a 0-ary function [func] */
+/** Represents a symbolic call to a 0-ary function [func]. */
 sealed interface Callable1CallContext<Caller, Return> : CallContext<Caller, Return> {
 
   val func: KFunction1<Caller, Return>
 }
 
-/** Represents a symbolic call to a 1-ary function for which the parameter must still be defined */
+/** Represents a symbolic call to a 1-ary function for which the parameter must still be defined. */
 sealed interface IntermediateCallable2CallContext<Caller, Param, Return> {
 
   fun withParam(cc: CallContext<*, Param>): Callable2CallContext<Caller, Param, Return>
 }
 
-/** Represents a symbolic call to a 1-ary function [func] */
+/** Represents a symbolic call to a 1-ary function [func]. */
 sealed interface Callable2CallContext<Caller, Param, Return> : CallContext<Caller, Return> {
 
   val func: KFunction2<Caller, Param, Return>
   val param: CallContext<*, Param>
 }
 
-/** Represents a symbolic call to a 2-ary function for which the parameters must still be defined */
+/**
+ * Represents a symbolic call to a 2-ary function for which the parameters must still be defined.
+ */
 sealed interface IntermediateCallable3CallContext<Caller, Param1, Param2, Return> {
 
   fun withParams(
@@ -86,7 +93,7 @@ sealed interface IntermediateCallable3CallContext<Caller, Param1, Param2, Return
   ): Callable3CallContext<Caller, Param1, Param2, Return>
 }
 
-/** Represents a symbolic call to a 2-ary function [func] */
+/** Represents a symbolic call to a 2-ary function [func]. */
 sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
     CallContext<Caller, Return> {
 
@@ -95,7 +102,7 @@ sealed interface Callable3CallContext<Caller, Param1, Param2, Return> :
   val param2: CallContext<*, Param2>
 }
 
-/** Starting point for defining symbolic member calls to [Type] */
+/** Starting point for defining symbolic member calls to [Type]. */
 class CallContextBase<Type> : CallContext<Nothing, Type> {
 
   var debugInfo: String? = null
@@ -134,13 +141,13 @@ inline operator fun <reified Return : Any, W> CallContextBase<Return>.times(
 
 /**
  * Realises a symbolic call to a property [prop] and checks if the property is legal (Not intended
- * for direct use)
+ * for direct use).
  */
 fun <Caller : Any, Return> CallContext<*, Caller>.callProperty(
     prop: KProperty1<Caller, Return>,
     callerClass: KClass<Caller>
 ): PropertyCallContext<Caller, Return> {
-  smtTranslationAnnotation(callerClass).requireTranslatableProperty(prop.name)
+  smtTranslationClassInfo(callerClass).requireTranslatableProperty(prop.name)
   return if (this is CallContextBase<Caller>) {
     PropertyCallContextImpl(prop, null)
   } else {
@@ -148,7 +155,7 @@ fun <Caller : Any, Return> CallContext<*, Caller>.callProperty(
   }
 }
 
-/** Returns a string formatted as "name (...)" */
+/** Returns a string formatted as "name (...)". */
 fun CallContext<*, *>.toFormattedString(): String {
   val name =
       when (this) {

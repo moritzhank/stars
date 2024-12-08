@@ -15,6 +15,12 @@
  * limitations under the License.
  */
 
+@file:Suppress(
+    "UndocumentedPublicClass",
+    "UndocumentedPublicFunction",
+    "UndocumentedPublicProperty",
+    "ExpressionBodySyntax")
+
 package tools.aqua.stars.logic.kcmftbl.dsl
 
 sealed interface Term<Type>
@@ -23,7 +29,7 @@ data class Constant<Type>(val value: Type) : Term<Type>
 
 data class Variable<Type>(val callContext: CallContext<*, Type>) : Term<Type>
 
-/** Create a deep copy of [term] */
+/** Create a deep copy of [term]. */
 fun <T> copyTerm(term: Term<T>): Term<T> {
   return when (term) {
     is Constant -> Constant(term.value)

@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+@file:Suppress(
+    "UndocumentedPublicClass", "UndocumentedPublicFunction", "UndocumentedPublicProperty")
+
 package tools.aqua.stars.logic.kcmftbl.dsl
 
 sealed interface TFunction<Return>

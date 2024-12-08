@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("OutdatedDocumentation")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
 import kotlin.reflect.KClass
@@ -25,7 +27,16 @@ import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.modules.SerializersModule
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 
+/**
+ * @param memberNames Used to be able to correctly set the serialised member in
+ *   [SmtIntermediateMember]
+ * @param currentMemberIndex Used to be able to correctly set the serialised member in
+ *   [SmtIntermediateMember]
+ * @param listIntermediateMember Needed to be able to collect list elements during serialization
+ */
 @OptIn(ExperimentalSerializationApi::class)
 internal class SmtDataEncoder(
     result: MutableList<SmtIntermediateRepresentation>,
@@ -37,7 +48,7 @@ internal class SmtDataEncoder(
     private val current: SmtIntermediateRepresentation?,
     private var currentMemberIndex: Int,
     private val memberNames: Array<String>,
-    private var listMembers: SmtIntermediateMember.List?,
+    private var listIntermediateMember: SmtIntermediateMember.List?,
     private val serializationMode: SmtDataSerializationMode = SmtDataSerializationMode.DEFAULT,
     nextSerializable: Any? = null,
 ) :
@@ -53,11 +64,17 @@ internal class SmtDataEncoder(
     "An unexpected error occurred during the serialization of an object."
   }
 
+  /** Sets the currently serialized Member to [member]. */
   private fun setMember(member: SmtIntermediateMember) {
     requireNotNull(current, defaultErrorMessage)
     current.members[memberNames[currentMemberIndex++]] = member
   }
 
+  /**
+   * Encode [obj] dependent on [serializationMode] (Used in [beginStructure]).
+   *
+   * @param memberNames Needed for translation process (See [SmtDataEncoder])
+   */
   private fun encodeSmtTranslatableBase(
       obj: SmtTranslatableBase,
       memberNames: Array<String>
@@ -71,7 +88,7 @@ internal class SmtDataEncoder(
         setMember(SmtIntermediateMember.Reference(smtID))
       }
     } else {
-      val listMembers = this.listMembers
+      val listMembers = this.listIntermediateMember
       require(listMembers is SmtIntermediateMember.List.ReferenceList) {
         "An unexpected error occurred during the serialization of a list of non-primitive values."
       }
@@ -90,6 +107,13 @@ internal class SmtDataEncoder(
         null)
   }
 
+  /**
+   * Encodes [nextSerializable] as a list (Used in [beginStructure]).
+   * - Retrieve generic argument class of list
+   * - Call [setMember] with [SmtIntermediateMember.List.ValueList] or
+   *   [SmtIntermediateMember.List.ReferenceList]
+   * - Setup new [SmtDataEncoder] for encoding of list elements
+   */
   private fun encodeNextSerializableAsList(): CompositeEncoder {
     val nextSerializable = this.nextSerializable
     require(nextSerializable is List<*>) {
@@ -105,7 +129,8 @@ internal class SmtDataEncoder(
             .getTranslatableProperties()
             .getOrNull(currentMemberIndex)
             ?.listTypeArgumentClass
-    requireNotNull(typeArgument, defaultErrorMessage) // TODO: Change error message
+    // TODO: Change error message:
+    requireNotNull(typeArgument, defaultErrorMessage)
     val primitive = typeArgument.smtPrimitive()
     val intermediateListMember =
         if (primitive != null) {
@@ -118,11 +143,11 @@ internal class SmtDataEncoder(
     } else {
       // This branch should not be taken, because nested lists are not allowed up to this point
       require(false, defaultErrorMessage)
-      val listMembers = this.listMembers
-      require(listMembers is SmtIntermediateMember.List.ReferenceList) {
-        "An unexpected error occurred during the serialization of a nested list."
-      }
-      listMembers.list.add(intermediateListMember.refID)
+      // val listMembers = this.listIntermediateMember
+      // require(listMembers is SmtIntermediateMember.List.ReferenceList) {
+      //   "An unexpected error occurred during the serialization of a nested list."
+      // }
+      // listMembers.list.add(intermediateListMember.refID)
     }
     capturedLists.add(intermediateListMember)
     return SmtDataEncoder(
@@ -138,11 +163,12 @@ internal class SmtDataEncoder(
         SmtDataSerializationMode.LIST)
   }
 
+  /** Already visited members are encoded with their refID dependent on [serializationMode]. */
   override fun encodeAlreadyVisitedMember(member: SmtIntermediateMember.Reference) {
     if (serializationMode == SmtDataSerializationMode.DEFAULT) {
       setMember(member)
     } else {
-      val listMembers = this.listMembers
+      val listMembers = this.listIntermediateMember
       require(listMembers is SmtIntermediateMember.List.ReferenceList) {
         "An unexpected error occurred during the serialization of a list of non-primitive values."
       }
@@ -150,13 +176,14 @@ internal class SmtDataEncoder(
     }
   }
 
+  /** This function is called for the serialization of all primitive elements. */
   override fun encodePrimitiveValue(value: Any, primitive: SmtPrimitive?) {
     // TODO: Enums are currently encoded as ints
     if (serializationMode == SmtDataSerializationMode.DEFAULT) {
       requireNotNull(primitive) { "An unexpected non-primitive value has occurred." }
       setMember(SmtIntermediateMember.Value(value, primitive))
     } else {
-      val listMembers = this.listMembers
+      val listMembers = this.listIntermediateMember
       require(listMembers is SmtIntermediateMember.List.ValueList) {
         "An unexpected error occurred during the serialization of a list of primitive values."
       }
@@ -167,6 +194,7 @@ internal class SmtDataEncoder(
     }
   }
 
+  /** This function is called for the serialization of all non-primitive elements. */
   override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
     val nextSerializable = this.nextSerializable
     requireNotNull(nextSerializable, defaultErrorMessage)

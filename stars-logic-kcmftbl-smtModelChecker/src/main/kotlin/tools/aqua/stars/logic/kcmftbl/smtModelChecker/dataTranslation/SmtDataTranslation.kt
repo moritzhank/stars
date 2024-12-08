@@ -15,87 +15,21 @@
  * limitations under the License.
  */
 
+@file:Suppress("StringLiteralDuplication", "UseDataClass")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 import kotlin.reflect.KClass
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.SmtSolver
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.firstCharLower
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.toSmtLibPrimitiveFormat
 
-private fun generatePredefinedDatatypes(result: StringBuilder, solver: SmtSolver) {
-  result.appendLine("; Predefined datatypes")
-  if (solver != SmtSolver.Z3) {
-    result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
-  }
-  result.appendLine()
-}
-
-private fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }
-
-private fun correctFormat(value: Any): Any {
-  return when (value) {
-    is String -> "\"$value\""
-    is Double -> value.toBigDecimal().toPlainString()
-    is Float -> value.toBigDecimal().toPlainString()
-    else -> value
-  }
-}
-
-private fun calculateMemberNameToIntermediates(
-    intermediateRepresentation: List<SmtIntermediateRepresentation>,
-    memberNameToIntermediates: MutableMap<String, SmtDataTranslationIntermediate>
-) {
-  for (rep in intermediateRepresentation) {
-    val repKClass = rep.ref::class
-    val annotation = smtTranslationAnnotation(repKClass)
-    val sortName = repKClass.simpleName!!
-    for (prop in annotation.getTranslatableProperties()) {
-      val fullPropName = "${sortName}_${prop.name}"
-      val intermediateMember = rep.members.getValue(prop.name)
-      memberNameToIntermediates
-          .computeIfAbsent(fullPropName) {
-            SmtDataTranslationIntermediate(
-                sortName,
-                SmtIntermediateMemberType.fromMember(intermediateMember),
-                prop.clazz,
-                prop.listTypeArgumentClass)
-          }
-          .members
-          .add(Pair(rep.ref.getSmtID(), intermediateMember))
-    }
-  }
-}
-
-private fun <T> generateITEStructure(
-    list: Collection<T>,
-    varName: String,
-    ifStr: (T) -> String,
-    thenStr: (T) -> String,
-    defaultValue: String? = null
-): String {
-  val iteStructureFront = StringBuilder("")
-  var bracketsNeeded = 0
-  val firstElem = list.first()
-  list.forEachIndexed { index, elem ->
-    // Skip first element if no default is given
-    val skip = defaultValue == null && index == 0
-    if (!skip) {
-      iteStructureFront.append("(ite (= $varName ${ifStr(elem)}) ${thenStr(elem)} ")
-      bracketsNeeded++
-    }
-  }
-  if (defaultValue == null) {
-    iteStructureFront.append("${thenStr(firstElem)}${")".repeat(bracketsNeeded)}")
-  } else {
-    iteStructureFront.append("$defaultValue${")".repeat(bracketsNeeded)}")
-  }
-  return iteStructureFront.toString()
-}
-
-/** Captures information about a member needed for translation */
+/** Captures information about a member needed for translation. */
 private class SmtDataTranslationIntermediate(
-    /** Sort of the object that contains the member represented by this class */
+    /** Sort of the object that contains the member represented by this class. */
     val containerSort: String,
     val memberType: SmtIntermediateMemberType,
-    /** Type of the member represented by this class */
+    /** Type of the member represented by this class. */
     val memberClass: Class<*>,
     val listArgumentClass: Class<*>?,
     /**
@@ -105,6 +39,7 @@ private class SmtDataTranslationIntermediate(
     val members: MutableList<Pair<Int, SmtIntermediateMember>> = mutableListOf()
 )
 
+/** Generate SmtLib. */
 fun generateSmtLib(
     intermediateRepresentation: List<SmtIntermediateRepresentation>,
     capturedClasses: MutableSet<KClass<*>>,
@@ -182,7 +117,7 @@ fun generateSmtLib(
                 "x",
                 { ifPair -> "ind_${ifPair.first}" },
                 { thenPair ->
-                  "${correctFormat((thenPair.second as SmtIntermediateMember.Value).value)}"
+                  (thenPair.second as SmtIntermediateMember.Value).value.toSmtLibPrimitiveFormat()
                 })
         val returnSort = intermediate.memberClass.smtPrimitive()!!.smtPrimitiveSortName
         result.appendLine(
@@ -232,11 +167,7 @@ fun generateSmtLib(
                       val refList = member.list
                       if (!refList.isEmpty()) {
                         generateITEStructure(
-                            refList,
-                            "y",
-                            { ifElem -> "ind_${ifElem}" },
-                            { _ -> "true" },
-                            "false")
+                            refList, "y", { ifElem -> "ind_${ifElem}" }, { _ -> "true" }, "false")
                       } else {
                         // An empty list has no elements
                         // TODO: Maybe implement possibility to omit these entries
@@ -255,4 +186,60 @@ fun generateSmtLib(
 
   result.appendLine("(check-sat)")
   return result.toString()
+}
+
+private fun generatePredefinedDatatypes(result: StringBuilder, solver: SmtSolver) {
+  result.appendLine("; Predefined datatypes")
+  if (solver != SmtSolver.Z3) {
+    result.appendLine("(declare-datatype List (par (T) ((nil) (cons (head T) (tail (List T))))))")
+  }
+  result.appendLine()
+}
+
+private fun calculateMemberNameToIntermediates(
+    intermediateRepresentation: List<SmtIntermediateRepresentation>,
+    memberNameToIntermediates: MutableMap<String, SmtDataTranslationIntermediate>
+) {
+  for (rep in intermediateRepresentation) {
+    val repKClass = rep.ref::class
+    val annotation = smtTranslationClassInfo(repKClass)
+    val sortName = repKClass.simpleName!!
+    for (prop in annotation.getTranslatableProperties()) {
+      val fullPropName = "${sortName}_${prop.name}"
+      val intermediateMember = rep.members.getValue(prop.name)
+      memberNameToIntermediates
+          .computeIfAbsent(fullPropName) {
+            SmtDataTranslationIntermediate(
+                sortName, intermediateMember.type(), prop.clazz, prop.listTypeArgumentClass)
+          }
+          .members
+          .add(Pair(rep.ref.getSmtID(), intermediateMember))
+    }
+  }
+}
+
+private fun <T> generateITEStructure(
+    list: Collection<T>,
+    varName: String,
+    ifStr: (T) -> String,
+    thenStr: (T) -> String,
+    defaultValue: String? = null
+): String {
+  val iteStructureFront = StringBuilder("")
+  var bracketsNeeded = 0
+  val firstElem = list.first()
+  list.forEachIndexed { index, elem ->
+    // Skip first element if no default is given
+    val skip = defaultValue == null && index == 0
+    if (!skip) {
+      iteStructureFront.append("(ite (= $varName ${ifStr(elem)}) ${thenStr(elem)} ")
+      bracketsNeeded++
+    }
+  }
+  if (defaultValue == null) {
+    iteStructureFront.append("${thenStr(firstElem)}${")".repeat(bracketsNeeded)}")
+  } else {
+    iteStructureFront.append("$defaultValue${")".repeat(bracketsNeeded)}")
+  }
+  return iteStructureFront.toString()
 }

@@ -15,20 +15,19 @@
  * limitations under the License.
  */
 
-@file:Suppress(
-    "UndocumentedPublicClass", "UndocumentedPublicFunction", "UndocumentedPublicProperty")
+@file:Suppress("ExpressionBodySyntax")
 
-package tools.aqua.stars.logic.kcmftbl.dsl
+package tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc
 
-/** Symbolic representation of n-ary functions (Wraps [TFunction]). */
-sealed interface TNFunction<Return> {
-  val func: TFunction<Return>
+/** Replaces first character with a lower-case one. */
+fun String.firstCharLower(): String = this.replaceFirstChar { it.lowercaseChar() }
+
+/** Converts given primitive to SmtLib format. */
+fun Any.toSmtLibPrimitiveFormat(): String {
+  return when (this) {
+    is String -> "\"$this\""
+    is Double -> this.toBigDecimal().toPlainString()
+    is Float -> this.toBigDecimal().toPlainString()
+    else -> this.toString()
+  }
 }
-
-sealed interface T1Function<Return> : TNFunction<Return>
-
-sealed interface T2Function<Param, Return> : TNFunction<Return>
-
-sealed interface T3Function<Param1, Param2, Return> : TNFunction<Return>
-
-sealed interface T4Function<Param1, Param2, Param3, Return> : TNFunction<Return>

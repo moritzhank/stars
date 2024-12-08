@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-@file:Suppress("unused")
+@file:Suppress(
+    "unused",
+    "OutdatedDocumentation",
+    "UndocumentedPublicClass",
+    "UndocumentedPublicFunction",
+    "UndocumentedPublicProperty",
+    "UseDataClass")
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
@@ -26,26 +32,13 @@ import kotlinx.serialization.serializer
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataEncoder
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtDataSerializationMode
 
-enum class SmtIntermediateMemberType {
+/** Represents the serialization of [ref]. */
+class SmtIntermediateRepresentation(
+    val ref: SmtTranslatableBase,
+    val members: MutableMap<String, SmtIntermediateMember> = mutableMapOf()
+)
 
-  REFERENCE,
-  VALUE,
-  VALUE_LIST,
-  REFERENCE_LIST;
-
-  companion object {
-    fun fromMember(smtIntermediateMember: SmtIntermediateMember): SmtIntermediateMemberType {
-      return when (smtIntermediateMember) {
-        is SmtIntermediateMember.Reference -> REFERENCE
-        is SmtIntermediateMember.Value -> VALUE
-        is SmtIntermediateMember.List.ValueList -> VALUE_LIST
-        is SmtIntermediateMember.List.ReferenceList -> REFERENCE_LIST
-      }
-    }
-  }
-}
-
-/** Represents a serialized member of [SmtIntermediateRepresentation] */
+/** Represents a serialized member of [SmtIntermediateRepresentation]. */
 sealed class SmtIntermediateMember {
 
   class Reference(val refID: Int) : SmtIntermediateMember()
@@ -59,18 +52,32 @@ sealed class SmtIntermediateMember {
 
     class ReferenceList(refID: Int, val list: MutableCollection<Int>) : List(refID)
   }
+
+  fun type(): SmtIntermediateMemberType =
+      when (this) {
+        is Reference -> SmtIntermediateMemberType.REFERENCE
+        is Value -> SmtIntermediateMemberType.VALUE
+        is List.ValueList -> SmtIntermediateMemberType.VALUE_LIST
+        is List.ReferenceList -> SmtIntermediateMemberType.REFERENCE_LIST
+      }
 }
 
-/** Represents the serialization of [ref] */
-class SmtIntermediateRepresentation(
-    val ref: SmtTranslatableBase,
-    val members: MutableMap<String, SmtIntermediateMember> = mutableMapOf()
-)
+/**
+ * Enum to streamline the handling of [SmtIntermediateMember] in the following translation process.
+ */
+enum class SmtIntermediateMemberType {
+
+  REFERENCE,
+  VALUE,
+  VALUE_LIST,
+  REFERENCE_LIST
+}
 
 /**
- * Generate the intermediate representation of [ref]
+ * Generate the intermediate representation of [ref].
  *
  * @param capturedClasses All classes found will be added to this set
+ * @param capturedLists All lists found will be added to this list
  */
 inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializersModule: SerializersModule,
@@ -84,9 +91,10 @@ inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
 }
 
 /**
- * Generate the intermediate representation of [ref]
+ * Generate the intermediate representation of [ref].
  *
  * @param capturedClasses All classes found will be added to this set
+ * @param capturedLists All lists found will be added to this list
  */
 fun <T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializer: SerializationStrategy<T>,

@@ -17,7 +17,7 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
-enum class SmtDataSerializationMode {
+internal enum class SmtDataSerializationMode {
   DEFAULT,
   LIST
 }

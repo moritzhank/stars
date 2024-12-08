@@ -15,6 +15,12 @@
  * limitations under the License.
  */
 
+@file:Suppress(
+    "UndocumentedPublicClass",
+    "UndocumentedPublicProperty",
+    "UndocumentedPublicFunction",
+    "ExpressionBodySyntax")
+
 package tools.aqua.stars.logic.kcmftbl.dsl
 
 import tools.aqua.stars.core.types.EntityType
@@ -76,7 +82,7 @@ data class MaxPrevalence(val fraction: Double, val inner: Formula) : Formula
 
 data class PastMaxPrevalence(val fraction: Double, val inner: Formula) : Formula
 
-/** Create a deep copy of [formula] */
+/** Create a deep copy of [formula]. */
 fun copyFormula(formula: Formula): Formula {
   return when (formula) {
     is TT -> formula

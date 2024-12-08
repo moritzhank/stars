@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@file:Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
+@file:Suppress("UNNECESSARY_NOT_NULL_ASSERTION", "OutdatedDocumentation")
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
@@ -27,8 +27,20 @@ import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.encoding.AbstractEncoder
 import kotlinx.serialization.modules.SerializersModule
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 
-/** Abstracts the verification and handling of the next serializable value ([nextSerializable]) */
+/**
+ * Abstracts the verification and handling of the next serializable value ([nextSerializable]).
+ * - Serialized elements must inherit from [SmtTranslatableBase]
+ * - Check that the list of members from the serializer matches the [SmtTranslationClassInfo]
+ * - Delegate already serialized elements to [encodeAlreadyVisitedMember]
+ * - Maintenance of [nextSerializable] for further processing
+ * - Delegate encoding of primitive values to [encodePrimitiveValue]
+ *
+ * @param nextSerializable Without it, it would not be possible to get the actual object down the
+ *   serialization process
+ */
 @ExperimentalSerializationApi
 internal abstract class AbstractSmtDataEncoder(
     protected val result: MutableList<SmtIntermediateRepresentation>,
@@ -39,27 +51,16 @@ internal abstract class AbstractSmtDataEncoder(
     protected var nextSerializable: Any? = null
 ) : AbstractEncoder() {
 
-  /** This function is called for each member encountered that has already been serialized */
+  /** This function is called for each member encountered that has already been serialized. */
   abstract fun encodeAlreadyVisitedMember(member: SmtIntermediateMember.Reference)
 
+  /** This function is called for each primitive value that has to be serialized. */
   abstract fun encodePrimitiveValue(value: Any, primitive: SmtPrimitive?)
 
-  private fun requireSameRegisteredElements(
-      descriptor: SerialDescriptor,
-      smtAnnotation: SmtTranslationAnnotation,
-      lazyMessage: (List<String>, List<String>) -> Any
-  ) {
-    val descriptorElementNames = descriptor.elementNames.toList()
-    val annotationElementNames =
-        smtAnnotation.getTranslatableProperties().fold(mutableListOf<String>()) { list, elem ->
-          list.apply { add(elem.name) }
-        } as List<String>
-    require(descriptorElementNames == annotationElementNames) {
-      lazyMessage(annotationElementNames, descriptorElementNames)
-    }
-  }
-
-  /** Verifies all requirements for serialized elements and handles already visited elements */
+  /**
+   * Verifies all requirements for serialized elements and handles already visited elements.
+   * IMPORTANT: [compareMembersFromSerializerAgainstClassInfo] is NOT performed for the root object!
+   */
   final override fun <T> encodeSerializableElement(
       descriptor: SerialDescriptor,
       index: Int,
@@ -79,20 +80,23 @@ internal abstract class AbstractSmtDataEncoder(
       }
       // TODO: This is not verified for root object
       // TODO: Performance hit of about 250ms
-      requireSameRegisteredElements(elemDescriptor, value.getSmtTranslationAnnotation()) { l1, l2 ->
-        val className = value!!::class.simpleName ?: "<unknown_class>"
-        val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
-        "The list of expected members does not match the serialised members for \"$className\" (Accessed via \"$memberName\"). Expected: $l1. Found: $l2. This may be due to incorrect configuration of a custom serializer or missing @Transient annotations."
-      }
+      compareMembersFromSerializerAgainstClassInfo(
+          elemDescriptor, value.getSmtTranslationAnnotation()) { l1, l2 ->
+            val className = value!!::class.simpleName ?: "<unknown_class>"
+            val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
+            "The list of expected members does not match the serialised members for \"$className\" (Accessed via \"$memberName\"). Expected: $l1. Found: $l2. This may be due to incorrect configuration of a custom serializer or missing @Transient annotations."
+          }
       val smtID = value.getSmtID()
       if (visitedSmtIDs[smtID] == true) {
         encodeAlreadyVisitedMember(SmtIntermediateMember.Reference(smtID))
         return
       }
-      require(elemDescriptor.kind != StructureKind.LIST) {
-        val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
-        "Generic (except lists), anonymous and polymorphic classes can not be translated. You can solve this by annotating \"$memberName}\" with @Transient."
-      }
+      // TODO: Investigate origin and move or remove
+      // require(elemDescriptor.kind != StructureKind.LIST) {
+      //  val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
+      //  "Generic (except lists), anonymous and polymorphic classes can not be translated. You can
+      // solve this by annotating \"$memberName}\" with @Transient."
+      // }
     }
     nextSerializable = value
     super.encodeSerializableElement(descriptor, index, serializer, value)
@@ -104,11 +108,26 @@ internal abstract class AbstractSmtDataEncoder(
       serializer: SerializationStrategy<T>,
       value: T?
   ) {
-    TODO()
+    error("Nullable elements are not supported yet by the serialization.")
   }
 
   final override fun encodeValue(value: Any) {
     nextSerializable = null
     encodePrimitiveValue(value, value.smtPrimitive())
+  }
+
+  private fun compareMembersFromSerializerAgainstClassInfo(
+      descriptor: SerialDescriptor,
+      classInfo: SmtTranslationClassInfo,
+      lazyMessage: (List<String>, List<String>) -> Any
+  ) {
+    val descriptorElementNames = descriptor.elementNames.toList()
+    val classInfoElementNames = mutableListOf<String>()
+    classInfo.getTranslatableProperties().fold(classInfoElementNames) { list, elem ->
+      list.apply { add(elem.name) }
+    }
+    require(descriptorElementNames == classInfoElementNames) {
+      lazyMessage(classInfoElementNames, descriptorElementNames)
+    }
   }
 }

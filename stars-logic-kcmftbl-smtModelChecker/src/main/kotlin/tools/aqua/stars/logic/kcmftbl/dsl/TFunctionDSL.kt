@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-@file:Suppress("UNCHECKED_CAST", "unused")
+@file:Suppress(
+    "UNCHECKED_CAST",
+    "unused",
+    "UndocumentedPublicClass",
+    "UndocumentedPublicFunction",
+    "UndocumentedPublicProperty",
+    "MatchingDeclarationName",
+    "ClassOrdering",
+    "ExpressionBodySyntax")
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
@@ -31,14 +39,14 @@ class TFunctionBuilder<Return>(
 
   companion object {
 
-    /** Define function with no parameters */
+    /** Define function with no parameters. */
     fun <Return> function(init: TFunctionBuilder<Return>.() -> Unit): T1Function<Return> {
       val builder = TFunctionBuilder<Return>(listOf(), mutableMapOf())
       init.invoke(builder)
       return T1FunctionImpl(builder.funs[0] as TFunction<Return>)
     }
 
-    /** Define function with one parameter */
+    /** Define function with one parameter. */
     fun <Param, Return> function(
         init: TFunctionBuilder<Return>.(CallContextBase<Param>) -> Unit
     ): T2Function<Param, Return> {
@@ -49,7 +57,7 @@ class TFunctionBuilder<Return>(
       return T2FunctionImpl(builder.funs[0] as TFunction<Return>)
     }
 
-    /** Define function with two parameters */
+    /** Define function with two parameters. */
     fun <Param1, Param2, Return> function(
         init: TFunctionBuilder<Return>.(CallContextBase<Param1>, CallContextBase<Param2>) -> Unit
     ): T3Function<Param1, Param2, Return> {
@@ -62,7 +70,7 @@ class TFunctionBuilder<Return>(
       return T3FunctionImpl(builder.funs[0] as TFunction<Return>)
     }
 
-    /** Define function with three parameters */
+    /** Define function with three parameters. */
     fun <Param1, Param2, Param3, Return> function(
         init:
             TFunctionBuilder<Return>.(

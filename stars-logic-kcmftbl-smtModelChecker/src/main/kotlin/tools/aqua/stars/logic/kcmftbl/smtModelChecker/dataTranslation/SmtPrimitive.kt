@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
+@file:Suppress("UndocumentedPublicProperty")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
+/** Represents Smt-primitives and their name in SmtLib. */
 enum class SmtPrimitive(val smtPrimitiveSortName: String) {
 
   BOOL("Bool"),
@@ -25,6 +28,7 @@ enum class SmtPrimitive(val smtPrimitiveSortName: String) {
   STRING("String")
 }
 
+/** Get [SmtPrimitive] for a [Class] (based on [Class.getSimpleName]). */
 fun Class<*>.smtPrimitive(): SmtPrimitive? =
     when (this.simpleName) {
       "boolean" -> SmtPrimitive.BOOL
@@ -35,6 +39,7 @@ fun Class<*>.smtPrimitive(): SmtPrimitive? =
       else -> null
     }
 
+/** Get [SmtPrimitive] for an object. */
 fun Any.smtPrimitive(): SmtPrimitive? =
     when (this) {
       is Boolean -> SmtPrimitive.BOOL

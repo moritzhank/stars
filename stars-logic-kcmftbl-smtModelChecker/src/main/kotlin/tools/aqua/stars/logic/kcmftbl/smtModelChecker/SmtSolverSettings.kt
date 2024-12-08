@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("UndocumentedPublicProperty", "ClassOrdering", "ExpressionBodySyntax")
+
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
 import java.io.File
@@ -23,6 +25,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getAbsolutePathFromProjectDir
 
+/** Contains all relevant settings for local SMT-solver instances. */
 @Serializable
 data class SmtSolverSettings(var pathToCVC5Bin: String, var pathToz3Bin: String) {
 
@@ -30,6 +33,7 @@ data class SmtSolverSettings(var pathToCVC5Bin: String, var pathToz3Bin: String)
 
     private val settingsFilePath = getAbsolutePathFromProjectDir("smtSolverSettings.json")
 
+    /** Loads the [SmtSolverSettings] from "smtSolverSettings.json". */
     fun load(): SmtSolverSettings? {
       val settingsFile = File(settingsFilePath)
       if (!settingsFile.exists()) {
@@ -38,11 +42,13 @@ data class SmtSolverSettings(var pathToCVC5Bin: String, var pathToz3Bin: String)
       return Json.decodeFromString(settingsFile.readText())
     }
 
+    /** Generate empty "smtSolverSettings.json". */
     fun generateTemplate() {
       File(settingsFilePath).writeText(Json.encodeToString(SmtSolverSettings("", "")))
     }
   }
 
+  /** Get the path to the local binary based on [SmtSolver]. */
   fun getPathToSolverBin(smtSolver: SmtSolver): String {
     return when (smtSolver) {
       SmtSolver.CVC5 -> pathToCVC5Bin
