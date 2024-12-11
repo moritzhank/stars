@@ -25,7 +25,6 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-import kotlin.reflect.KClass
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
@@ -73,42 +72,25 @@ enum class SmtIntermediateMemberType {
   REFERENCE_LIST
 }
 
-/**
- * Generate the intermediate representation of [ref].
- *
- * @param capturedClasses All classes found will be added to this set
- * @param capturedLists All lists found will be added to this list
- */
+/** Generate the intermediate representation of [ref]. */
 inline fun <reified T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializersModule: SerializersModule,
-    ref: T,
-    capturedClasses: MutableSet<KClass<*>>,
-    capturedLists: MutableList<SmtIntermediateMember.List>
+    ref: T
 ): List<SmtIntermediateRepresentation> {
   val serializer = serializersModule.serializer<T>()
-  return getSmtIntermediateRepresentation(
-      serializer, serializersModule, ref, capturedClasses, capturedLists)
+  return getSmtIntermediateRepresentation(serializer, serializersModule, ref)
 }
 
-/**
- * Generate the intermediate representation of [ref].
- *
- * @param capturedClasses All classes found will be added to this set
- * @param capturedLists All lists found will be added to this list
- */
+/** Generate the intermediate representation of [ref]. */
 fun <T : SmtTranslatableBase> getSmtIntermediateRepresentation(
     serializer: SerializationStrategy<T>,
     serializersModule: SerializersModule,
-    ref: T,
-    capturedClasses: MutableSet<KClass<*>>,
-    capturedLists: MutableList<SmtIntermediateMember.List>
+    ref: T
 ): List<SmtIntermediateRepresentation> {
   val result = mutableListOf<SmtIntermediateRepresentation>()
   val encoder =
       SmtDataEncoder(
           result,
-          capturedClasses,
-          capturedLists,
           mutableMapOf(),
           serializersModule,
           SmtIntermediateRepresentation(ref),

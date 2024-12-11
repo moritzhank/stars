@@ -18,12 +18,10 @@
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.experiments
 
 import java.io.File
-import kotlin.reflect.KClass
 import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.ExperimentLoader
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
@@ -32,16 +30,13 @@ fun main() {
   val t: Segment = ExperimentLoader.loadTestSegment()
   println("Finished reading.")
   val serializersModule = EmptySerializersModule()
-  val capturedClasses = mutableSetOf<KClass<*>>()
-  val capturedLists = mutableListOf<SmtIntermediateMember.List>()
   var intermediateRepresentation: List<SmtIntermediateRepresentation>
   val intermediateRepresentationTime = measureTime {
-    intermediateRepresentation =
-        getSmtIntermediateRepresentation(serializersModule, t, capturedClasses, capturedLists)
+    intermediateRepresentation = getSmtIntermediateRepresentation(serializersModule, t)
   }
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
-  val smtLib = generateSmtLib(intermediateRepresentation, capturedClasses, capturedLists)
+  val smtLib = generateSmtLib(intermediateRepresentation, mutableSetOf(), mutableListOf())
   File("test.smt2").writeText(smtLib)
   println("Generated SmtLib lines: ${smtLib.lines().size}")
   // println("Running solver ...")
