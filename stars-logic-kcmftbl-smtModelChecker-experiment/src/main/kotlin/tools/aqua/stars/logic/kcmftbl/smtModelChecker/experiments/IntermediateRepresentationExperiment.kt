@@ -17,7 +17,6 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.experiments
 
-// import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.time.measureTime
@@ -30,12 +29,12 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSm
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
 
 fun main() {
-  val t: Segment = ExperimentLoader.Companion.loadTestSegment()
+  val t: Segment = ExperimentLoader.loadTestSegment()
   println("Finished reading.")
   val serializersModule = EmptySerializersModule()
   val capturedClasses = mutableSetOf<KClass<*>>()
   val capturedLists = mutableListOf<SmtIntermediateMember.List>()
-  var intermediateRepresentation: List<SmtIntermediateRepresentation> = listOf()
+  var intermediateRepresentation: List<SmtIntermediateRepresentation>
   val intermediateRepresentationTime = measureTime {
     intermediateRepresentation =
         getSmtIntermediateRepresentation(serializersModule, t, capturedClasses, capturedLists)

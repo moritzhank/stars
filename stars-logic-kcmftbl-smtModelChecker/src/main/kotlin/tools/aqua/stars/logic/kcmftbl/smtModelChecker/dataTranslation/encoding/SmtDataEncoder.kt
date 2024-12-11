@@ -19,7 +19,6 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
-import kotlin.reflect.KClass
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
@@ -27,8 +26,6 @@ import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.modules.SerializersModule
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 
 /**
  * @param memberNames Used to be able to correctly set the serialised member in
@@ -40,8 +37,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtInterme
 @OptIn(ExperimentalSerializationApi::class)
 internal class SmtDataEncoder(
     result: MutableList<SmtIntermediateRepresentation>,
-    capturedClasses: MutableSet<KClass<*>>,
-    capturedLists: MutableList<SmtIntermediateMember.List>,
     visitedSmtIDs: MutableMap<Int, Boolean>,
     serializersModule: SerializersModule,
     // Changing parameters:
@@ -54,8 +49,6 @@ internal class SmtDataEncoder(
 ) :
     AbstractSmtDataEncoder(
         result,
-        capturedClasses,
-        capturedLists,
         visitedSmtIDs,
         serializersModule,
         nextSerializable) {
@@ -97,8 +90,6 @@ internal class SmtDataEncoder(
     result.add(intermediateRepresentation)
     return SmtDataEncoder(
         result,
-        capturedClasses,
-        capturedLists,
         visitedSmtIDs,
         serializersModule,
         intermediateRepresentation,
@@ -149,11 +140,8 @@ internal class SmtDataEncoder(
       // }
       // listMembers.list.add(intermediateListMember.refID)
     }
-    capturedLists.add(intermediateListMember)
     return SmtDataEncoder(
         result,
-        capturedClasses,
-        capturedLists,
         visitedSmtIDs,
         serializersModule,
         null,
@@ -207,7 +195,6 @@ internal class SmtDataEncoder(
     require(kind == StructureKind.CLASS, defaultErrorMessage)
     // Encode class
     require(nextSerializable is SmtTranslatableBase, defaultErrorMessage)
-    capturedClasses.add(nextSerializable::class)
     return encodeSmtTranslatableBase(
         nextSerializable, descriptor.elementNames.toList().toTypedArray())
   }

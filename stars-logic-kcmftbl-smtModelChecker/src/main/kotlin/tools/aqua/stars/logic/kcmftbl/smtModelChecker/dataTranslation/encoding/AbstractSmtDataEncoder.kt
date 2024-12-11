@@ -19,16 +19,14 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding
 
-import kotlin.reflect.KClass
-import kotlinx.serialization.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.descriptors.elementNames
 import kotlinx.serialization.encoding.AbstractEncoder
 import kotlinx.serialization.modules.SerializersModule
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.*
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateMember
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 
 /**
  * Abstracts the verification and handling of the next serializable value ([nextSerializable]).
@@ -44,8 +42,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtInterme
 @ExperimentalSerializationApi
 internal abstract class AbstractSmtDataEncoder(
     protected val result: MutableList<SmtIntermediateRepresentation>,
-    protected val capturedClasses: MutableSet<KClass<*>>,
-    protected val capturedLists: MutableList<SmtIntermediateMember.List>,
     protected val visitedSmtIDs: MutableMap<Int, Boolean>,
     override val serializersModule: SerializersModule,
     protected var nextSerializable: Any? = null

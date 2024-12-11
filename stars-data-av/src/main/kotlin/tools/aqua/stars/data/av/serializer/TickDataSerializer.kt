@@ -19,22 +19,13 @@ package tools.aqua.stars.data.av.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.encodeStructure
-import tools.aqua.stars.data.av.dataclasses.Block
-import tools.aqua.stars.data.av.dataclasses.Daytime
-import tools.aqua.stars.data.av.dataclasses.Pedestrian
-import tools.aqua.stars.data.av.dataclasses.Segment
-import tools.aqua.stars.data.av.dataclasses.TickData
-import tools.aqua.stars.data.av.dataclasses.TickDataUnitSeconds
-import tools.aqua.stars.data.av.dataclasses.TrafficLight
-import tools.aqua.stars.data.av.dataclasses.Vehicle
-import tools.aqua.stars.data.av.dataclasses.WeatherParameters
+import tools.aqua.stars.data.av.dataclasses.*
 
 class TickDataSerializer() : KSerializer<TickData> {
 
