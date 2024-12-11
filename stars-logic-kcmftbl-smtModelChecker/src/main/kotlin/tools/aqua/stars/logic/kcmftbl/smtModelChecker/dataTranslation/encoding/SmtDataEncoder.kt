@@ -46,12 +46,7 @@ internal class SmtDataEncoder(
     private var listIntermediateMember: SmtIntermediateMember.List?,
     private val serializationMode: SmtDataSerializationMode = SmtDataSerializationMode.DEFAULT,
     nextSerializable: Any? = null,
-) :
-    AbstractSmtDataEncoder(
-        result,
-        visitedSmtIDs,
-        serializersModule,
-        nextSerializable) {
+) : AbstractSmtDataEncoder(result, visitedSmtIDs, serializersModule, nextSerializable) {
 
   private val defaultErrorMessage = {
     "An unexpected error occurred during the serialization of an object."
@@ -89,13 +84,7 @@ internal class SmtDataEncoder(
     }
     result.add(intermediateRepresentation)
     return SmtDataEncoder(
-        result,
-        visitedSmtIDs,
-        serializersModule,
-        intermediateRepresentation,
-        0,
-        memberNames,
-        null)
+        result, visitedSmtIDs, serializersModule, intermediateRepresentation, 0, memberNames, null)
   }
 
   /**
