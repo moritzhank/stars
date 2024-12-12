@@ -30,7 +30,7 @@ import kotlinx.serialization.Transient
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtAllowNonTrivialGetter
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.ClassValueCache
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getKmProperties
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getQualifiedName
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getSimpleName
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.resolveClassAndGenericArgumentClass
 
 /** Stores a list of translatable properties of a class. */
@@ -50,6 +50,8 @@ internal class SmtTranslationClassInfo(
 
   fun getTranslatableProperties() = properties
 
+  fun getTranslationName() = translationName
+
   class Property(
       val name: String,
       val nonTrivialGetter: Boolean,
@@ -66,7 +68,7 @@ internal fun <T : Any> smtTranslationClassInfo(kClass: KClass<T>): SmtTranslatio
   // Lambda expression to calculate the SmtTranslationClassInfo for kClass
   val smtTranslationClassInfoFactory: () -> SmtTranslationClassInfo = {
     val translationName: String =
-        kClass.findAnnotation<SerialName>()?.value ?: getQualifiedName(kClass)
+        kClass.findAnnotation<SerialName>()?.value ?: getSimpleName(kClass)
     val translatableProperties = mutableListOf<SmtTranslationClassInfo.Property>()
     for (kmProperty in getKmProperties(kClass)) {
       // Get the kProperty associated with kmProperty

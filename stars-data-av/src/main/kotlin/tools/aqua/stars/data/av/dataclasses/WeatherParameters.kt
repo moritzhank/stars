@@ -54,4 +54,4 @@ data class WeatherParameters(
     val scatteringIntensity: Double,
     val mieScatteringScale: Double,
     val rayleighScatteringScale: Double,
-) : SmtTranslatableBase() {}
+) : SmtTranslatableBase()

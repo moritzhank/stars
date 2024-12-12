@@ -23,10 +23,10 @@ import kotlin.reflect.KClass
 import kotlinx.metadata.KmProperty
 import kotlinx.metadata.jvm.KotlinClassMetadata
 
-/** Get qualified name of [kClass] with guarantee. */
-internal fun getQualifiedName(kClass: KClass<*>): String {
-  val name = kClass.qualifiedName
-  requireNotNull(name) { "No qualified name could be found for \"$kClass\"." }
+/** Get simple name of [kClass] with guarantee. */
+internal fun getSimpleName(kClass: KClass<*>): String {
+  val name = kClass.simpleName
+  requireNotNull(name) { "No simple name could be found for \"$kClass\"." }
   return name
 }
 

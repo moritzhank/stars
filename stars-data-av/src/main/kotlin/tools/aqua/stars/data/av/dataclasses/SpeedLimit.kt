@@ -32,4 +32,4 @@ data class SpeedLimit(
     val speedLimit: Double,
     val fromDistanceFromStart: Double,
     val toDistanceFromStart: Double
-) : SmtTranslatableBase() {}
+) : SmtTranslatableBase()

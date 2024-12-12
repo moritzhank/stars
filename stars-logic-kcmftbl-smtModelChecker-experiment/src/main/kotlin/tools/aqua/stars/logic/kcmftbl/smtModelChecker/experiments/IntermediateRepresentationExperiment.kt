@@ -22,6 +22,7 @@ import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.ExperimentLoader
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtDataTranslationWrapper
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
@@ -36,9 +37,17 @@ fun main() {
   }
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
-  val smtLib = generateSmtLib(intermediateRepresentation)
-  File("test.smt2").writeText(smtLib)
+  var translationWrapper: SmtDataTranslationWrapper
+  val translationWrapperTime = measureTime {
+    translationWrapper = SmtDataTranslationWrapper(intermediateRepresentation)
+  }
+  println("Duration of generation of SmtDataTranslationWrapper: $translationWrapperTime")
+  var smtLib: String
+  val smtLibTime = measureTime { smtLib = generateSmtLib(translationWrapper) }
+  println("Duration of generation of SMT-LIB: $smtLibTime")
   println("Generated SmtLib lines: ${smtLib.lines().size}")
+  File("test.smt2").writeText(smtLib)
+
   // println("Running solver ...")
   // val ctx = DispatcherTCPContext("127.0.0.1", 7500)
   // val msg = "cvc5\n$smtLib\n\$EOF\$\n"

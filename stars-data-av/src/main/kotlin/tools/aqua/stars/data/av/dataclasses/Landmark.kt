@@ -48,4 +48,4 @@ data class Landmark(
     val text: String,
     val location: Location,
     val rotation: Rotation
-) : SmtTranslatableBase() {}
+) : SmtTranslatableBase()

@@ -28,4 +28,4 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property z The z ordinate.
  */
 @Serializable
-data class Location(val x: Double, val y: Double, val z: Double) : SmtTranslatableBase() {}
+data class Location(val x: Double, val y: Double, val z: Double) : SmtTranslatableBase()

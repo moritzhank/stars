@@ -32,4 +32,4 @@ data class LaneMidpoint(
     val distanceToStart: Double,
     val location: Location,
     val rotation: Rotation,
-) : SmtTranslatableBase() {}
+) : SmtTranslatableBase()

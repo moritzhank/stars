@@ -27,7 +27,8 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.encodeStructure
 import tools.aqua.stars.data.av.dataclasses.*
 
-class TickDataSerializer() : KSerializer<TickData> {
+/** Custom [KSerializer] for [TickData]. */
+class TickDataSerializer : KSerializer<TickData> {
 
   override val descriptor: SerialDescriptor =
       buildClassSerialDescriptor("TickData") {
