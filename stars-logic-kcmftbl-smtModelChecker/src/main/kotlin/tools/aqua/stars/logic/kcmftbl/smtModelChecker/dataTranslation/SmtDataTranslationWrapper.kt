@@ -15,25 +15,24 @@
  * limitations under the License.
  */
 
-@file:Suppress("StringLiteralDuplication", "UseDataClass")
-
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.SmtSolver
+import kotlin.reflect.KClass
 
-/** Generate SmtLib. */
-fun generateSmtLib(
-    intermediateRepresentation: List<SmtIntermediateRepresentation>,
-    solver: SmtSolver = SmtSolver.CVC5
-): String {
-  val result = StringBuilder()
+/** Groups IDs of [SmtIntermediateRepresentation] by type/sort */
+sealed class SmtDataTranslationWrapper(
+    private val intermediateRepresentation: List<SmtIntermediateRepresentation>
+) {
 
-  // Prelude
-  result.appendLine("(set-logic ALL)")
+  private val capturedKClassesToOccurrence = mutableMapOf<KClass<*>, Int>()
+  val externalSmtIDs = Array(intermediateRepresentation.size) { -1 }
 
-  // Generate sort definitions
-  result.appendLine()
+  init {
+    intermediateRepresentation.forEach { intermediate ->
+      val kClass = intermediate::class
+      capturedKClassesToOccurrence[kClass] = capturedKClassesToOccurrence.getOrPut(kClass) { 0 } + 1
+    }
+    //intermediateRepresentation.forEach { intermediate ->
 
-  result.appendLine("(check-sat)")
-  return result.toString()
+  }
 }

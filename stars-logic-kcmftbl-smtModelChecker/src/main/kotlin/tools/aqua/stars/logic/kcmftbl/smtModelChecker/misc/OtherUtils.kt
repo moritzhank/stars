@@ -31,3 +31,30 @@ fun Any.toSmtLibPrimitiveFormat(): String {
     else -> this.toString()
   }
 }
+
+/** Generate ITE-structure for SMT-LIB. */
+fun <T> generateEqualsITEStructure(
+    elements: Collection<T>,
+    comparisonVarName: String,
+    ifStr: (T) -> String,
+    thenStr: (T) -> String,
+    defaultValue: String? = null
+): String {
+  val iteStructureFront = StringBuilder("")
+  var bracketsNeeded = 0
+  val firstElem = elements.first()
+  elements.forEachIndexed { index, elem ->
+    // Skip first element if no default is given
+    val skip = defaultValue == null && index == 0
+    if (!skip) {
+      iteStructureFront.append("(ite (= $comparisonVarName ${ifStr(elem)}) ${thenStr(elem)} ")
+      bracketsNeeded++
+    }
+  }
+  if (defaultValue == null) {
+    iteStructureFront.append("${thenStr(firstElem)}${")".repeat(bracketsNeeded)}")
+  } else {
+    iteStructureFront.append("$defaultValue${")".repeat(bracketsNeeded)}")
+  }
+  return iteStructureFront.toString()
+}

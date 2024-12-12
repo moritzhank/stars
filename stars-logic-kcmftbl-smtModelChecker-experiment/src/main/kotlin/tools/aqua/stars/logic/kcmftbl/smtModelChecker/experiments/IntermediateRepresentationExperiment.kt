@@ -36,7 +36,7 @@ fun main() {
   }
   println("Duration of generation of intermediate representation: $intermediateRepresentationTime")
   println("Size of intermediate representation: ${intermediateRepresentation.size}")
-  val smtLib = generateSmtLib(intermediateRepresentation, mutableSetOf(), mutableListOf())
+  val smtLib = generateSmtLib(intermediateRepresentation)
   File("test.smt2").writeText(smtLib)
   println("Generated SmtLib lines: ${smtLib.lines().size}")
   // println("Running solver ...")
