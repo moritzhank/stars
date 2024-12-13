@@ -22,6 +22,7 @@ package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.SmtSolver
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.firstCharLower
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.generateEqualsITEStructure
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.toSmtLibPrimitiveFormat
 
 /** Generate SmtLib. */
 fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSolver.CVC5): String {
@@ -46,6 +47,7 @@ fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSo
   for ((name, smtIntermediateMember) in wrapper.memberNameToSmtIntermediateMember) {
     val memberInfo = wrapper.memberNameToMemberInfo[name]!!
     when (memberInfo.memberType) {
+      // Generate member definition for references
       SmtIntermediateMemberType.REFERENCE -> {
         val iteStructure =
             generateEqualsITEStructure(
@@ -58,8 +60,75 @@ fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSo
                 "-1")
         result.appendLine("(define-fun ${name.firstCharLower()} ((id Int)) Int $iteStructure)")
       }
-      // TODO
-      else -> {}
+      // Generate member definition for values
+      SmtIntermediateMemberType.VALUE -> {
+        val smtPrimitive = memberInfo.memberClass.smtPrimitive()!!
+        val iteStructure =
+          generateEqualsITEStructure(
+            smtIntermediateMember.entries,
+            "id",
+            { ifPair -> "${ifPair.component1()}" },
+            { thenPair ->
+              (thenPair.component2() as SmtIntermediateMember.Value).value.toSmtLibPrimitiveFormat()
+            }, smtPrimitive.defaultValue.toSmtLibPrimitiveFormat())
+        val returnSort = smtPrimitive.smtPrimitiveSortName
+        result.appendLine("(define-fun ${name.firstCharLower()} ((id Int)) $returnSort $iteStructure)")
+      }
+      // Generate member definition for lists
+      SmtIntermediateMemberType.VALUE_LIST,
+      SmtIntermediateMemberType.REFERENCE_LIST -> {
+        // Generate member to list mapping
+        val iteStructure =
+          generateEqualsITEStructure(
+            smtIntermediateMember.entries,
+            "listId",
+            { ifEntry -> "${ifEntry.component1()}" },
+            { thenEntry ->
+              "${(thenEntry.component2() as SmtIntermediateMember.List).refID}"
+            },
+            "-1")
+        result.appendLine("(define-fun ${name.firstCharLower()} ((listId Int)) Int $iteStructure)")
+
+        // TODO Generate *_elemInList(list, elem)
+      }
+      /*
+        // Generate isListElement function
+        val listArgumentClass = intermediate.listArgumentClass!!
+        val listArgumentSort =
+            listArgumentClass.smtPrimitive()?.smtPrimitiveSortName ?: listArgumentClass.simpleName
+        // The outer ite structure contains ites over all possible ListRef objects. The inner ite
+        // structure contains ite over all possible elements of the corresponding listRef.
+        val outerITEStructure =
+            generateITEStructure(
+                intermediate.members,
+                "x",
+                { ifPair -> "list_${(ifPair.second as SmtIntermediateMember.List).refID}" },
+                { thenPair ->
+                  when (val member = thenPair.second as SmtIntermediateMember.List) {
+                    is SmtIntermediateMember.List.ValueList -> {
+                      TODO()
+                    }
+                    is SmtIntermediateMember.List.ReferenceList -> {
+                      val refList = member.list
+                      if (!refList.isEmpty()) {
+                        generateITEStructure(
+                            refList, "y", { ifElem -> "ind_${ifElem}" }, { _ -> "true" }, "false")
+                      } else {
+                        // An empty list has no elements
+                        // TODO: Maybe implement possibility to omit these entries
+                        "false"
+                      }
+                    }
+                  }
+                },
+                "false")
+        result.appendLine(
+            "(define-fun ${memberName.firstCharLower()}_isListElement ((x ListRef) (y $listArgumentSort)) Bool $outerITEStructure)")
+      }
+    }
+  }
+  result.appendLine()
+       */
     }
   }
   result.appendLine()
