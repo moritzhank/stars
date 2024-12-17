@@ -17,17 +17,21 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.experiments
 
-import java.io.File
 import kotlin.time.measureTime
 import kotlinx.serialization.modules.EmptySerializersModule
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.ExperimentLoader
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.SmtSolver
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtDataTranslationWrapper
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtIntermediateRepresentation
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.generateSmtLib
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.getSmtIntermediateRepresentation
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.runSmtSolver
 
 fun main() {
+  // Options
+  val solver = SmtSolver.Z3
+
   val t: Segment = ExperimentLoader.loadTestSegment()
   println("Finished reading.")
   val serializersModule = EmptySerializersModule()
@@ -44,15 +48,12 @@ fun main() {
   println("Duration of generation of SmtDataTranslationWrapper: $translationWrapperTime")
   var smtLib: String
   val smtLibTime = measureTime { smtLib = generateSmtLib(translationWrapper) }
+  smtLib += "(check-sat)"
   println("Duration of generation of SMT-LIB: $smtLibTime")
   println("Generated SmtLib lines: ${smtLib.lines().size}")
-  File("test.smt2").writeText(smtLib)
-
-  // println("Running solver ...")
-  // val ctx = DispatcherTCPContext("127.0.0.1", 7500)
-  // val msg = "cvc5\n$smtLib\n\$EOF\$\n"
-  // val result = runBlocking { ctx.sendMessage(msg) }
-  // println("========[ Result of the solver ]========")
-  // println(result)
-  // println("========================================")
+  val statsOption = if (solver == SmtSolver.Z3) "-st" else "--stats"
+  println("Running solver ...")
+  println("========[ Result of the solver ]========")
+  println(runSmtSolver(smtLib, solver, true, statsOption))
+  println("========================================")
 }

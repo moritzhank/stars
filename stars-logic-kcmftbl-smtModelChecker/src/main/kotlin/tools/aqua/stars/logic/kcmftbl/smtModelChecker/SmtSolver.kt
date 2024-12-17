@@ -29,7 +29,7 @@ enum class SmtSolver(val solverName: String) {
   Z3("z3")
 }
 
-/** Run a local SMT-Solver instance. This requires a correct setup "smtSolverSettings.json". */
+/** Run a local SMT-Solver instance. This requires a correct setup of "smtSolverSettings.json". */
 fun runSmtSolver(
     program: String,
     solver: SmtSolver = SmtSolver.CVC5,

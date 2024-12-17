@@ -45,7 +45,7 @@ internal class PythonCommandLineWrapper {
           } else if (pythonInstalled("python3")) {
             "python3"
           } else {
-            throw IllegalStateException("No python installation could be found.")
+            error("No python installation could be found.")
           }
       this.pythonBaseCmdCache = pythonBaseCmd
       return pythonBaseCmd
