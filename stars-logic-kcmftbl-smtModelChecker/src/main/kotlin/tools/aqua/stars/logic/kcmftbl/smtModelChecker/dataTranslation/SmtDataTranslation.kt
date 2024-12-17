@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@file:Suppress("StringLiteralDuplication", "UseDataClass")
+@file:Suppress("StringLiteralDuplication", "UseDataClass", "NotImplementedDeclaration")
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
@@ -36,7 +36,12 @@ fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSo
   result.appendLine("; Sort intervals")
   wrapper.capturedKClassToExternalIDInterval.forEach { (kClass, interval) ->
     // Should be in cache to this point
-    val name = smtTranslationClassInfo(kClass).getTranslationName()
+    val name =
+        if (kClass != List::class) {
+          smtTranslationClassInfo(kClass).getTranslationName()
+        } else {
+          "List"
+        }
     result.appendLine(
         "(define-fun is_$name ((id Int)) Bool (and (>= id ${interval.first}) (<= id ${interval.second})))")
   }
@@ -53,7 +58,7 @@ fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSo
             generateEqualsITEStructure(
                 smtIntermediateMember.entries,
                 "id",
-                { ifEntry -> "${ifEntry.component1()}" },
+                { ifEntry -> "${wrapper.smtIDToExternalID[ifEntry.component1()]!!}" },
                 { thenEntry ->
                   "${(thenEntry.component2() as SmtIntermediateMember.Reference).refID}"
                 },
@@ -64,77 +69,59 @@ fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSo
       SmtIntermediateMemberType.VALUE -> {
         val smtPrimitive = memberInfo.memberClass.smtPrimitive()!!
         val iteStructure =
-          generateEqualsITEStructure(
-            smtIntermediateMember.entries,
-            "id",
-            { ifPair -> "${ifPair.component1()}" },
-            { thenPair ->
-              (thenPair.component2() as SmtIntermediateMember.Value).value.toSmtLibPrimitiveFormat()
-            }, smtPrimitive.defaultValue.toSmtLibPrimitiveFormat())
+            generateEqualsITEStructure(
+                smtIntermediateMember.entries,
+                "id",
+                { ifPair -> "${wrapper.smtIDToExternalID[ifPair.component1()]!!}" },
+                { thenPair ->
+                  (thenPair.component2() as SmtIntermediateMember.Value)
+                      .value
+                      .toSmtLibPrimitiveFormat()
+                },
+                smtPrimitive.defaultValue.toSmtLibPrimitiveFormat())
         val returnSort = smtPrimitive.smtPrimitiveSortName
-        result.appendLine("(define-fun ${name.firstCharLower()} ((id Int)) $returnSort $iteStructure)")
+        result.appendLine(
+            "(define-fun ${name.firstCharLower()} ((id Int)) $returnSort $iteStructure)")
       }
       // Generate member definition for lists
-      SmtIntermediateMemberType.VALUE_LIST,
       SmtIntermediateMemberType.REFERENCE_LIST -> {
         // Generate member to list mapping
         val iteStructure =
-          generateEqualsITEStructure(
-            smtIntermediateMember.entries,
-            "listId",
-            { ifEntry -> "${ifEntry.component1()}" },
-            { thenEntry ->
-              "${(thenEntry.component2() as SmtIntermediateMember.List).refID}"
-            },
-            "-1")
+            generateEqualsITEStructure(
+                smtIntermediateMember.entries,
+                "listId",
+                { ifEntry -> "${wrapper.smtIDToExternalID[ifEntry.component1()]!!}" },
+                { thenEntry -> "${(thenEntry.component2() as SmtIntermediateMember.List).refID}" },
+                "-1")
         result.appendLine("(define-fun ${name.firstCharLower()} ((listId Int)) Int $iteStructure)")
-
-        // TODO Generate *_elemInList(list, elem)
-      }
-      /*
-        // Generate isListElement function
-        val listArgumentClass = intermediate.listArgumentClass!!
-        val listArgumentSort =
-            listArgumentClass.smtPrimitive()?.smtPrimitiveSortName ?: listArgumentClass.simpleName
-        // The outer ite structure contains ites over all possible ListRef objects. The inner ite
-        // structure contains ite over all possible elements of the corresponding listRef.
-        val outerITEStructure =
-            generateITEStructure(
-                intermediate.members,
-                "x",
-                { ifPair -> "list_${(ifPair.second as SmtIntermediateMember.List).refID}" },
-                { thenPair ->
-                  when (val member = thenPair.second as SmtIntermediateMember.List) {
-                    is SmtIntermediateMember.List.ValueList -> {
-                      TODO()
-                    }
-                    is SmtIntermediateMember.List.ReferenceList -> {
-                      val refList = member.list
-                      if (!refList.isEmpty()) {
-                        generateITEStructure(
-                            refList, "y", { ifElem -> "ind_${ifElem}" }, { _ -> "true" }, "false")
-                      } else {
-                        // An empty list has no elements
-                        // TODO: Maybe implement possibility to omit these entries
-                        "false"
-                      }
-                    }
+        // Generate list membership function
+        val iteStructure2 =
+            generateEqualsITEStructure(
+                smtIntermediateMember.entries,
+                "listId",
+                { ifEntry ->
+                  "${wrapper.smtIDToExternalID[(ifEntry.component2() as SmtIntermediateMember.List.ReferenceList).refID]!!}"
+                },
+                { thenEntry ->
+                  val list =
+                      (thenEntry.component2() as SmtIntermediateMember.List.ReferenceList).list
+                  if (list.isNotEmpty()) {
+                    generateEqualsITEStructure(
+                        list, "elemId", { ifEntry -> "$ifEntry" }, { _ -> "true" }, "false")
+                  } else {
+                    // TODO: Maybe cut out these entry, because default value is always false
+                    "false"
                   }
                 },
                 "false")
         result.appendLine(
-            "(define-fun ${memberName.firstCharLower()}_isListElement ((x ListRef) (y $listArgumentSort)) Bool $outerITEStructure)")
+            "(define-fun in_${name.firstCharLower()} ((listId Int) (elemId Int)) Bool $iteStructure2)")
+      }
+      SmtIntermediateMemberType.VALUE_LIST -> {
+        TODO()
       }
     }
   }
   result.appendLine()
-       */
-    }
-  }
-  result.appendLine()
-
-  // TODO ...
-
-  result.appendLine("(check-sat)")
   return result.toString()
 }

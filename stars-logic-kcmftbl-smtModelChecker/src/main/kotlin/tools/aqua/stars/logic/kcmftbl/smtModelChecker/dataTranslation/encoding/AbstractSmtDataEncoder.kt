@@ -77,7 +77,7 @@ internal abstract class AbstractSmtDataEncoder(
       // TODO: This is not verified for root object
       // TODO: Performance hit of about 250ms
       compareMembersFromSerializerAgainstClassInfo(
-          elemDescriptor, value.getSmtTranslationAnnotation()) { l1, l2 ->
+          elemDescriptor, value.getSmtTranslationClassInfo()) { l1, l2 ->
             val className = value!!::class.simpleName ?: "<unknown_class>"
             val memberName = "${descriptor.serialName}.${descriptor.getElementName(index)}"
             "The list of expected members does not match the serialised members for \"$className\" (Accessed via \"$memberName\"). Expected: $l1. Found: $l2. This may be due to incorrect configuration of a custom serializer or missing @Transient annotations."

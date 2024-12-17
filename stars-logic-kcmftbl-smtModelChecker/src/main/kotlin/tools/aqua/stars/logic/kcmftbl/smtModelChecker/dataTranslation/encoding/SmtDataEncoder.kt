@@ -105,7 +105,7 @@ internal class SmtDataEncoder(
     val typeArgument =
         current!!
             .ref
-            .getSmtTranslationAnnotation()
+            .getSmtTranslationClassInfo()
             .getTranslatableProperties()
             .getOrNull(currentMemberIndex)
             ?.listTypeArgumentClass

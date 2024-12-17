@@ -40,6 +40,6 @@ abstract class SmtTranslatableBase {
     return smtID
   }
 
-  internal fun getSmtTranslationAnnotation(): SmtTranslationClassInfo =
+  internal fun getSmtTranslationClassInfo(): SmtTranslationClassInfo =
       smtTranslationClassInfo(this::class)
 }
