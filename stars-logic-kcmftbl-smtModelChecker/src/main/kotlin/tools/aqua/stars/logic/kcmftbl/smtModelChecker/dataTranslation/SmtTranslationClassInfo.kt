@@ -62,7 +62,10 @@ internal class SmtTranslationClassInfo(
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationClassInfo>()
 
-/** Generate SmtTranslationClassInfo for [kClass] or get it from [SMT_TRANSLATION_CACHE]. */
+/**
+ * Generate SmtTranslationClassInfo for [kClass] or get it from [SMT_TRANSLATION_CACHE]. IMPORTANT:
+ * This will throw an error if called on non-Kotlin classes such as lists.
+ */
 @OptIn(ExperimentalStdlibApi::class)
 internal fun <T : Any> smtTranslationClassInfo(kClass: KClass<T>): SmtTranslationClassInfo {
   // Lambda expression to calculate the SmtTranslationClassInfo for kClass

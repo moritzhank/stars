@@ -31,6 +31,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.runSmtSolver
 fun main() {
   // Options
   val solver = SmtSolver.Z3
+  val removeSmt2File = false
 
   val t: Segment = ExperimentLoader.loadTestSegment()
   println("Finished reading.")
@@ -54,6 +55,6 @@ fun main() {
   val statsOption = if (solver == SmtSolver.Z3) "-st" else "--stats"
   println("Running solver ...")
   println("========[ Result of the solver ]========")
-  println(runSmtSolver(smtLib, solver, true, statsOption))
+  println(runSmtSolver(smtLib, solver, removeSmt2File, statsOption))
   println("========================================")
 }

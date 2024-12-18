@@ -116,6 +116,18 @@ fun generateSmtLib(wrapper: SmtDataTranslationWrapper, solver: SmtSolver = SmtSo
                 "false")
         result.appendLine(
             "(define-fun in_${name.firstCharLower()} ((listId Int) (elemId Int)) Bool $iteStructure2)")
+        // Generate list size function
+        val iteStructure3 =
+            generateEqualsITEStructure(
+                smtIntermediateMember.entries,
+                "listId",
+                { ifEntry -> "${wrapper.smtIDToExternalID[ifEntry.component1()]!!}" },
+                { thenEntry ->
+                  "${(thenEntry.component2() as SmtIntermediateMember.List.ReferenceList).list.size}"
+                },
+                "-1")
+        result.appendLine(
+            "(define-fun size_${name.firstCharLower()} ((listId Int)) Int $iteStructure3)")
       }
       SmtIntermediateMemberType.VALUE_LIST -> {
         TODO()

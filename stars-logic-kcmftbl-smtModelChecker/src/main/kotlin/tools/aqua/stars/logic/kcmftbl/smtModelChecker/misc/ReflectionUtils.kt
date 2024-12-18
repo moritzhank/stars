@@ -35,7 +35,12 @@ internal fun getKmProperties(kClass: KClass<*>): List<KmProperty> {
   // Adapted from
   // https://discuss.kotlinlang.org/t/reflection-and-properties-checking-for-custom-getters-setters/22457/2
   val kotlinClassMetadata =
-      KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
+      try {
+        KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
+      } catch (e: NullPointerException) {
+        // Error message rewritten to be more meaningful
+        error("Failed to retrieve Kotlin metadata for '$kClass'.")
+      }
   return (kotlinClassMetadata as KotlinClassMetadata.Class).kmClass.properties
 }
 

@@ -19,30 +19,19 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-/** Contains commonly used predefined functions. */
-sealed class PredefinedFunctions {
+import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
 
-  companion object {
-    /*
-    val IntSignFunction = function { int: CCB<Int> ->
-      branch {
-            eq {
-              wrap(int)
-              const(0)
-            }
+/** Contains commonly used predefined functions. */
+object PredefinedFunctions {
+
+  val IntSign = function { int: CCB<Int> ->
+    branch {
+          lt {
+            wrap(int)
+            const(0)
           }
-          .satisfied { const(10) }
-          .otherwise {
-            branch {
-                  gt {
-                    wrap(int)
-                    const(0)
-                  }
-                }
-                .satisfied { const(1) }
-                .otherwise { const(-1) }
-          }
-    }
-     */
+        }
+        .satisfied { const(-1) }
+        .otherwise { const(1) }
   }
 }
