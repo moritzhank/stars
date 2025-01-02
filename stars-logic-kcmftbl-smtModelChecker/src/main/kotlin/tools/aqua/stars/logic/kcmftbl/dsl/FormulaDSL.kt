@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -159,24 +159,36 @@ class FormulaBuilder(
     return Exists(ccb, phi[0])
   }
 
-  private fun buildMinPrevalence(fraction: Double): MinPrevalence {
+  private fun buildMinPrevalence(
+      interval: Pair<Int, Int>? = null,
+      fraction: Double
+  ): MinPrevalence {
     assert(phi.size == 1)
-    return MinPrevalence(fraction, phi[0])
+    return MinPrevalence(interval, fraction, phi[0])
   }
 
-  private fun buildMaxPrevalence(fraction: Double): MaxPrevalence {
+  private fun buildMaxPrevalence(
+      interval: Pair<Int, Int>? = null,
+      fraction: Double
+  ): MaxPrevalence {
     assert(phi.size == 1)
-    return MaxPrevalence(fraction, phi[0])
+    return MaxPrevalence(interval, fraction, phi[0])
   }
 
-  private fun buildPastMinPrevalence(fraction: Double): PastMinPrevalence {
+  private fun buildPastMinPrevalence(
+      interval: Pair<Int, Int>? = null,
+      fraction: Double
+  ): PastMinPrevalence {
     assert(phi.size == 1)
-    return PastMinPrevalence(fraction, phi[0])
+    return PastMinPrevalence(interval, fraction, phi[0])
   }
 
-  private fun buildPastMaxPrevalence(fraction: Double): PastMaxPrevalence {
+  private fun buildPastMaxPrevalence(
+      interval: Pair<Int, Int>? = null,
+      fraction: Double
+  ): PastMaxPrevalence {
     assert(phi.size == 1)
-    return PastMaxPrevalence(fraction, phi[0])
+    return PastMaxPrevalence(interval, fraction, phi[0])
   }
 
   private fun <Type> buildBinding(ccb: CallContextBase<Type>, term: Term<Type>): Binding<Type> {
@@ -337,30 +349,42 @@ class FormulaBuilder(
 
   fun FormulaBuilder.minPrevalence(
       fraction: Double,
+      interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): MinPrevalence {
-    return deriveFormulaBuilder().apply(init).buildMinPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildMinPrevalence(interval, fraction).also {
+      phi.add(it)
+    }
   }
 
   fun FormulaBuilder.maxPrevalence(
       fraction: Double,
+      interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): MaxPrevalence {
-    return deriveFormulaBuilder().apply(init).buildMaxPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildMaxPrevalence(interval, fraction).also {
+      phi.add(it)
+    }
   }
 
   fun FormulaBuilder.pastMinPrevalence(
       fraction: Double,
+      interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): PastMinPrevalence {
-    return deriveFormulaBuilder().apply(init).buildPastMinPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildPastMinPrevalence(interval, fraction).also {
+      phi.add(it)
+    }
   }
 
   fun FormulaBuilder.pastMaxPrevalence(
       fraction: Double,
+      interval: Pair<Int, Int>? = null,
       init: FormulaBuilder.() -> Unit = {}
   ): PastMaxPrevalence {
-    return deriveFormulaBuilder().apply(init).buildPastMaxPrevalence(fraction).also { phi.add(it) }
+    return deriveFormulaBuilder().apply(init).buildPastMaxPrevalence(interval, fraction).also {
+      phi.add(it)
+    }
   }
 
   fun <Type> FormulaBuilder.binding(
@@ -391,4 +415,7 @@ class FormulaBuilder(
       assertCallContextAllowed(cc).let { Variable(cc) }
 
   fun <Type> const(value: Type): Constant<Type> = Constant(value)
+
+  /** This function is not intended to be used by the user. */
+  fun getPhi(): List<Formula> = phi.toList()
 }

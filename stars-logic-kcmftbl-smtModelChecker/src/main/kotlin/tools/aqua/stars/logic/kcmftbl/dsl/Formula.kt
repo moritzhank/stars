@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,13 +74,29 @@ data class Binding<Type>(
   fun copy(): Binding<Type> = Binding(ccb, copyTerm(bindTerm), inner)
 }
 
-data class MinPrevalence(val fraction: Double, val inner: Formula) : Formula
+data class MinPrevalence(
+    val interval: Pair<Int, Int>? = null,
+    val fraction: Double,
+    val inner: Formula
+) : Formula
 
-data class PastMinPrevalence(val fraction: Double, val inner: Formula) : Formula
+data class PastMinPrevalence(
+    val interval: Pair<Int, Int>? = null,
+    val fraction: Double,
+    val inner: Formula
+) : Formula
 
-data class MaxPrevalence(val fraction: Double, val inner: Formula) : Formula
+data class MaxPrevalence(
+    val interval: Pair<Int, Int>? = null,
+    val fraction: Double,
+    val inner: Formula
+) : Formula
 
-data class PastMaxPrevalence(val fraction: Double, val inner: Formula) : Formula
+data class PastMaxPrevalence(
+    val interval: Pair<Int, Int>? = null,
+    val fraction: Double,
+    val inner: Formula
+) : Formula
 
 /** Create a deep copy of [formula]. */
 fun copyFormula(formula: Formula): Formula {
@@ -103,10 +119,14 @@ fun copyFormula(formula: Formula): Formula {
     is Forall<*> -> Forall(formula.ccb, copyFormula(formula.inner))
     is Exists<*> -> Exists(formula.ccb, copyFormula(formula.inner))
     is Binding<*> -> formula.copy()
-    is MinPrevalence -> MinPrevalence(formula.fraction, copyFormula(formula.inner))
-    is PastMinPrevalence -> PastMinPrevalence(formula.fraction, copyFormula(formula.inner))
-    is MaxPrevalence -> MaxPrevalence(formula.fraction, copyFormula(formula.inner))
-    is PastMaxPrevalence -> PastMaxPrevalence(formula.fraction, copyFormula(formula.inner))
+    is MinPrevalence ->
+        MinPrevalence(formula.interval?.copy(), formula.fraction, copyFormula(formula.inner))
+    is PastMinPrevalence ->
+        PastMinPrevalence(formula.interval?.copy(), formula.fraction, copyFormula(formula.inner))
+    is MaxPrevalence ->
+        MaxPrevalence(formula.interval?.copy(), formula.fraction, copyFormula(formula.inner))
+    is PastMaxPrevalence ->
+        PastMaxPrevalence(formula.interval?.copy(), formula.fraction, copyFormula(formula.inner))
     is Leq<*> -> formula.copy()
     is Geq<*> -> formula.copy()
     is Lt<*> -> formula.copy()

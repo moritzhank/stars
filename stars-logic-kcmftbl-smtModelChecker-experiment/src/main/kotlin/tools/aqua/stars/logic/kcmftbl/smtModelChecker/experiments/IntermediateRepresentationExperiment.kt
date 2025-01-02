@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.runSmtSolver
 
 fun main() {
   // Options
-  val solver = SmtSolver.Z3
+  val solver = SmtSolver.CVC5
   val removeSmt2File = false
 
   val t: Segment = ExperimentLoader.loadTestSegment()
