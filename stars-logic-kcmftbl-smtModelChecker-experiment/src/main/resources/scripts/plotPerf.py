@@ -29,13 +29,20 @@ def main():
 
     # Plot
     plt.figure(figsize=(8, 6))
+
+    # Settings for publications
+    plt.rcParams["font.size"] = 14
+    plt.tight_layout()
+
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.plot(data1_x, data1_y, marker="o",label=legend1)
+    plt.plot(data1_x, data1_y, marker="o",label=legend1,color="red",lw=3,markersize=6)
     if len(sys.argv) > 8:
-        plt.plot(data2_x, data2_y, marker="o",label=legend2)
-    plt.legend()
+        plt.plot(data2_x, data2_y, marker="o",label=legend2,color="blue",lw=3,markersize=6)
+    legend = plt.legend(framealpha=1)
+    legend.get_frame().set_edgecolor("black")
+    plt.grid()
     if saveFile == "<plot>":
         plt.show()
     else:

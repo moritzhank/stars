@@ -26,7 +26,6 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getAbsolutePathFromPr
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.runSmtSolver
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.getDateTimeString
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.linSpaceArr
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.plotPerf
 
 private val resultFolderName =
     getAbsolutePathFromProjectDir("experiment${File.separator}smtDistinctPerf")
@@ -37,19 +36,20 @@ fun main() {
   val rangeOfDistinctStatements = linSpaceArr(2, 3000, 30)
   val rangeOfDistinctStatementsZ3 = linSpaceArr(3000, 10_0000, 30)
 
-  val resultFileCVC5 = runCVC5Experiment(listOf(10, 20, 30), 1)
-  // val resultFileZ3 = runZ3Experiment(rangeOfDistinctStatementsZ3, 1)
-
+  val resultFileCVC5 = runCVC5Experiment(rangeOfDistinctStatements, 3)
+  val resultFileZ3 = runZ3Experiment(rangeOfDistinctStatements + rangeOfDistinctStatementsZ3, 3)
+  /*
   val title = "Performance evaluation of SMT solvers for the \'distinct individuals\'-problem"
   plotPerf(
-      null,
-      title,
+      "experiment/smtDistinctPerf/test.png",
+      "",
       "Number of distinct individuals",
       "Duration [s]",
       resultFileCVC5,
       "CVC5 v1.2.0",
       1 / 1000f)
   File(resultFileCVC5).delete()
+   */
 }
 
 private fun runZ3Experiment(rangeOfDistinctStatements: List<Int>, repetitions: Int = 3): String {
