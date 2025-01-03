@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ internal class PythonCommandLineWrapper {
           } else if (pythonInstalled("python3")) {
             "python3"
           } else {
-            throw IllegalStateException("No python installation could be found.")
+            error("No python installation could be found.")
           }
       this.pythonBaseCmdCache = pythonBaseCmd
       return pythonBaseCmd

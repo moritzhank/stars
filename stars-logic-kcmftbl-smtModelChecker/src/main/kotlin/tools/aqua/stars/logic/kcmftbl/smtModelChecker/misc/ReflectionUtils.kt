@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +23,10 @@ import kotlin.reflect.KClass
 import kotlinx.metadata.KmProperty
 import kotlinx.metadata.jvm.KotlinClassMetadata
 
-/** Get qualified name of [kClass] with guarantee. */
-internal fun getQualifiedName(kClass: KClass<*>): String {
-  val name = kClass.qualifiedName
-  requireNotNull(name) { "No qualified name could be found for \"$kClass\"." }
+/** Get simple name of [kClass] with guarantee. */
+internal fun getSimpleName(kClass: KClass<*>): String {
+  val name = kClass.simpleName
+  requireNotNull(name) { "No simple name could be found for \"$kClass\"." }
   return name
 }
 
@@ -35,7 +35,12 @@ internal fun getKmProperties(kClass: KClass<*>): List<KmProperty> {
   // Adapted from
   // https://discuss.kotlinlang.org/t/reflection-and-properties-checking-for-custom-getters-setters/22457/2
   val kotlinClassMetadata =
-      KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
+      try {
+        KotlinClassMetadata.readStrict(kClass.java.getAnnotation(Metadata::class.java))
+      } catch (e: NullPointerException) {
+        // Error message rewritten to be more meaningful
+        error("Failed to retrieve Kotlin metadata for '$kClass'.")
+      }
   return (kotlinClassMetadata as KotlinClassMetadata.Class).kmClass.properties
 }
 

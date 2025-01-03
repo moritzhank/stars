@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS Project Authors
+ * Copyright 2023-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,4 +32,4 @@ data class SpeedLimit(
     val speedLimit: Double,
     val fromDistanceFromStart: Double,
     val toDistanceFromStart: Double
-) : SmtTranslatableBase() {}
+) : SmtTranslatableBase()

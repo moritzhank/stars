@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +20,12 @@
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation
 
 /** Represents Smt-primitives and their name in SmtLib. */
-enum class SmtPrimitive(val smtPrimitiveSortName: String) {
+enum class SmtPrimitive(val smtPrimitiveSortName: String, val defaultValue: Any) {
 
-  BOOL("Bool"),
-  INT("Int"),
-  REAL("Real"),
-  STRING("String")
+  BOOL("Bool", false),
+  INT("Int", Int.MIN_VALUE),
+  REAL("Real", Double.MIN_VALUE),
+  STRING("String", "")
 }
 
 /** Get [SmtPrimitive] for a [Class] (based on [Class.getSimpleName]). */

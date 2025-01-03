@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,6 @@ abstract class SmtTranslatableBase {
     return smtID
   }
 
-  internal fun getSmtTranslationAnnotation(): SmtTranslationClassInfo =
+  internal fun getSmtTranslationClassInfo(): SmtTranslationClassInfo =
       smtTranslationClassInfo(this::class)
 }

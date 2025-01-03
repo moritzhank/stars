@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ enum class SmtSolver(val solverName: String) {
   Z3("z3")
 }
 
-/** Run a local SMT-Solver instance. This requires a correct setup "smtSolverSettings.json". */
+/** Run a local SMT-Solver instance. This requires a correct setup of "smtSolverSettings.json". */
 fun runSmtSolver(
     program: String,
     solver: SmtSolver = SmtSolver.CVC5,

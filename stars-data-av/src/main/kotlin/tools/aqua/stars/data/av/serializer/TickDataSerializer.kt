@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,8 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.encodeStructure
 import tools.aqua.stars.data.av.dataclasses.*
 
-class TickDataSerializer() : KSerializer<TickData> {
+/** Custom [KSerializer] for [TickData]. */
+class TickDataSerializer : KSerializer<TickData> {
 
   override val descriptor: SerialDescriptor =
       buildClassSerialDescriptor("TickData") {

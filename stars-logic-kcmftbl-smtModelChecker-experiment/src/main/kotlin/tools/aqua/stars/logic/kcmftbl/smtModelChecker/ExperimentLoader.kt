@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,18 +22,15 @@ import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.importer.carla.CarlaSimulationRunsWrapper
 import tools.aqua.stars.importer.carla.loadSegments
 
-class ExperimentLoader {
+object ExperimentLoader {
 
-  companion object {
-
-    fun loadTestSegment(): Segment {
-      val dynamic = getPathToResource("/data/dynamic_data__Game_Carla_Maps_Town01_seed2.json")
-      val static = getPathToResource("/data/static_data__Game_Carla_Maps_Town01.json")
-      val wrapper = CarlaSimulationRunsWrapper(static, listOf(dynamic))
-      return loadSegments(listOf(wrapper), false, 10, true).first()
-    }
-
-    fun getPathToResource(name: String) =
-        Paths.get(ExperimentLoader::class.java.getResource(name)!!.toURI())
+  fun loadTestSegment(): Segment {
+    val dynamic = getPathToResource("/data/dynamic_data__Game_Carla_Maps_Town01_seed2.json")
+    val static = getPathToResource("/data/static_data__Game_Carla_Maps_Town01.json")
+    val wrapper = CarlaSimulationRunsWrapper(static, listOf(dynamic))
+    return loadSegments(listOf(wrapper), false, 10, true).first()
   }
+
+  fun getPathToResource(name: String) =
+      Paths.get(ExperimentLoader::class.java.getResource(name)!!.toURI())
 }

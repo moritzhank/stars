@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ import kotlinx.serialization.Transient
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.encoding.SmtAllowNonTrivialGetter
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.ClassValueCache
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getKmProperties
-import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getQualifiedName
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getSimpleName
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.resolveClassAndGenericArgumentClass
 
 /** Stores a list of translatable properties of a class. */
@@ -50,6 +50,8 @@ internal class SmtTranslationClassInfo(
 
   fun getTranslatableProperties() = properties
 
+  fun getTranslationName() = translationName
+
   class Property(
       val name: String,
       val nonTrivialGetter: Boolean,
@@ -60,13 +62,16 @@ internal class SmtTranslationClassInfo(
 
 internal val SMT_TRANSLATION_CACHE = ClassValueCache<SmtTranslationClassInfo>()
 
-/** Generate SmtTranslationClassInfo for [kClass] or get it from [SMT_TRANSLATION_CACHE]. */
+/**
+ * Generate SmtTranslationClassInfo for [kClass] or get it from [SMT_TRANSLATION_CACHE]. IMPORTANT:
+ * This will throw an error if called on non-Kotlin classes such as lists.
+ */
 @OptIn(ExperimentalStdlibApi::class)
 internal fun <T : Any> smtTranslationClassInfo(kClass: KClass<T>): SmtTranslationClassInfo {
   // Lambda expression to calculate the SmtTranslationClassInfo for kClass
   val smtTranslationClassInfoFactory: () -> SmtTranslationClassInfo = {
     val translationName: String =
-        kClass.findAnnotation<SerialName>()?.value ?: getQualifiedName(kClass)
+        kClass.findAnnotation<SerialName>()?.value ?: getSimpleName(kClass)
     val translatableProperties = mutableListOf<SmtTranslationClassInfo.Property>()
     for (kmProperty in getKmProperties(kClass)) {
       // Get the kProperty associated with kmProperty

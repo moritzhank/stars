@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS Project Authors
+ * Copyright 2023-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,4 +28,4 @@ import tools.aqua.stars.logic.kcmftbl.smtModelChecker.dataTranslation.SmtTransla
  * @property roll The roll.
  */
 @Serializable
-data class Rotation(val pitch: Double, val yaw: Double, val roll: Double) : SmtTranslatableBase() {}
+data class Rotation(val pitch: Double, val yaw: Double, val roll: Double) : SmtTranslatableBase()

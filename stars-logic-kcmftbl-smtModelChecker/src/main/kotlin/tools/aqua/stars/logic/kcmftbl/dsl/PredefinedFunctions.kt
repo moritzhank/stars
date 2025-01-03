@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,30 +19,19 @@
 
 package tools.aqua.stars.logic.kcmftbl.dsl
 
-/** Contains commonly used predefined functions. */
-sealed class PredefinedFunctions {
+import tools.aqua.stars.logic.kcmftbl.dsl.TFunctionBuilder.Companion.function
 
-  companion object {
-    /*
-    val IntSignFunction = function { int: CCB<Int> ->
-      branch {
-            eq {
-              wrap(int)
-              const(0)
-            }
+/** Contains commonly used predefined functions. */
+object PredefinedFunctions {
+
+  val IntSign = function { int: CCB<Int> ->
+    branch {
+          lt {
+            wrap(int)
+            const(0)
           }
-          .satisfied { const(10) }
-          .otherwise {
-            branch {
-                  gt {
-                    wrap(int)
-                    const(0)
-                  }
-                }
-                .satisfied { const(1) }
-                .otherwise { const(-1) }
-          }
-    }
-     */
+        }
+        .satisfied { const(-1) }
+        .otherwise { const(1) }
   }
 }

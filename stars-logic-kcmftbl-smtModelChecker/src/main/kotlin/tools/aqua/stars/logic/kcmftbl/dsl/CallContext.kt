@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The STARS Project Authors
+ * Copyright 2024-2025 The STARS Project Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -147,12 +147,12 @@ fun <Caller : Any, Return> CallContext<*, Caller>.callProperty(
     prop: KProperty1<Caller, Return>,
     callerClass: KClass<Caller>
 ): PropertyCallContext<Caller, Return> {
-  smtTranslationClassInfo(callerClass).requireTranslatableProperty(prop.name)
-  return if (this is CallContextBase<Caller>) {
-    PropertyCallContextImpl(prop, null)
-  } else {
-    PropertyCallContextImpl(prop, this)
+  // Exception for List::size
+  if (callerClass != List::class || prop.name != "size") {
+    smtTranslationClassInfo(callerClass).requireTranslatableProperty(prop.name)
   }
+  // Notice: Previously, the base of PropertyCallContextImpl was set to zero when called on CCB
+  return PropertyCallContextImpl(prop, this)
 }
 
 /** Returns a string formatted as "name (...)". */
