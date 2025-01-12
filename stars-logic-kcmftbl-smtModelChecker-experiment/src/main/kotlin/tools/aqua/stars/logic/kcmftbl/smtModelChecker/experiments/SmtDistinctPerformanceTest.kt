@@ -19,13 +19,18 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker.experiments
 
-import java.io.File
-import kotlin.time.Duration
+import oshi.SystemInfo
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.SmtSolver
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.MemoryProfiler
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.misc.getAbsolutePathFromProjectDir
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.runSmtSolver
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.getDateTimeString
 import tools.aqua.stars.logic.kcmftbl.smtModelChecker.scripts.linSpaceArr
+import tools.aqua.stars.logic.kcmftbl.smtModelChecker.smtSolverVersion
+import java.io.File
+import java.util.Locale
+import kotlin.math.pow
+import kotlin.time.Duration
 
 private val resultFolderName =
     getAbsolutePathFromProjectDir("experiment${File.separator}smtDistinctPerf")
@@ -36,8 +41,9 @@ fun main() {
   val rangeOfDistinctStatements = linSpaceArr(2, 3000, 30)
   val rangeOfDistinctStatementsZ3 = linSpaceArr(3000, 10_0000, 30)
 
-  val resultFileCVC5 = runCVC5Experiment(rangeOfDistinctStatements, 3)
-  val resultFileZ3 = runZ3Experiment(rangeOfDistinctStatements + rangeOfDistinctStatementsZ3, 3)
+  //val resultFileCVC5 = runCVC5Experiment(rangeOfDistinctStatements, 3)
+  val resultFileZ3 = runCVC5Experiment(rangeOfDistinctStatements.dropLast(25), 1)
+
   /*
   val title = "Performance evaluation of SMT solvers for the \'distinct individuals\'-problem"
   plotPerf(
@@ -82,6 +88,13 @@ private fun runCVC5Experiment(rangeOfDistinctStatements: List<Int>, repetitions:
   }
 }
 
+val memProfilerCond: (MemoryProfiler) -> Boolean = { memProfiler ->
+  println("${memProfiler.numSamples} | ${memProfiler.elapsedMillis}")
+  memProfiler.maxProcMemUsageBytes != -1L &&
+  memProfiler.maxSysMemUsagePercent != -1.0 &&
+  memProfiler.numSamples > 10
+}
+
 /** @return Path to the resulting CSV file */
 private fun runExperiment(
     solver: SmtSolver,
@@ -91,9 +104,17 @@ private fun runExperiment(
     extractDurationFromOutput: (String) -> Duration
 ): String {
   val results = Array(rangeOfDistinctStatements.size) { Array(repetitions) { -1L } }
+  val memoryStats = Array(rangeOfDistinctStatements.size) { Array(repetitions) { Pair(-1.0, -1L) } }
   rangeOfDistinctStatements.forEachIndexed { i, numDistinctStatements ->
-    val result = runSmtSolver(generateSmtLib(numDistinctStatements), solver, true, *solverArgs)
+    val smtLib = generateSmtLib(numDistinctStatements)
     (0 ..< repetitions).forEach { j ->
+      val result =
+          runSmtSolver(smtLib, solver, true, *solverArgs) { pid ->
+            val memProfiler = MemoryProfiler.start(pid.toInt())
+            if (memProfilerCond(memProfiler)) {
+              memoryStats[i][j] = Pair(memProfiler.maxSysMemUsagePercent, memProfiler.maxProcMemUsageBytes)
+            }
+          }
       results[i][j] = extractDurationFromOutput(result).inWholeMilliseconds
       println(
           "${solver.solverName} took ${results[i][j]}ms for $numDistinctStatements distinct-statements (k = $j)")
@@ -101,12 +122,24 @@ private fun runExperiment(
   }
   // Persist results into csv
   val timeCols = (1..repetitions).fold("") { acc, i -> "$acc\"time$i\", " }.dropLast(2)
+  val maxSysMemUsagePCols =
+      (1..repetitions).fold("") { acc, i -> "$acc\"maxSysMemUsage%$i\", " }.dropLast(2)
+  val maxSolverMemUsageBCols =
+      (1..repetitions).fold("") { acc, i -> "$acc\"maxSolverMemUsageB$i\", " }.dropLast(2)
   val csv = StringBuilder()
-  csv.appendLine("\"numOfDistInd\", $timeCols")
+  csv.appendLine(generateDetailsComment(solver, "\"Distinct Individuals\"-Benchmark"))
+  csv.appendLine("\"numOfDistInd\", $timeCols, $maxSysMemUsagePCols, $maxSolverMemUsageBCols")
   rangeOfDistinctStatements.forEachIndexed { i, numDistinctStatements ->
     val resultTimeCols =
         (0 ..< repetitions).fold("") { acc, j -> acc + "${results[i][j]}, " }.dropLast(2)
-    csv.appendLine("$numDistinctStatements, $resultTimeCols")
+    val resultMaxSysMemUsagePCols =
+        (0 ..< repetitions)
+            .fold("") { acc, j -> acc + "%.2f, ".format(Locale.ENGLISH, memoryStats[i][j].first) }
+            .dropLast(2)
+    val resultMaxSolverMemUsageBCols =
+        (0 ..< repetitions).fold("") { acc, j -> acc + "${memoryStats[i][j].second}, " }.dropLast(2)
+    csv.appendLine(
+        "$numDistinctStatements, $resultTimeCols, $resultMaxSysMemUsagePCols, $resultMaxSolverMemUsageBCols")
   }
   val resultCsvFile =
       File("$resultFolderName${File.separator}${solver.solverName}_${getDateTimeString()}.csv")
@@ -127,5 +160,23 @@ private fun generateSmtLib(numDistinctStatements: Int): String {
   }
   result.appendLine("))")
   result.appendLine("(check-sat)")
+  return result.toString()
+}
+
+private fun generateDetailsComment(solver: SmtSolver, title: String): String {
+  val sysInfo = SystemInfo()
+  val cpu = sysInfo.hardware.processor.processorIdentifier.name.trim()
+  val ram =
+      (sysInfo.hardware.memory.physicalMemory.foldRight(0L) { elem, acc -> acc + elem.capacity } *
+          10.0.pow(-9) / 1.074)
+  val ramStr = String.format(Locale.ENGLISH, "%.2f", ram)
+  val os = "${sysInfo.operatingSystem.family} ${sysInfo.operatingSystem.versionInfo}"
+  val result = StringBuilder()
+  result.appendLine("# Details for $title")
+  result.appendLine("# Date, time: \"${getDateTimeString('.', ':', ", ", false)}\"")
+  result.appendLine("# Solver: \"${smtSolverVersion(solver)}\"")
+  result.appendLine("# CPU: \"$cpu\"")
+  result.appendLine("# RAM: \"$ramStr\"")
+  result.appendLine("# OS: \"$os\"")
   return result.toString()
 }

@@ -34,8 +34,46 @@ fun runSmtSolver(
     program: String,
     solver: SmtSolver = SmtSolver.CVC5,
     removeSmt2File: Boolean = true,
-    vararg solverArgs: String
+    vararg solverArgs: String,
+    memoryProfilerCallback: ((Long) -> Unit)? = null
 ): String {
+  val solverBinPath = requireSolverBinPath(solver)
+  val smtTmpDirPath = getAbsolutePathFromProjectDir("smtTmp")
+  File(smtTmpDirPath).mkdir()
+  val smt2FilePath = "$smtTmpDirPath${File.separator}${UUID.randomUUID()}.smt2"
+  val smt2File = File(smt2FilePath).apply { writeText(program) }
+  val proc = ProcessBuilder(solverBinPath, smt2FilePath, *solverArgs).start()
+  memoryProfilerCallback?.invoke(proc.pid())
+  proc.waitFor()
+  val result = proc.inputReader().readText() + proc.errorReader().readText()
+  if (removeSmt2File) {
+    smt2File.delete()
+  }
+  return result
+}
+
+/**
+ * Run a local SMT-Solver instance with the option to show the version. This requires a correct
+ * setup of "smtSolverSettings.json".
+ */
+fun smtSolverVersion(solver: SmtSolver): String {
+  val solverBinPath = requireSolverBinPath(solver)
+  val versionOption =
+      when (solver) {
+        SmtSolver.CVC5 -> "--version"
+        SmtSolver.Z3 -> "--version"
+      }
+  val proc = ProcessBuilder(solverBinPath, versionOption).start().apply { waitFor() }
+  val result = proc.inputReader().readText() + proc.errorReader().readText()
+  return when (solver) {
+    SmtSolver.CVC5 -> {
+      result.lines().first().removePrefix("This is ").dropLastWhile { it != '[' }.dropLast(2)
+    }
+    SmtSolver.Z3 -> result.dropLastWhile { it != '-' }.dropLast(2)
+  }
+}
+
+private fun requireSolverBinPath(solver: SmtSolver): String {
   val settings = SmtSolverSettings.load()
   requireNotNull(settings) {
     SmtSolverSettings.generateTemplate()
@@ -45,14 +83,5 @@ fun runSmtSolver(
   require(File(solverBinPath).exists()) {
     "The specified binary (at \"$solverBinPath\") for ${solver.solverName} does not exist."
   }
-  val smtTmpDirPath = getAbsolutePathFromProjectDir("smtTmp")
-  File(smtTmpDirPath).mkdir()
-  val smt2FilePath = "$smtTmpDirPath${File.separator}${UUID.randomUUID()}.smt2"
-  val smt2File = File(smt2FilePath).apply { writeText(program) }
-  val proc = ProcessBuilder(solverBinPath, smt2FilePath, *solverArgs).start().apply { waitFor() }
-  val result = proc.inputReader().readText() + proc.errorReader().readText()
-  if (removeSmt2File) {
-    smt2File.delete()
-  }
-  return result
+  return solverBinPath
 }

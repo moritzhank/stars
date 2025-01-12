@@ -17,10 +17,12 @@
 
 package tools.aqua.stars.logic.kcmftbl.smtModelChecker
 
-import java.nio.file.Paths
 import tools.aqua.stars.data.av.dataclasses.Segment
 import tools.aqua.stars.importer.carla.CarlaSimulationRunsWrapper
 import tools.aqua.stars.importer.carla.loadSegments
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.absolute
 
 object ExperimentLoader {
 
@@ -31,6 +33,12 @@ object ExperimentLoader {
     return loadSegments(listOf(wrapper), false, 10, true).first()
   }
 
-  fun getPathToResource(name: String) =
-      Paths.get(ExperimentLoader::class.java.getResource(name)!!.toURI())
+  fun getPathToResource(name: String): Path {
+    val uri = ExperimentLoader::class.java.getResource(name)!!.toURI()
+    return try {
+      Paths.get(uri)
+    } catch (_: Exception) {
+      Paths.get(name.trimStart('/', '\\')).absolute()
+    }
+  }
 }

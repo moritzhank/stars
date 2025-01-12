@@ -12,7 +12,7 @@ def main():
     fileName1 = sys.argv[5]
     legend1 = sys.argv[6]
     scaling1 = sys.argv[7]
-    data1 = np.loadtxt(open(fileName1, "rb"), delimiter=",", skiprows=1)
+    data1 = np.loadtxt(open(fileName1, "rb"), delimiter=",", skiprows=8)
     data1_x = np.concatenate(data1[:, :1], axis=0)
     repetitions = data1[:, 1:].shape[1]
     data1_y = (data1[:, 1:] @ np.ones((repetitions, 1))) / repetitions * float(scaling1)
@@ -22,7 +22,7 @@ def main():
         fileName2 = sys.argv[8]
         legend2 = sys.argv[9]
         scaling2 = sys.argv[10]
-        data2 = np.loadtxt(open(fileName2, "rb"), delimiter=",", skiprows=1)
+        data2 = np.loadtxt(open(fileName2, "rb"), delimiter=",", skiprows=8)
         data2_x = np.concatenate(data2[:, :1], axis=0)
         repetitions = data2[:, 1:].shape[1]
         data2_y = (data2[:, 1:] @ np.ones((repetitions, 1))) / repetitions * float(scaling2)
